@@ -5,11 +5,138 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+/////////////////////////////////////////////////
+// AUTHENTICATION
+/////////////////////////////////////////////////
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users           User[]
+  rolePermissions RolePermission[]
+
+  @@map("roles")
+}
+
+enum Module {
+  PROJECT
+  LABOUR
+  COMPANY
+  CUSTOMER
+  ATTENDANCE
+  PAYROLL
+  INVENTORY
+  SUPPLIER
+  REPORT
+}
+
+enum Action {
+  CREATE
+  VIEW
+  UPDATE
+  DELETE
+  APPROVE
+  EXPORT
+  ASSIGN
+}
+
+model Permission {
+  id          String   @id @default(uuid())
+
+  module      Module
+  action      Action
+
+  description String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  rolePermissions RolePermission[]
+
+  @@unique([module, action])
+
+  @@map("permissions")
+}
+
+
+model RolePermission {
+  id           String   @id @default(uuid())
+
+  roleId       String
+  permissionId String
+
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime @default(now())
+
+  @@unique([roleId, permissionId])
+
+  @@map("role_permissions")
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING
+}
+
+model User {
+  id              String      @id @default(uuid())
+
+  fullName       String
+  avatarUrl      String?
+
+  email           String      @unique
+  phone           String?     @unique
+
+  password        String
+
+  status          UserStatus  @default(ACTIVE)
+
+  emailVerified   Boolean     @default(false)
+  phoneVerified   Boolean     @default(false)
+
+  lastLoginAt     DateTime?
+
+  roleId          String
+  role            Role        @relation(fields: [roleId], references: [id])
+
+  refreshTokens   RefreshToken[]
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@map("users")
+}
+
+
+model RefreshToken {
+  id         String   @id @default(uuid())
+
+  token      String
+
+  expiresAt  DateTime
+  revokedAt  DateTime?
+
+  userId     String
+  user       User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt  DateTime @default(now())
+
+  @@map("refresh_tokens")
 }

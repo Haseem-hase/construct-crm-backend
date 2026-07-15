@@ -1,12 +1,6 @@
 import * as authRepository from "./auth.repository";
-
-interface RegisterCustomerInput {
-    fullName: string;
-    email: string;
-    phone: string;
-    password: string;
-    confirmPassword: string;
-}
+import bcrypt from "bcrypt";
+import { RegisterCustomerInput } from "./auth.types";
 
 export const registerCustomer = async (
     data: RegisterCustomerInput
@@ -36,8 +30,24 @@ export const registerCustomer = async (
         throw new Error("Customer role do not found.")
     }
 
+    const hashedPassword = await bcrypt.hash(
+        data.password,
+        10
+    );
+
+    const user = await authRepository.createUser({
+        fullName: data.fullName,
+        email: data.email,
+        phone: data.phone,
+        password: hashedPassword,
+        roleId: customerRole.id,
+    })
+
+    const { password, ...userWithoutPassword } = user;
+
      return {
         success: true,
-        message: "Everything looks good.",
+        message: "Customer registered successfully.",
+        data: userWithoutPassword,
     };
 };

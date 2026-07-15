@@ -1,6 +1,7 @@
 import * as authRepository from "./auth.repository";
 import bcrypt from "bcrypt";
 import { RegisterCustomerInput } from "./auth.types";
+import { ConflictError } from "../../errors/ConflictError";
 
 export const registerCustomer = async (
     data: RegisterCustomerInput
@@ -11,7 +12,7 @@ export const registerCustomer = async (
     );
 
     if (existingUser) {
-        throw new Error("Email already registered.");
+        throw new ConflictError("Email already registered.");
     }
     
     const existingPhone = await authRepository.findUserByPhone(
@@ -19,7 +20,7 @@ export const registerCustomer = async (
     );
 
     if(existingPhone) {
-        throw new Error("Phone number already registered")
+        throw new ConflictError("Phone number already registered")
     }
 
     const customerRole = await authRepository.findRoleByName(

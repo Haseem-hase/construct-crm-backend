@@ -6,6 +6,9 @@ export const findUserByEmail = async (email: string) => {
         where: {
             email,
         },
+        include: {
+            role: true,
+        },
     });
 };
 

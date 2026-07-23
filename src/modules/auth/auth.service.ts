@@ -1,7 +1,9 @@
 import * as authRepository from "./auth.repository";
 import bcrypt from "bcrypt";
-import { RegisterCustomerInput } from "./auth.types";
+import { LoginInput, LoginResponse, RegisterCustomerInput } from "./auth.types";
 import { ConflictError } from "../../errors/ConflictError";
+import { generateAccessToken } from "../../utils/jwt.utils";
+import { UnauthorizedError } from "../../errors/UnauthorizedError";
 
 export const registerCustomer = async (
     data: RegisterCustomerInput
@@ -50,5 +52,41 @@ export const registerCustomer = async (
         success: true,
         message: "Customer registered successfully.",
         data: userWithoutPassword,
+    };
+};
+
+//login
+export const login = async (
+    data: LoginInput
+): Promise<LoginResponse> => {
+
+    const user = await authRepository.findUserByEmail(data.email);
+
+    if (!user) {
+        throw new UnauthorizedError("Invalid email or password.");
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+        data.password,
+        user.password
+    );
+
+    if (!isPasswordValid) {
+        throw new UnauthorizedError("Invalid email or password.");
+    }
+
+    const accessToken = generateAccessToken({
+        userId: user.id,
+        role: user.role.name,
+    });
+
+    return {
+        accessToken,
+        user: {
+            id: user.id,
+            fullName: user.fullName,
+            email: user.email,
+            role: user.role.name,
+        },
     };
 };

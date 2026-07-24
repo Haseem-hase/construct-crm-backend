@@ -1,4 +1,5 @@
 import prisma from '../../lib/prisma';
+import { authenticatedUserSelect } from '../../shared/types/authenticated-user';
 import { CreateUserInput } from './auth.types';
 
 export const findUserByEmail = async (email: string) => {
@@ -33,5 +34,15 @@ export const createUser = async (
 ) => {
     return await prisma.user.create({
         data,
+    });
+};
+
+export const findUserById = async (id: string) => {
+    return await prisma.user.findUnique({
+        where: {
+            id,
+        },
+        select: authenticatedUserSelect
+        
     });
 };

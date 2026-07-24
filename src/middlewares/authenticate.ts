@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { UnauthorizedError } from "../errors/UnauthorizedError";
 import { verifyAccessToken } from "../utils/jwt.utils";
+import { findUserById } from "../modules/auth/auth.repository";
 
 export const authenticate = async (
     req: Request,
@@ -10,7 +11,7 @@ export const authenticate = async (
     try {
         const authHeader = req.headers.authorization;
 
-        if(!authHeader || !authHeader.startsWith("Bearer ")) {
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
             throw new UnauthorizedError("Authentication token is missing.");
         }
 
@@ -18,7 +19,13 @@ export const authenticate = async (
 
         const payload = verifyAccessToken(token);
 
-        req.user = payload;
+        const user = await findUserById(payload.userId);
+
+        if (!user) {
+            throw new UnauthorizedError("User not found.");
+        }
+
+        req.user = user;
 
         next();
     } catch (error) {

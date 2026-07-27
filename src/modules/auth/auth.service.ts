@@ -1,9 +1,10 @@
 import * as authRepository from "./auth.repository";
 import bcrypt from "bcrypt";
-import { LoginInput, LoginResponse, RegisterCustomerInput } from "./auth.types";
+import { LoginInput, LoginResponse, MeResponse, RegisterCustomerInput } from "./auth.types";
 import { ConflictError } from "../../errors/ConflictError";
 import { generateAccessToken } from "../../utils/jwt.utils";
 import { UnauthorizedError } from "../../errors/UnauthorizedError";
+import { AuthenticatedUser } from "../../shared/types/authenticated-user";
 
 export const registerCustomer = async (
     data: RegisterCustomerInput
@@ -89,4 +90,14 @@ export const login = async (
             role: user.role.name,
         },
     };
+};
+
+//get me 
+export const getMe = async (
+    user: AuthenticatedUser
+): Promise<MeResponse> => {
+    
+    return {
+        user,
+    }
 };

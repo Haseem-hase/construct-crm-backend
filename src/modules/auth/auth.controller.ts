@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import * as authService from "./auth.service";
 import { success } from "zod";
 
+//register
 export const registerCustomer = async (
     req: Request,
     res: Response,
@@ -16,6 +17,7 @@ export const registerCustomer = async (
     }
 };
 
+//login
 export const login = async (
     req: Request,
     res: Response,
@@ -32,3 +34,21 @@ export const login = async (
         next(error);
     }
 };
+
+//get me
+export const getMe = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const result = await authService.getMe(req.user!);
+
+        res.status(200).json({
+            success: true,
+            data: result,
+        });
+    } catch (error) {
+        next(error);
+    }
+}

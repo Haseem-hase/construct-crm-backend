@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { loginSchema, registerCustomerSchema } from "./auth.validation";
+import { AuthenticatedUser } from "../../shared/types/authenticated-user";
 
 export type RegisterCustomerInput = z.infer<
     typeof registerCustomerSchema
@@ -25,4 +26,8 @@ export interface AuthUser {
 export interface LoginResponse {
     accessToken: string;
     user: AuthUser;
+}
+
+export interface MeResponse {
+    user: AuthenticatedUser
 }

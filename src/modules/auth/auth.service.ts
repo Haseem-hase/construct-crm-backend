@@ -2,9 +2,12 @@ import * as authRepository from "./auth.repository";
 import bcrypt from "bcrypt";
 import { LoginInput, LoginResponse, MeResponse, RegisterCustomerInput } from "./auth.types";
 import { ConflictError } from "../../errors/ConflictError";
-import { generateAccessToken } from "../../utils/jwt.utils";
+import { generateAccessToken, generateRefreshToken } from "../../utils/jwt.utils";
 import { UnauthorizedError } from "../../errors/UnauthorizedError";
 import { AuthenticatedUser } from "../../shared/types/authenticated-user";
+import { addDuration } from "../../utils/date.utils";
+import { getDurationEnv } from "../../utils/env.utils";
+import { createRefreshToken } from "./refresh-token.repository";
 
 export const registerCustomer = async (
     data: RegisterCustomerInput
@@ -76,13 +79,32 @@ export const login = async (
         throw new UnauthorizedError("Invalid email or password.");
     }
 
-    const accessToken = generateAccessToken({
+    const payload = {
         userId: user.id,
         role: user.role.name,
-    });
+    };
+
+    const accessToken = generateAccessToken(payload);
+
+    const refreshToken = generateRefreshToken(payload);
+
+    const hashedRefreshToken = await bcrypt.hash(
+        refreshToken, 10
+    )
+
+    const expiresAt = addDuration(
+        getDurationEnv("JWT_REFRESH_EXPIRES_IN")
+    )
+
+    await createRefreshToken({
+        hashedToken: hashedRefreshToken,
+        userId:user.id,
+        expiresAt,
+    })
 
     return {
         accessToken,
+        refreshToken,
         user: {
             id: user.id,
             fullName: user.fullName,

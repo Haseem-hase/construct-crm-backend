@@ -1,32 +1,86 @@
 import jwt from "jsonwebtoken";
-import type { StringValue } from "ms";
+import { getEnv } from "./env.utils";
 
-export interface AccessTokenPayload {
+export interface TokenPayload {
     userId: string;
     role: string;
 }
 
-const jwtSecret = process.env.JWT_SECRET;
-const jwtAccessExpiresIn = process.env.JWT_ACCESS_EXPIRES_IN as StringValue;
+const jwtAccessSecret = getEnv("JWT_SECRET");
+const jwtRefreshSecret = getEnv("JWT_REFRESH_SECRET");
 
-if (!jwtSecret) {
-    throw new Error("JWT_SECRET is not configured.");
-}
+const jwtAccessExpiresIn = getEnv("JWT_ACCESS_EXPIRES_IN");
+const jwtRefreshExpiresIn = getEnv("JWT_REFRESH_EXPIRES_IN");
 
-if (!jwtAccessExpiresIn) {
-    throw new Error("JWT_ACCESS_EXPIRES_IN is not configured.");
-}
-
-export const generateAccessToken = (
-    payload: AccessTokenPayload
+/**
+ * Private helper for generating JWTs
+ */
+const generateToken = (
+    payload: TokenPayload,
+    secret: string,
+    expiresIn: string
 ): string => {
-    return jwt.sign(payload, jwtSecret, {
-        expiresIn: jwtAccessExpiresIn,
-    });
+    return jwt.sign(payload, secret, {
+        expiresIn,
+    } as jwt.SignOptions);
 };
 
+/**
+ * Private helper for verifying JWTs
+ */
+const verifyToken = (
+    token: string,
+    secret: string
+): TokenPayload => {
+    return jwt.verify(token, secret) as TokenPayload;
+};
+
+/**
+ * Generate Access Token
+ */
+export const generateAccessToken = (
+    payload: TokenPayload
+): string => {
+    return generateToken(
+        payload,
+        jwtAccessSecret,
+        jwtAccessExpiresIn
+    );
+};
+
+/**
+ * Generate Refresh Token
+ */
+export const generateRefreshToken = (
+    payload: TokenPayload
+): string => {
+    return generateToken(
+        payload,
+        jwtRefreshSecret,
+        jwtRefreshExpiresIn
+    );
+};
+
+/**
+ * Verify Access Token
+ */
 export const verifyAccessToken = (
     token: string
-): AccessTokenPayload => {
-    return jwt.verify(token, jwtSecret) as AccessTokenPayload;
+): TokenPayload => {
+    return verifyToken(
+        token,
+        jwtAccessSecret
+    );
+};
+
+/**
+ * Verify Refresh Token
+ */
+export const verifyRefreshToken = (
+    token: string
+): TokenPayload => {
+    return verifyToken(
+        token,
+        jwtRefreshSecret
+    );
 };

@@ -31,3 +31,9 @@ export interface LoginResponse {
 export interface MeResponse {
     user: AuthenticatedUser
 }
+
+export interface CreateRefreshTokenInput {
+    hashedToken: string;
+    userId: string;
+    expiresAt: Date;
+}

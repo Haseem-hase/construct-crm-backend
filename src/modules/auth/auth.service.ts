@@ -2,12 +2,12 @@ import * as authRepository from "./auth.repository";
 import bcrypt from "bcrypt";
 import { LoginInput, LoginResponse, MeResponse, RegisterCustomerInput } from "./auth.types";
 import { ConflictError } from "../../errors/ConflictError";
-import { generateAccessToken, generateRefreshToken } from "../../utils/jwt.utils";
+import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../utils/jwt.utils";
 import { UnauthorizedError } from "../../errors/UnauthorizedError";
 import { AuthenticatedUser } from "../../shared/types/authenticated-user";
 import { addDuration } from "../../utils/date.utils";
 import { getDurationEnv } from "../../utils/env.utils";
-import { createRefreshToken } from "./refresh-token.repository";
+import { createRefreshToken, findRefreshTokensByUserId } from "./refresh-token.repository";
 
 export const registerCustomer = async (
     data: RegisterCustomerInput
@@ -20,12 +20,12 @@ export const registerCustomer = async (
     if (existingUser) {
         throw new ConflictError("Email already registered.");
     }
-    
+
     const existingPhone = await authRepository.findUserByPhone(
         data.phone
     );
 
-    if(existingPhone) {
+    if (existingPhone) {
         throw new ConflictError("Phone number already registered")
     }
 
@@ -33,7 +33,7 @@ export const registerCustomer = async (
         "CUSTOMER"
     );
 
-    if(!customerRole) {
+    if (!customerRole) {
         throw new Error("Customer role do not found.")
     }
 
@@ -52,7 +52,7 @@ export const registerCustomer = async (
 
     const { password, ...userWithoutPassword } = user;
 
-     return {
+    return {
         success: true,
         message: "Customer registered successfully.",
         data: userWithoutPassword,
@@ -98,7 +98,7 @@ export const login = async (
 
     await createRefreshToken({
         hashedToken: hashedRefreshToken,
-        userId:user.id,
+        userId: user.id,
         expiresAt,
     })
 
@@ -114,11 +114,50 @@ export const login = async (
     };
 };
 
+export const refreshAccessToken = async (
+    refreshToken: string
+) => {
+    const payload = verifyRefreshToken(refreshToken);
+
+    const storedTokens =
+        await findRefreshTokensByUserId(payload.userId);
+
+    let matchedToken = null;
+
+    for (const storedToken of storedTokens) {
+        const matches = await bcrypt.compare(
+            refreshToken,
+            storedToken.token
+        );
+
+        if (matches) {
+            matchedToken = storedToken;
+            break;
+        }
+    }
+
+    if (!matchedToken) {
+        throw new Error("Invalid refresh token.");
+    }
+
+    if (matchedToken.revokedAt) {
+        throw new Error("Refresh token has been revoked.");
+    }
+
+    if (matchedToken.expiresAt <= new Date()) {
+        throw new Error("Refresh token has expired.");
+    }
+
+
+
+};
+
+
 //get me 
 export const getMe = async (
     user: AuthenticatedUser
 ): Promise<MeResponse> => {
-    
+
     return {
         user,
     }

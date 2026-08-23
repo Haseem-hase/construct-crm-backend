@@ -12,3 +12,13 @@ export const createRefreshToken = async (
         },
     });
 };
+
+export const findRefreshTokensByUserId = async (
+    userId: string
+) => {
+    return prisma.refreshToken.findMany({
+        where: {
+            userId,
+        },
+    });
+};

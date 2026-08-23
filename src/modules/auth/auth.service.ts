@@ -120,11 +120,11 @@ export const refreshAccessToken = async (
     const payload = verifyRefreshToken(refreshToken);
 
     const storedTokens =
-        await findRefreshTokensByUserId(payload.userId);
+        await findRefreshTokensByUserId(payload.userId); //one user hae different refresh token when he used to logs in mobile, pc, etx
 
     let matchedToken = null;
 
-    for (const storedToken of storedTokens) {
+    for (const storedToken of storedTokens) { //we are checking stored token each one by one
         const matches = await bcrypt.compare(
             refreshToken,
             storedToken.token
@@ -148,6 +148,20 @@ export const refreshAccessToken = async (
         throw new Error("Refresh token has expired.");
     }
 
+    const user = await authRepository.findUserById(payload.userId);
+
+    if(!user) {
+        throw new Error("User not found.");
+    }
+
+    const accessToken = generateAccessToken({
+        userId: user.id,
+        role: user.role.name,
+    });
+
+    return {
+        accessToken,
+    }
 
 
 };

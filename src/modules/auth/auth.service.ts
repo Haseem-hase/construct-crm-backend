@@ -128,15 +128,15 @@ export const refreshAccessToken = async (
     );
 
     if (!matchedToken) {
-        throw new Error("Invalid refresh token.");
+        throw new UnauthorizedError("Invalid refresh token.");
     }
 
     if (matchedToken.revokedAt) {
-        throw new Error("Refresh token has been revoked.");
+        throw new UnauthorizedError("Refresh token has been revoked.");
     }
 
     if (matchedToken.expiresAt <= new Date()) {
-        throw new Error("Refresh token has expired.");
+        throw new UnauthorizedError("Refresh token has expired.");
     }
 
     const user = await authRepository.findUserById(payload.userId);

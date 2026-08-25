@@ -22,3 +22,16 @@ export const findRefreshTokensByUserId = async (
         },
     });
 };
+
+export const revokeRefreshToken = async (
+    id: string
+) => {
+    return prisma.refreshToken.update({
+        where: {
+            id,
+        },
+        data: {
+            revokedAt: new Date(),
+        },
+    });
+};

@@ -9,6 +9,7 @@ import { AuthenticatedUser } from "../../shared/types/authenticated-user";
 import { addDuration } from "../../utils/date.utils";
 import { getDurationEnv } from "../../utils/env.utils";
 import { createRefreshToken, findRefreshTokensByUserId } from "./refresh-token.repository";
+import { findMatchingRefreshToken } from "./refresh-token.service";
 
 export const registerCustomer = async (
     data: RegisterCustomerInput
@@ -120,22 +121,10 @@ export const refreshAccessToken = async (
 ) => {
     const payload = verifyRefreshToken(refreshToken);
 
-    const storedTokens =
-        await findRefreshTokensByUserId(payload.userId); //one user hae different refresh token when he used to logs in mobile, pc, etx
-
-    let matchedToken = null;
-
-    for (const storedToken of storedTokens) { //we are checking stored token each one by one
-        const matches = await bcrypt.compare(
-            crypto.createHash("sha256").update(refreshToken).digest("hex"),
-            storedToken.token
-        );
-
-        if (matches) {
-            matchedToken = storedToken;
-            break;
-        }
-    }
+    const matchedToken = await findMatchingRefreshToken(
+        refreshToken,
+        payload.userId
+    );
 
     if (!matchedToken) {
         throw new Error("Invalid refresh token.");
@@ -151,7 +140,7 @@ export const refreshAccessToken = async (
 
     const user = await authRepository.findUserById(payload.userId);
 
-    if(!user) {
+    if (!user) {
         throw new Error("User not found.");
     }
 

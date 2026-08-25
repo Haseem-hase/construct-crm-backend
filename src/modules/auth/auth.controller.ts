@@ -52,3 +52,20 @@ export const getMe = async (
         next(error);
     }
 }
+
+//post refresh token logic
+export const refreshAccessToken = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const result = await authService.refreshAccessToken(
+            req.body.refreshToken
+        );
+
+        res.status(200).json(result);
+    } catch (error) {
+        next(error);
+    }
+};

@@ -1,5 +1,6 @@
 import * as authRepository from "./auth.repository";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 import { LoginInput, LoginResponse, MeResponse, RegisterCustomerInput } from "./auth.types";
 import { ConflictError } from "../../errors/ConflictError";
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../utils/jwt.utils";
@@ -89,7 +90,7 @@ export const login = async (
     const refreshToken = generateRefreshToken(payload);
 
     const hashedRefreshToken = await bcrypt.hash(
-        refreshToken, 10
+        crypto.createHash("sha256").update(refreshToken).digest("hex"), 10
     )
 
     const expiresAt = addDuration(
@@ -126,7 +127,7 @@ export const refreshAccessToken = async (
 
     for (const storedToken of storedTokens) { //we are checking stored token each one by one
         const matches = await bcrypt.compare(
-            refreshToken,
+            crypto.createHash("sha256").update(refreshToken).digest("hex"),
             storedToken.token
         );
 

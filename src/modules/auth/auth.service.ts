@@ -8,7 +8,7 @@ import { UnauthorizedError } from "../../errors/UnauthorizedError";
 import { AuthenticatedUser } from "../../shared/types/authenticated-user";
 import { addDuration } from "../../utils/date.utils";
 import { getDurationEnv } from "../../utils/env.utils";
-import { createRefreshToken, findRefreshTokensByUserId } from "./refresh-token.repository";
+import { createRefreshToken, findRefreshTokensByUserId, revokeRefreshToken } from "./refresh-token.repository";
 import { findMatchingRefreshToken } from "./refresh-token.service";
 
 export const registerCustomer = async (
@@ -116,6 +116,7 @@ export const login = async (
     };
 };
 
+//store refresh token
 export const refreshAccessToken = async (
     refreshToken: string
 ) => {
@@ -154,6 +155,32 @@ export const refreshAccessToken = async (
     }
 
 
+};
+
+//logout
+export const logout = async (
+    refreshToken: string
+) => {
+    const payload = verifyRefreshToken(refreshToken);
+
+    const matchedToken = await findMatchingRefreshToken(
+        refreshToken,
+        payload.userId
+    );
+
+    if(!matchedToken) {
+        throw new UnauthorizedError("Invalid refresh token.");
+    }
+
+    if(matchedToken.revokedAt) {
+        throw new UnauthorizedError("Refresh token has already been revoked");
+    }
+
+    await revokeRefreshToken(matchedToken.id);
+
+    return {
+        message: "Logged out successfully."
+    };
 };
 
 

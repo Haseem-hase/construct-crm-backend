@@ -69,3 +69,23 @@ export const refreshAccessToken = async (
         next(error);
     }
 };
+
+//logout
+export const logout = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const result = await authService.logout(
+            req.body.refreshToken
+        );
+
+        res.status(200).json({
+            success: true,
+            data: result,
+        });
+    } catch (error) {
+        next(error);
+    }
+};

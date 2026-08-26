@@ -1,4 +1,4 @@
-import { Request, response, NextFunction } from "express";
+import { Request, Response, NextFunction } from "express";
 import { ForbiddenError } from "../errors/ForbiddenError";
 
 export const authorize = (...roles: string[]) => {

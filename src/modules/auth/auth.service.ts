@@ -116,7 +116,7 @@ export const login = async (
     };
 };
 
-//store refresh token
+//genrate new access token and refresh token using old refresh token
 export const refreshAccessToken = async (
     refreshToken: string
 ) => {
@@ -139,11 +139,30 @@ export const refreshAccessToken = async (
         throw new UnauthorizedError("Refresh token has expired.");
     }
 
+    await revokeRefreshToken(matchedToken.id)
+
     const user = await authRepository.findUserById(payload.userId);
 
     if (!user) {
         throw new Error("User not found.");
     }
+
+    const newResfreshToken = generateRefreshToken({
+        userId: user.id,
+        role: user.role.name,
+    });
+
+    const hashedRefreshToken = await bcrypt.hash(crypto.createHash("sha256").update(newResfreshToken).digest("hex"),10);
+
+    const expiresAt = addDuration(
+        getDurationEnv("JWT_REFRESH_EXPIRES_IN")
+    )
+
+    await createRefreshToken({
+        hashedToken: hashedRefreshToken,
+        userId: user.id,
+        expiresAt,
+    });
 
     const accessToken = generateAccessToken({
         userId: user.id,
@@ -152,6 +171,7 @@ export const refreshAccessToken = async (
 
     return {
         accessToken,
+        refreshToken: newResfreshToken,
     }
 
 

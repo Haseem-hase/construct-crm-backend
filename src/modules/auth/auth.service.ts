@@ -139,20 +139,20 @@ export const refreshAccessToken = async (
         throw new UnauthorizedError("Refresh token has expired.");
     }
 
-    await revokeRefreshToken(matchedToken.id)
-
     const user = await authRepository.findUserById(payload.userId);
 
     if (!user) {
-        throw new Error("User not found.");
+        throw new UnauthorizedError("User not found.");
     }
+
+    await revokeRefreshToken(matchedToken.id)
 
     const newResfreshToken = generateRefreshToken({
         userId: user.id,
         role: user.role.name,
     });
 
-    const hashedRefreshToken = await bcrypt.hash(crypto.createHash("sha256").update(newResfreshToken).digest("hex"),10);
+    const hashedRefreshToken = await bcrypt.hash(crypto.createHash("sha256").update(newResfreshToken).digest("hex"), 10);
 
     const expiresAt = addDuration(
         getDurationEnv("JWT_REFRESH_EXPIRES_IN")
@@ -188,11 +188,11 @@ export const logout = async (
         payload.userId
     );
 
-    if(!matchedToken) {
+    if (!matchedToken) {
         throw new UnauthorizedError("Invalid refresh token.");
     }
 
-    if(matchedToken.revokedAt) {
+    if (matchedToken.revokedAt) {
         throw new UnauthorizedError("Refresh token has already been revoked");
     }
 

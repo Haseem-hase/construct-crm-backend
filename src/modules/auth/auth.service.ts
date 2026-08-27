@@ -8,7 +8,7 @@ import { UnauthorizedError } from "../../errors/UnauthorizedError";
 import { AuthenticatedUser } from "../../shared/types/authenticated-user";
 import { addDuration } from "../../utils/date.utils";
 import { getDurationEnv } from "../../utils/env.utils";
-import { createRefreshToken, findRefreshTokensByUserId, revokeRefreshToken } from "./refresh-token.repository";
+import { createRefreshToken, revokeRefreshToken } from "./refresh-token.repository";
 import { findMatchingRefreshToken } from "./refresh-token.service";
 
 export const registerCustomer = async (
@@ -147,12 +147,12 @@ export const refreshAccessToken = async (
 
     await revokeRefreshToken(matchedToken.id)
 
-    const newResfreshToken = generateRefreshToken({
+    const newRefreshToken = generateRefreshToken({
         userId: user.id,
         role: user.role.name,
     });
 
-    const hashedRefreshToken = await bcrypt.hash(crypto.createHash("sha256").update(newResfreshToken).digest("hex"), 10);
+    const hashedRefreshToken = await bcrypt.hash(crypto.createHash("sha256").update(newRefreshToken).digest("hex"), 10);
 
     const expiresAt = addDuration(
         getDurationEnv("JWT_REFRESH_EXPIRES_IN")
@@ -171,7 +171,7 @@ export const refreshAccessToken = async (
 
     return {
         accessToken,
-        refreshToken: newResfreshToken,
+        refreshToken: newRefreshToken,
     }
 
 

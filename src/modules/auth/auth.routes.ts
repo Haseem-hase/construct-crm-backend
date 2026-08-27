@@ -15,4 +15,16 @@ router.post("/refresh", authController.refreshAccessToken);
 
 router.post("/logout", authController.logout)
 
+router.get(
+    "/customer-only",
+    authenticate,
+    authorize("ADMIN"),
+    (req, res) => {
+        res.json({
+            success: true,
+            message: "You are allowed to access this route.",
+        });
+    }
+);
+
 export default router;

@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { AppError } from "../errors/AppError";
 import { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
-import { success } from "zod";
 
 export const errorHandler = (
     err: Error,
@@ -20,14 +19,14 @@ export const errorHandler = (
     if (err instanceof TokenExpiredError) {
         return res.status(401).json({
             success: false,
-            message: "Access token has expired.",
+            message: "Token has expired.",
         });
     }
 
     if (err instanceof JsonWebTokenError) {
         return res.status(401).json({
             success: false,
-            message: "Invalid access token.",
+            message: "Invalid token.",
         });
     }
 

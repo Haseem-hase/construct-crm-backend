@@ -2,18 +2,20 @@ import { Router } from "express";
 import * as authController from "./auth.controller"
 import { authenticate } from "../../middlewares/authenticate";
 import { authorize } from "../../middlewares/authorize";
+import { validate } from "../../middlewares/validate";
+import { loginSchema, refreshTokenSchema, registerCustomerSchema } from "./auth.validation";
 
 const router = Router();
 
-router.post("/register/customer", authController.registerCustomer);
+router.post("/register/customer", validate(registerCustomerSchema), authController.registerCustomer);
 
-router.post("/login", authController.login)
+router.post("/login", validate(loginSchema), authController.login)
 
 router.get("/me", authenticate, authController.getMe)
 
-router.post("/refresh", authController.refreshAccessToken);
+router.post("/refresh", validate(refreshTokenSchema), authController.refreshAccessToken);
 
-router.post("/logout", authController.logout)
+router.post("/logout", validate(refreshTokenSchema), authController.logout)
 
 router.get(
     "/customer-only",

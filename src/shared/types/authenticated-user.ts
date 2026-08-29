@@ -5,6 +5,7 @@ export const authenticatedUserSelect = {
     fullName: true,
     email: true,
     phone: true,
+    organizationId: true,
     role: {
         select: {
             id: true,

@@ -16,6 +16,10 @@ async function main() {
       description: "System Administrator",
     },
     {
+      name: "ORGANIZATION_OWNER",
+      description: "Owner of a construction organization",
+    },
+    {
       name: "CONTRACTOR",
       description: "Construction Company",
     },

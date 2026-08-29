@@ -149,10 +149,40 @@ model Organization {
   name        String
   description String?
 
-  users User[]
+  users     User[]
+  customers Customer[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("organizations")
+}
+
+/////////////////////////////////////////////////
+// ORGANIZATION
+/////////////////////////////////////////////////
+
+model Customer {
+  id String @id @default(uuid())
+
+  name         String
+  customerCode String  @unique
+  description  String?
+
+  email String?
+  phone String?
+
+  address    String?
+  city       String?
+  country    String?
+  postalCode String?
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId])
+  @@map("customers")
 }

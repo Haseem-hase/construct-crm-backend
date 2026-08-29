@@ -113,6 +113,9 @@ model User {
   roleId String
   role   Role   @relation(fields: [roleId], references: [id])
 
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
   refreshTokens RefreshToken[]
 
   createdAt DateTime @default(now())
@@ -145,6 +148,8 @@ model Organization {
   id          String  @id @default(uuid())
   name        String
   description String?
+
+  users User[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { AppError } from "../errors/AppError";
+import { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
 
 export const errorHandler = (
     err: Error,
@@ -12,6 +13,20 @@ export const errorHandler = (
         return res.status(err.statusCode).json({
             success: false,
             message: err.message,
+        });
+    }
+
+    if (err instanceof TokenExpiredError) {
+        return res.status(401).json({
+            success: false,
+            message: "Token has expired.",
+        });
+    }
+
+    if (err instanceof JsonWebTokenError) {
+        return res.status(401).json({
+            success: false,
+            message: "Invalid token.",
         });
     }
 

@@ -1,8 +1,17 @@
 import { z } from "zod";
-import { loginSchema, registerCustomerSchema } from "./auth.validation";
+import { loginSchema, registerCustomerSchema, refreshTokenSchema, } from "./auth.validation";
+import { AuthenticatedUser } from "../../shared/types/authenticated-user";
 
 export type RegisterCustomerInput = z.infer<
     typeof registerCustomerSchema
+>;
+
+export type LoginInput = z.infer<
+    typeof loginSchema
+>;
+
+export type RefreshTokenInput = z.infer<
+    typeof refreshTokenSchema
 >;
 
 export interface CreateUserInput {
@@ -13,8 +22,6 @@ export interface CreateUserInput {
     roleId: string;
 }
 
-export type LoginInput = z.infer<typeof loginSchema>;
-
 export interface AuthUser {
     id: string;
     fullName: string;
@@ -24,5 +31,16 @@ export interface AuthUser {
 
 export interface LoginResponse {
     accessToken: string;
+    refreshToken: string;
     user: AuthUser;
+}
+
+export interface MeResponse {
+    user: AuthenticatedUser
+}
+
+export interface CreateRefreshTokenInput {
+    hashedToken: string;
+    userId: string;
+    expiresAt: Date;
 }

@@ -1,9 +1,15 @@
 import * as authRepository from "./auth.repository";
 import bcrypt from "bcrypt";
-import { LoginInput, LoginResponse, RegisterCustomerInput } from "./auth.types";
+import crypto from "crypto";
+import { LoginInput, LoginResponse, MeResponse, RegisterCustomerInput } from "./auth.types";
 import { ConflictError } from "../../errors/ConflictError";
-import { generateAccessToken } from "../../utils/jwt.utils";
+import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../utils/jwt.utils";
 import { UnauthorizedError } from "../../errors/UnauthorizedError";
+import { AuthenticatedUser } from "../../shared/types/authenticated-user";
+import { addDuration } from "../../utils/date.utils";
+import { getDurationEnv } from "../../utils/env.utils";
+import { createRefreshToken, revokeRefreshToken } from "./refresh-token.repository";
+import { findMatchingRefreshToken } from "./refresh-token.service";
 
 export const registerCustomer = async (
     data: RegisterCustomerInput
@@ -16,12 +22,12 @@ export const registerCustomer = async (
     if (existingUser) {
         throw new ConflictError("Email already registered.");
     }
-    
+
     const existingPhone = await authRepository.findUserByPhone(
         data.phone
     );
 
-    if(existingPhone) {
+    if (existingPhone) {
         throw new ConflictError("Phone number already registered")
     }
 
@@ -29,7 +35,7 @@ export const registerCustomer = async (
         "CUSTOMER"
     );
 
-    if(!customerRole) {
+    if (!customerRole) {
         throw new Error("Customer role do not found.")
     }
 
@@ -48,7 +54,7 @@ export const registerCustomer = async (
 
     const { password, ...userWithoutPassword } = user;
 
-     return {
+    return {
         success: true,
         message: "Customer registered successfully.",
         data: userWithoutPassword,
@@ -75,13 +81,32 @@ export const login = async (
         throw new UnauthorizedError("Invalid email or password.");
     }
 
-    const accessToken = generateAccessToken({
+    const payload = {
         userId: user.id,
         role: user.role.name,
-    });
+    };
+
+    const accessToken = generateAccessToken(payload);
+
+    const refreshToken = generateRefreshToken(payload);
+
+    const hashedRefreshToken = await bcrypt.hash(
+        crypto.createHash("sha256").update(refreshToken).digest("hex"), 10
+    )
+
+    const expiresAt = addDuration(
+        getDurationEnv("JWT_REFRESH_EXPIRES_IN")
+    )
+
+    await createRefreshToken({
+        hashedToken: hashedRefreshToken,
+        userId: user.id,
+        expiresAt,
+    })
 
     return {
         accessToken,
+        refreshToken,
         user: {
             id: user.id,
             fullName: user.fullName,
@@ -89,4 +114,102 @@ export const login = async (
             role: user.role.name,
         },
     };
+};
+
+//genrate new access token and refresh token using old refresh token
+export const refreshAccessToken = async (
+    refreshToken: string
+) => {
+    const payload = verifyRefreshToken(refreshToken);
+
+    const matchedToken = await findMatchingRefreshToken(
+        refreshToken,
+        payload.userId
+    );
+
+    if (!matchedToken) {
+        throw new UnauthorizedError("Invalid refresh token.");
+    }
+
+    if (matchedToken.revokedAt) {
+        throw new UnauthorizedError("Refresh token has been revoked.");
+    }
+
+    if (matchedToken.expiresAt <= new Date()) {
+        throw new UnauthorizedError("Refresh token has expired.");
+    }
+
+    const user = await authRepository.findUserById(payload.userId);
+
+    if (!user) {
+        throw new UnauthorizedError("User not found.");
+    }
+
+    await revokeRefreshToken(matchedToken.id)
+
+    const newRefreshToken = generateRefreshToken({
+        userId: user.id,
+        role: user.role.name,
+    });
+
+    const hashedRefreshToken = await bcrypt.hash(crypto.createHash("sha256").update(newRefreshToken).digest("hex"), 10);
+
+    const expiresAt = addDuration(
+        getDurationEnv("JWT_REFRESH_EXPIRES_IN")
+    )
+
+    await createRefreshToken({
+        hashedToken: hashedRefreshToken,
+        userId: user.id,
+        expiresAt,
+    });
+
+    const accessToken = generateAccessToken({
+        userId: user.id,
+        role: user.role.name,
+    });
+
+    return {
+        accessToken,
+        refreshToken: newRefreshToken,
+    }
+
+
+};
+
+//logout
+export const logout = async (
+    refreshToken: string
+) => {
+    const payload = verifyRefreshToken(refreshToken);
+
+    const matchedToken = await findMatchingRefreshToken(
+        refreshToken,
+        payload.userId
+    );
+
+    if (!matchedToken) {
+        throw new UnauthorizedError("Invalid refresh token.");
+    }
+
+    if (matchedToken.revokedAt) {
+        throw new UnauthorizedError("Refresh token has already been revoked");
+    }
+
+    await revokeRefreshToken(matchedToken.id);
+
+    return {
+        message: "Logged out successfully."
+    };
+};
+
+
+//get me 
+export const getMe = async (
+    user: AuthenticatedUser
+): Promise<MeResponse> => {
+
+    return {
+        user,
+    }
 };

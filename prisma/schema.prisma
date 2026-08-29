@@ -18,12 +18,12 @@ datasource db {
 /////////////////////////////////////////////////
 
 model Role {
-  id          String   @id @default(uuid())
-  name        String   @unique
+  id          String  @id @default(uuid())
+  name        String  @unique
   description String?
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   users           User[]
   rolePermissions RolePermission[]
@@ -54,37 +54,34 @@ enum Action {
 }
 
 model Permission {
-  id          String   @id @default(uuid())
+  id String @id @default(uuid())
 
-  module      Module
-  action      Action
+  module Module
+  action Action
 
   description String?
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   rolePermissions RolePermission[]
 
   @@unique([module, action])
-
   @@map("permissions")
 }
 
-
 model RolePermission {
-  id           String   @id @default(uuid())
+  id String @id @default(uuid())
 
   roleId       String
   permissionId String
 
-  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
 
-  createdAt    DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@unique([roleId, permissionId])
-
   @@map("role_permissions")
 }
 
@@ -96,47 +93,66 @@ enum UserStatus {
 }
 
 model User {
-  id              String      @id @default(uuid())
+  id String @id @default(uuid())
 
-  fullName       String
-  avatarUrl      String?
+  fullName  String
+  avatarUrl String?
 
-  email           String      @unique
-  phone           String?     @unique
+  email String  @unique
+  phone String? @unique
 
-  password        String
+  password String
 
-  status          UserStatus  @default(ACTIVE)
+  status UserStatus @default(ACTIVE)
 
-  emailVerified   Boolean     @default(false)
-  phoneVerified   Boolean     @default(false)
+  emailVerified Boolean @default(false)
+  phoneVerified Boolean @default(false)
 
-  lastLoginAt     DateTime?
+  lastLoginAt DateTime?
 
-  roleId          String
-  role            Role        @relation(fields: [roleId], references: [id])
+  roleId String
+  role   Role   @relation(fields: [roleId], references: [id])
 
-  refreshTokens   RefreshToken[]
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
 
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  refreshTokens RefreshToken[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("users")
 }
 
-
 model RefreshToken {
-  id         String   @id @default(uuid())
+  id String @id @default(uuid())
 
-  token      String
+  token String @unique
 
-  expiresAt  DateTime
-  revokedAt  DateTime?
+  expiresAt DateTime
+  revokedAt DateTime?
 
-  userId     String
-  user       User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt  DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@map("refresh_tokens")
+}
+
+/////////////////////////////////////////////////
+// ORGANIZATION
+/////////////////////////////////////////////////
+
+model Organization {
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+
+  users User[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("organizations")
 }

@@ -118,6 +118,10 @@ model User {
 
   refreshTokens RefreshToken[]
 
+  projectMemberships ProjectMember[]
+
+  labourAssignments ProjectLabour[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -151,6 +155,7 @@ model Organization {
 
   users     User[]
   customers Customer[]
+  projects  Project[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -159,7 +164,7 @@ model Organization {
 }
 
 /////////////////////////////////////////////////
-// ORGANIZATION
+// CUSTOMER
 /////////////////////////////////////////////////
 
 model Customer {
@@ -180,9 +185,129 @@ model Customer {
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
+  projects Project[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([organizationId])
   @@map("customers")
+}
+
+/////////////////////////////////////////////////
+// PROJECT
+/////////////////////////////////////////////////
+
+enum ProjectStatus {
+  PLANNING
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+}
+
+model Project {
+  id String @id @default(uuid())
+
+  projectCode String  @unique
+  name        String
+  description String?
+
+  status ProjectStatus @default(PLANNING)
+
+  // Organization that owns/manages the project
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  // Customer who owns/gave the project
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
+
+  // Location
+  address   String?
+  city      String?
+  latitude  Decimal? @db.Decimal(10, 7)
+  longitude Decimal? @db.Decimal(10, 7)
+
+  // Timeline
+  startDate        DateTime
+  scheduledEndDate DateTime
+  actualEndDate    DateTime?
+
+  // Progress
+  progressPercentage Int @default(0)
+
+  // Financial
+  budget Decimal? @db.Decimal(15, 2)
+
+  members ProjectMember[]
+
+  labourAssignments ProjectLabour[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([customerId])
+  @@index([status])
+  @@map("projects")
+}
+
+/////////////////////////////////////////////////
+// PROJECT MEMBERS
+/////////////////////////////////////////////////
+
+enum ProjectMemberRole {
+  CONTRACTOR
+  PROJECT_MANAGER
+  SUPERVISOR
+  SITE_ENGINEER
+}
+
+model ProjectMember {
+  id String @id @default(uuid())
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  role ProjectMemberRole
+
+  assignedAt DateTime  @default(now())
+  removedAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([projectId, userId])
+  @@index([projectId])
+  @@index([userId])
+  @@map("project_members")
+}
+
+/////////////////////////////////////////////////
+// PROJECT LABOURS
+/////////////////////////////////////////////////
+
+model ProjectLabour {
+  id String @id @default(uuid())
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  labourId String
+  labour   User   @relation(fields: [labourId], references: [id], onDelete: Cascade)
+
+  assignedAt DateTime  @default(now())
+  removedAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([projectId, labourId])
+  @@index([projectId])
+  @@index([labourId])
+  @@map("project_labour")
 }

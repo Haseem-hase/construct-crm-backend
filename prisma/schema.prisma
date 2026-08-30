@@ -151,6 +151,7 @@ model Organization {
 
   users     User[]
   customers Customer[]
+  projects  Project[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -159,7 +160,7 @@ model Organization {
 }
 
 /////////////////////////////////////////////////
-// ORGANIZATION
+// CUSTOMER
 /////////////////////////////////////////////////
 
 model Customer {
@@ -180,9 +181,66 @@ model Customer {
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
+  projects Project[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([organizationId])
   @@map("customers")
+}
+
+/////////////////////////////////////////////////
+// PROJECT
+/////////////////////////////////////////////////
+
+enum ProjectStatus {
+  PLANNING
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+}
+
+model Project {
+  id String @id @default(uuid())
+
+  projectCode String  @unique
+  name        String
+  description String?
+
+  status ProjectStatus @default(PLANNING)
+
+  // Organization that owns/manages the project
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  // Customer who owns/gave the project
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
+
+  // Location
+  address   String?
+  city      String?
+  latitude  Decimal? @db.Decimal(10, 7)
+  longitude Decimal? @db.Decimal(10, 7)
+
+  // Timeline
+  startDate        DateTime
+  scheduledEndDate DateTime
+  actualEndDate    DateTime?
+
+  // Progress
+  progressPercentage Int @default(0)
+
+  // Financial
+  budget Decimal? @db.Decimal(15, 2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([customerId])
+  @@index([status])
+  @@map("projects")
 }

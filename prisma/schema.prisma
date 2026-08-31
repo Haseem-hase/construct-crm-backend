@@ -19,11 +19,11 @@ datasource db {
 
 model Role {
   id          String  @id @default(uuid())
-  name        String  @unique
+  name        String
   description String?
 
   organizationId String?
-  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -46,6 +46,8 @@ enum Module {
   INVENTORY
   SUPPLIER
   REPORT
+  ROLE
+  USER
 }
 
 enum Action {
@@ -159,6 +161,7 @@ model Organization {
   description String?
 
   users     User[]
+  roles     Role[]
   customers Customer[]
   projects  Project[]
 

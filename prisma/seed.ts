@@ -319,79 +319,69 @@ async function main() {
 
     console.log("✅ Permissions Seeded");
 
-    //////////////////////////////////////////////////
-    // SUPER ADMIN ROLE
-    //////////////////////////////////////////////////
+//////////////////////////////////////////////////
+// SUPER ADMIN USER
+//////////////////////////////////////////////////
 
-    let superAdminRole = await prisma.role.findFirst({
-        where: {
-            name: "SUPER_ADMIN",
-            organizationId: null,
-        },
-    });
+const superAdminEmail = process.env.SUPER_ADMIN_EMAIL;
+const superAdminPassword = process.env.SUPER_ADMIN_PASSWORD;
+const superAdminName = process.env.SUPER_ADMIN_NAME;
+const superAdminPhone = process.env.SUPER_ADMIN_PHONE;
 
-    if (!superAdminRole) {
-        superAdminRole = await prisma.role.create({
-            data: {
-                name: "SUPER_ADMIN",
-                description: "System Administrator",
-                organizationId: null,
-            },
-        });
+if (
+    !superAdminEmail ||
+    !superAdminPassword ||
+    !superAdminName
+) {
+    throw new Error(
+        "SUPER_ADMIN_EMAIL, SUPER_ADMIN_PASSWORD and SUPER_ADMIN_NAME must be configured in .env"
+    );
+}
 
-        console.log("✅ SUPER_ADMIN Role Created");
-    } else {
-        console.log("ℹ️ SUPER_ADMIN Role Already Exists");
-    }
+const existingAdmin = await prisma.user.findUnique({
+    where: {
+        email: superAdminEmail,
+    },
+});
 
-    //////////////////////////////////////////////////
-    // SUPER ADMIN USER
-    //////////////////////////////////////////////////
+if (!existingAdmin) {
+    const hashedPassword = await bcrypt.hash(
+        superAdminPassword,
+        12
+    );
 
-    const superAdminEmail = process.env.SUPER_ADMIN_EMAIL;
-    const superAdminPassword = process.env.SUPER_ADMIN_PASSWORD;
-    const superAdminName = process.env.SUPER_ADMIN_NAME;
-    const superAdminPhone = process.env.SUPER_ADMIN_PHONE;
-
-    if (
-        !superAdminEmail ||
-        !superAdminPassword ||
-        !superAdminName
-    ) {
-        throw new Error(
-            "SUPER_ADMIN_EMAIL, SUPER_ADMIN_PASSWORD and SUPER_ADMIN_NAME must be configured in .env"
-        );
-    }
-
-    const existingAdmin = await prisma.user.findUnique({
-        where: {
+    await prisma.user.create({
+        data: {
+            fullName: superAdminName,
             email: superAdminEmail,
+            phone: superAdminPhone || null,
+            password: hashedPassword,
+
+            systemRole: "SUPER_ADMIN",
+
+            organizationId: null,
+            organizationRoleId: null,
+
+            emailVerified: true,
+            phoneVerified: true,
         },
     });
 
-    if (!existingAdmin) {
-        const hashedPassword = await bcrypt.hash(
-            superAdminPassword,
-            12
-        );
+    console.log("✅ Super Admin Created");
+} else {
+    await prisma.user.update({
+        where: {
+            id: existingAdmin.id,
+        },
+        data: {
+            systemRole: "SUPER_ADMIN",
+            organizationId: null,
+            organizationRoleId: null,
+        },
+    });
 
-        await prisma.user.create({
-            data: {
-                fullName: superAdminName,
-                email: superAdminEmail,
-                phone: superAdminPhone || null,
-                password: hashedPassword,
-                roleId: superAdminRole.id,
-                organizationId: null,
-                emailVerified: true,
-                phoneVerified: true,
-            },
-        });
-
-        console.log("✅ Super Admin Created");
-    } else {
-        console.log("ℹ️ Super Admin Already Exists");
-    }
+    console.log("✅ Super Admin Updated");
+}
 
     //////////////////////////////////////////////////
     // COMPLETE

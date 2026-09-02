@@ -17,18 +17,56 @@ datasource db {
 // AUTHENTICATION
 /////////////////////////////////////////////////
 
+/////////////////////////////////////////////////
+// ROLES
+/////////////////////////////////////////////////
+
 model Role {
-  id          String  @id @default(uuid())
-  name        String  @unique
+  id String @id @default(uuid())
+
+  name        String
   description String?
+
+  // true  = global role created by SUPER_ADMIN
+  // false = custom role created by ORGANIZATION_OWNER
+  isGlobal Boolean @default(true)
+
+  // NULL for global roles.
+  // Set for organization-specific custom roles.
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  users           User[]
+  organizationRoles OrganizationRole[]
+
+  @@unique([name, organizationId])
+  @@index([organizationId])
+  @@map("roles")
+}
+
+model OrganizationRole {
+  id String @id @default(uuid())
+
+  organizationId String
+  roleId         String
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  users User[]
+
   rolePermissions RolePermission[]
 
-  @@map("roles")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([organizationId, roleId])
+  @@index([organizationId])
+  @@index([roleId])
+  @@map("organization_roles")
 }
 
 enum Module {
@@ -41,6 +79,8 @@ enum Module {
   INVENTORY
   SUPPLIER
   REPORT
+  ROLE
+  USER
 }
 
 enum Action {
@@ -73,15 +113,18 @@ model Permission {
 model RolePermission {
   id String @id @default(uuid())
 
-  roleId       String
-  permissionId String
+  organizationRoleId String
+  permissionId       String
 
-  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  organizationRole OrganizationRole @relation(fields: [organizationRoleId], references: [id], onDelete: Cascade)
+
   permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
-  @@unique([roleId, permissionId])
+  @@unique([organizationRoleId, permissionId])
+  @@index([organizationRoleId])
+  @@index([permissionId])
   @@map("role_permissions")
 }
 
@@ -90,6 +133,10 @@ enum UserStatus {
   INACTIVE
   SUSPENDED
   PENDING
+}
+
+enum SystemRole {
+  SUPER_ADMIN
 }
 
 model User {
@@ -110,11 +157,13 @@ model User {
 
   lastLoginAt DateTime?
 
-  roleId String
-  role   Role   @relation(fields: [roleId], references: [id])
+  systemRole SystemRole?
 
   organizationId String?
   organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  organizationRoleId String?
+  organizationRole   OrganizationRole? @relation(fields: [organizationRoleId], references: [id])
 
   refreshTokens RefreshToken[]
 
@@ -153,9 +202,11 @@ model Organization {
   name        String
   description String?
 
-  users     User[]
-  customers Customer[]
-  projects  Project[]
+  users             User[]
+  roles             Role[]
+  organizationRoles OrganizationRole[]
+  customers         Customer[]
+  projects          Project[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

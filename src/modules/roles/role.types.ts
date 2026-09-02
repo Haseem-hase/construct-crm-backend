@@ -1,19 +1,93 @@
 import { Prisma } from "@prisma/client";
 
-import { CreateRoleInput, UpdateRoleInput } from "./role.validation";
+import {
+    CreateRoleInput,
+    UpdateRoleInput,
+} from "./role.validation";
 
-//create role
+
+// ======================================================
+// CREATE ROLE
+// ======================================================
+
 export type CreateRoleData = CreateRoleInput;
 
-//update role
+
+// ======================================================
+// UPDATE ROLE
+// ======================================================
+
 export type UpdateRoleData = UpdateRoleInput;
 
-//role with its permissions
-export const roleWithPermissionsSelect = {
+
+// ======================================================
+// BASIC GLOBAL ROLE
+// ======================================================
+
+export const roleSelect = {
     id: true,
     name: true,
     description: true,
+    isGlobal: true,
+    createdAt: true,
+    updatedAt: true,
+} as const;
+
+export type Role = Prisma.RoleGetPayload<{
+    select: typeof roleSelect;
+}>;
+
+
+// ======================================================
+// ROLE WITH ORGANIZATION INFORMATION
+// ======================================================
+
+export const roleWithOrganizationsSelect = {
+    id: true,
+    name: true,
+    description: true,
+    isGlobal: true,
+
+    organizationRoles: {
+        select: {
+            id: true,
+
+            organization: {
+                select: {
+                    id: true,
+                    name: true,
+                },
+            },
+        },
+    },
+
+    createdAt: true,
+    updatedAt: true,
+} as const;
+
+export type RoleWithOrganizations = Prisma.RoleGetPayload<{
+    select: typeof roleWithOrganizationsSelect;
+}>;
+
+
+// ======================================================
+// ORGANIZATION ROLE WITH PERMISSIONS
+// ======================================================
+
+export const organizationRoleWithPermissionsSelect = {
+    id: true,
+
     organizationId: true,
+    roleId: true,
+
+    role: {
+        select: {
+            id: true,
+            name: true,
+            description: true,
+            isGlobal: true,
+        },
+    },
 
     rolePermissions: {
         select: {
@@ -32,23 +106,7 @@ export const roleWithPermissionsSelect = {
     updatedAt: true,
 } as const;
 
-export type RoleWithPermissions = Prisma.RoleGetPayload<{
-    select: typeof roleWithPermissionsSelect;
-}>;
-
-//basuc role
-export const roleSelect = {
-    id: true,
-    name: true,
-    description: true,
-    organizationId: true,
-    createdAt: true,
-    updatedAt: true,
-} as const;
-
-export type Role = Prisma.RoleGetPayload<{
-    select: typeof roleSelect;
-}>;
-
-
-
+export type OrganizationRoleWithPermissions =
+    Prisma.OrganizationRoleGetPayload<{
+        select: typeof organizationRoleWithPermissionsSelect;
+    }>;

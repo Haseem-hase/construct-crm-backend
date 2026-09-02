@@ -15,7 +15,6 @@ export const createRoleSchema = z.object({
 
     permissionIds: z
         .array(z.string().uuid("Invalid permission ID."))
-        .optional()
         .default([]),
 })
 

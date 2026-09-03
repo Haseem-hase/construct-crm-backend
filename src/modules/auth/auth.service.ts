@@ -31,13 +31,8 @@ export const registerCustomer = async (
         throw new ConflictError("Phone number already registered")
     }
 
-    const customerRole = await authRepository.findRoleByName(
-        "CUSTOMER"
-    );
+    // Customer role is now handled per-organization, leaving empty for global registration
 
-    if (!customerRole) {
-        throw new Error("Customer role do not found.")
-    }
 
     const hashedPassword = await bcrypt.hash(
         data.password,
@@ -49,8 +44,7 @@ export const registerCustomer = async (
         email: data.email,
         phone: data.phone,
         password: hashedPassword,
-        roleId: customerRole.id,
-    })
+    });
 
     const { password, ...userWithoutPassword } = user;
 
@@ -81,9 +75,11 @@ export const login = async (
         throw new UnauthorizedError("Invalid email or password.");
     }
 
+    const roleName = user.systemRole || user.organizationRole?.role.name || "USER";
+
     const payload = {
         userId: user.id,
-        role: user.role.name,
+        role: roleName,
     };
 
     const accessToken = generateAccessToken(payload);
@@ -111,7 +107,7 @@ export const login = async (
             id: user.id,
             fullName: user.fullName,
             email: user.email,
-            role: user.role.name,
+            role: roleName,
         },
     };
 };
@@ -147,9 +143,11 @@ export const refreshAccessToken = async (
 
     await revokeRefreshToken(matchedToken.id)
 
+    const roleName = user.systemRole || user.organizationRole?.role.name || "USER";
+
     const newRefreshToken = generateRefreshToken({
         userId: user.id,
-        role: user.role.name,
+        role: roleName,
     });
 
     const hashedRefreshToken = await bcrypt.hash(crypto.createHash("sha256").update(newRefreshToken).digest("hex"), 10);
@@ -166,7 +164,7 @@ export const refreshAccessToken = async (
 
     const accessToken = generateAccessToken({
         userId: user.id,
-        role: user.role.name,
+        role: roleName,
     });
 
     return {

@@ -1,11 +1,16 @@
 import { Router } from "express";
 
 import {
-    createRoleController,
-    getRolesController,
-    getRoleController,
-    updateRoleController,
-    deleteRoleController,
+    createGlobalRoleController,
+    getGlobalRolesController,
+    getGlobalRoleController,
+    updateGlobalRoleController,
+    deleteGlobalRoleController,
+    createOrganizationRoleController,
+    getOrganizationRolesController,
+    getOrganizationRoleController,
+    updateOrganizationRoleController,
+    deleteOrganizationRoleController,
 } from "./role.controller";
 
 import { authenticate } from "../../middlewares/authenticate";
@@ -18,57 +23,82 @@ const router = Router();
 //all role routes require authentication
 router.use(authenticate);
 
-/**
- * Create Role
- *
- * Only Organization Owners can create
- * organization-specific roles.
- */
+// ==========================================
+// GLOBAL ROLE ROUTES (SUPER_ADMIN)
+// ==========================================
+
+router.post(
+    "/global",
+    authorize("SUPER_ADMIN"),
+    validate(createRoleSchema, "body"),
+    createGlobalRoleController
+);
+
+router.get(
+    "/global",
+    authorize("SUPER_ADMIN"),
+    getGlobalRolesController
+);
+
+router.get(
+    "/global/:id",
+    authorize("SUPER_ADMIN"),
+    validate(roleIdSchema, "params"),
+    getGlobalRoleController
+);
+
+router.patch(
+    "/global/:id",
+    authorize("SUPER_ADMIN"),
+    validate(roleIdSchema, "params"),
+    validate(updateRoleSchema, "body"),
+    updateGlobalRoleController
+);
+
+router.delete(
+    "/global/:id",
+    authorize("SUPER_ADMIN"),
+    validate(roleIdSchema, "params"),
+    deleteGlobalRoleController
+);
+
+// ==========================================
+// ORGANIZATION ROLE ROUTES (ORGANIZATION_OWNER)
+// ==========================================
+
 router.post(
     "/",
     authorize("ORGANIZATION_OWNER"),
     validate(createRoleSchema, "body"),
-    createRoleController
+    createOrganizationRoleController
 );
 
-/**
- * Get all Roles
- */
 router.get(
     "/",
     authorize("ORGANIZATION_OWNER"),
-    getRolesController
+    getOrganizationRolesController
 );
 
-/**
- * Get Role by ID
- */
 router.get(
     "/:id",
     authorize("ORGANIZATION_OWNER"),
     validate(roleIdSchema, "params"),
-    getRoleController
+    getOrganizationRoleController
 );
 
-/**
- * Update Role
- */
 router.patch(
     "/:id",
     authorize("ORGANIZATION_OWNER"),
     validate(roleIdSchema, "params"),
-    validate(updateRoleSchema),
-    updateRoleController
+    validate(updateRoleSchema, "body"),
+    updateOrganizationRoleController
 );
 
-/**
- * Delete Role
- */
 router.delete(
     "/:id",
     authorize("ORGANIZATION_OWNER"),
     validate(roleIdSchema, "params"),
-    deleteRoleController
+    deleteOrganizationRoleController
 );
 
 export default router;

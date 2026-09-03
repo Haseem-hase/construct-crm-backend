@@ -1,53 +1,199 @@
 import prisma from "../../lib/prisma";
+
 import {
     CreateRoleData,
+    OrganizationRole,
+    OrganizationRoleWithPermissions,
     Role,
-    RoleWithPermissions,
     UpdateRoleData,
+    organizationRoleSelect,
+    organizationRoleWithPermissionsSelect,
     roleSelect,
-    roleWithPermissionsSelect,
 } from "./role.types";
 
+/////////////////////////////////////////////////
+// GLOBAL ROLE OPERATIONS
+/////////////////////////////////////////////////
 
 /**
- * Create a role
+ * Create a global role.
+ *
+ * A global role is created by SUPER_ADMIN.
+ * After creation, an OrganizationRole is created
+ * for every existing organization.
  */
-export const createRole = async (
-    organizationId: string,
+export const createGlobalRole = async (
     data: CreateRoleData
 ): Promise<Role> => {
-    return await prisma.role.create({
-        data: {
-            name: data.name,
-            description: data.description,
-            organizationId,
+    return await prisma.$transaction(async (tx) => {
+        // Create global role
+        const role = await tx.role.create({
+            data: {
+                name: data.name,
+                description: data.description,
+                isGlobal: true,
+            },
+            select: roleSelect,
+        });
 
-            rolePermissions: data.permissionIds?.length
-                ? {
-                      create: data.permissionIds.map((permissionId) => ({
-                          permissionId,
-                      })),
-                  }
-                : undefined,
+        // Get all organizations
+        const organizations = await tx.organization.findMany({
+            select: {
+                id: true,
+            },
+        });
+
+        // Create this role for every organization
+        if (organizations.length > 0) {
+            await tx.organizationRole.createMany({
+                data: organizations.map((organization) => ({
+                    organizationId: organization.id,
+                    roleId: role.id,
+                })),
+            });
+        }
+
+        return role;
+    });
+};
+
+/**
+ * Find all global roles.
+ */
+export const findGlobalRoles = async (): Promise<Role[]> => {
+    return await prisma.role.findMany({
+        where: {
+            isGlobal: true,
         },
+        select: roleSelect,
+        orderBy: {
+            createdAt: "desc",
+        },
+    });
+};
 
+/**
+ * Find a global role by ID.
+ */
+export const findGlobalRoleById = async (
+    id: string
+): Promise<Role | null> => {
+    return await prisma.role.findFirst({
+        where: {
+            id,
+            isGlobal: true,
+        },
         select: roleSelect,
     });
 };
 
+/**
+ * Find a global role by name.
+ */
+export const findGlobalRoleByName = async (
+    name: string
+): Promise<Role | null> => {
+    return await prisma.role.findFirst({
+        where: {
+            name,
+            isGlobal: true,
+        },
+        select: roleSelect,
+    });
+};
 
 /**
- * Find all roles belonging to an organization
+ * Update a global role.
  */
-export const findRolesByOrganization = async (
+export const updateGlobalRole = async (
+    id: string,
+    data: UpdateRoleData
+): Promise<Role> => {
+    return await prisma.role.update({
+        where: {
+            id,
+        },
+        data: {
+            name: data.name,
+            description: data.description,
+        },
+        select: roleSelect,
+    });
+};
+
+/**
+ * Delete a global role.
+ *
+ * OrganizationRole records will be deleted automatically
+ * because of the Cascade relation in the Prisma schema.
+ */
+export const deleteGlobalRole = async (
+    id: string
+): Promise<Role> => {
+    return await prisma.role.delete({
+        where: {
+            id,
+        },
+        select: roleSelect,
+    });
+};
+
+/////////////////////////////////////////////////
+// ORGANIZATION ROLE OPERATIONS
+/////////////////////////////////////////////////
+
+/**
+ * Create an organization-specific role.
+ *
+ * This is used by ORGANIZATION_OWNER.
+ */
+export const createOrganizationRole = async (
+    organizationId: string,
+    data: CreateRoleData
+): Promise<OrganizationRoleWithPermissions> => {
+    return await prisma.$transaction(async (tx) => {
+        const role = await tx.role.create({
+            data: {
+                name: data.name,
+                description: data.description,
+                isGlobal: false,
+                organizationId,
+            }
+        });
+
+        return await tx.organizationRole.create({
+            data: {
+                organizationId,
+                roleId: role.id,
+                rolePermissions: data.permissionIds?.length
+                    ? {
+                          create: data.permissionIds.map((permissionId) => ({
+                              permissionId,
+                          })),
+                      }
+                    : undefined,
+            },
+            select: organizationRoleWithPermissionsSelect,
+        });
+    });
+};
+
+/**
+ * Find all roles available to an organization.
+ *
+ * This includes:
+ * - Global roles assigned to the organization
+ * - Organization-specific roles
+ */
+export const findOrganizationRoles = async (
     organizationId: string
-): Promise<Role[]> => {
-    return await prisma.role.findMany({
+): Promise<OrganizationRole[]> => {
+    return await prisma.organizationRole.findMany({
         where: {
             organizationId,
         },
 
-        select: roleSelect,
+        select: organizationRoleSelect,
 
         orderBy: {
             createdAt: "desc",
@@ -55,140 +201,164 @@ export const findRolesByOrganization = async (
     });
 };
 
-
 /**
- * Find a role by ID
+ * Find an organization role by ID.
  */
-export const findRoleById = async (
-    id: string
-): Promise<Role | null> => {
-    return await prisma.role.findUnique({
+export const findOrganizationRoleById = async (
+    id: string,
+    organizationId: string
+): Promise<OrganizationRole | null> => {
+    return await prisma.organizationRole.findFirst({
         where: {
             id,
+            organizationId,
         },
 
-        select: roleSelect,
+        select: organizationRoleSelect,
     });
 };
 
-
 /**
- * Find a role by ID with its permissions
+ * Find an organization role by ID with permissions.
  */
-export const findRoleByIdWithPermissions = async (
-    id: string
-): Promise<RoleWithPermissions | null> => {
-    return await prisma.role.findUnique({
+export const findOrganizationRoleByIdWithPermissions = async (
+    id: string,
+    organizationId: string
+): Promise<OrganizationRoleWithPermissions | null> => {
+    return await prisma.organizationRole.findFirst({
         where: {
             id,
+            organizationId,
         },
 
-        select: roleWithPermissionsSelect,
+        select: organizationRoleWithPermissionsSelect,
     });
 };
 
-
 /**
- * Find a role by name inside an organization
+ * Find an organization's role by role name.
  */
-export const findRoleByName = async (
+export const findOrganizationRoleByName = async (
     organizationId: string,
     name: string
-): Promise<Role | null> => {
-    return await prisma.role.findUnique({
+): Promise<OrganizationRole | null> => {
+    return await prisma.organizationRole.findFirst({
         where: {
-            organizationId_name: {
-                organizationId,
+            organizationId,
+
+            role: {
                 name,
             },
         },
 
-        select: roleSelect,
+        select: organizationRoleSelect,
     });
 };
 
-
 /**
- * Update a role
+ * Update an organization role.
+ *
+ * The role name and description belong to the underlying Role.
+ * Permissions belong to the OrganizationRole.
  */
-export const updateRole = async (
+export const updateOrganizationRole = async (
     id: string,
+    organizationId: string,
     data: UpdateRoleData
-): Promise<Role> => {
+): Promise<OrganizationRoleWithPermissions> => {
     return await prisma.$transaction(async (tx) => {
+        const organizationRole = await tx.organizationRole.findFirst({
+            where: {
+                id,
+                organizationId,
+            },
 
-        /**
-         * Update basic role information
-         */
-        const role = await tx.role.update({
+            select: {
+                id: true,
+                roleId: true,
+            },
+        });
+
+        if (!organizationRole) {
+            throw new Error("Organization role not found.");
+        }
+
+        // Update role information if provided
+        if (
+            data.name !== undefined ||
+            data.description !== undefined
+        ) {
+            await tx.role.update({
+                where: {
+                    id: organizationRole.roleId,
+                },
+
+                data: {
+                    ...(data.name !== undefined && {
+                        name: data.name,
+                    }),
+
+                    ...(data.description !== undefined && {
+                        description: data.description,
+                    }),
+                },
+            });
+        }
+
+        // Update permissions if provided
+        if (data.permissionIds !== undefined) {
+            await tx.rolePermission.deleteMany({
+                where: {
+                    organizationRoleId: id,
+                },
+            });
+
+            if (data.permissionIds.length > 0) {
+                await tx.rolePermission.createMany({
+                    data: data.permissionIds.map((permissionId) => ({
+                        organizationRoleId: id,
+                        permissionId,
+                    })),
+                });
+            }
+        }
+
+        return await tx.organizationRole.findUniqueOrThrow({
             where: {
                 id,
             },
 
-            data: {
-                name: data.name,
-                description: data.description,
-            },
-
-            select: roleSelect,
+            select: organizationRoleWithPermissionsSelect,
         });
-
-
-        /**
-         * Update permissions if permissionIds
-         * were provided.
-         */
-        if (data.permissionIds !== undefined) {
-
-            await tx.rolePermission.deleteMany({
-                where: {
-                    roleId: id,
-                },
-            });
-
-
-            if (data.permissionIds.length > 0) {
-
-                await tx.rolePermission.createMany({
-                    data: data.permissionIds.map((permissionId) => ({
-                        roleId: id,
-                        permissionId,
-                    })),
-                });
-
-            }
-        }
-
-        return role;
     });
 };
 
-
 /**
- * Delete a role
+ * Delete an organization role.
  */
-export const deleteRole = async (
-    id: string
-): Promise<Role> => {
-    return await prisma.role.delete({
+export const deleteOrganizationRole = async (
+    id: string,
+    organizationId: string
+): Promise<OrganizationRole> => {
+    return await prisma.organizationRole.delete({
         where: {
             id,
+            organizationId,
         },
 
-        select: roleSelect,
+        select: organizationRoleSelect,
     });
 };
 
-
 /**
- * Check whether a role has users
+ * Count users assigned to an organization role.
  */
-export const countUsersWithRole = async (
-    roleId: string
+export const countUsersWithOrganizationRole = async (
+    organizationRoleId: string
 ): Promise<number> => {
     return await prisma.user.count({
         where: {
-            roleId,
+            organizationRoleId,
         },
     });
 };

@@ -7,14 +7,18 @@ export const authorize = (...roles: string[]) => {
         res: Response,
         next: NextFunction
     ) => {
-        const userRole = req.user!.role.name;
+        const user = req.user!;
 
-        if (userRole === "SUPER_ADMIN") {
-            next();
-            return;
+        if (user.systemRole === "SUPER_ADMIN") {
+            // SUPER_ADMIN has access to routes that allow SUPER_ADMIN explicitly
+            if (roles.includes("SUPER_ADMIN") || roles.length === 0) {
+                return next();
+            }
         }
 
-        if (!roles.includes(req.user!.role.name)) {
+        const userRole = user.systemRole || user.organizationRole?.role.name;
+
+        if (!userRole || !roles.includes(userRole)) {
             throw new ForbiddenError(
                 "You are not authorized to perform this action."
             );

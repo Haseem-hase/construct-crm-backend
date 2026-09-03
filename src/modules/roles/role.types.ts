@@ -1,29 +1,13 @@
 import { Prisma } from "@prisma/client";
+import { CreateRoleInput, UpdateRoleInput } from "./role.validation";
 
-import {
-    CreateRoleInput,
-    UpdateRoleInput,
-} from "./role.validation";
-
-
-// ======================================================
-// CREATE ROLE
-// ======================================================
-
+// Create role
 export type CreateRoleData = CreateRoleInput;
 
-
-// ======================================================
-// UPDATE ROLE
-// ======================================================
-
+// Update role
 export type UpdateRoleData = UpdateRoleInput;
 
-
-// ======================================================
-// BASIC GLOBAL ROLE
-// ======================================================
-
+// Basic global Role
 export const roleSelect = {
     id: true,
     name: true,
@@ -37,27 +21,18 @@ export type Role = Prisma.RoleGetPayload<{
     select: typeof roleSelect;
 }>;
 
-
-// ======================================================
-// ROLE WITH ORGANIZATION INFORMATION
-// ======================================================
-
-export const roleWithOrganizationsSelect = {
+// Organization Role with the underlying global role
+export const organizationRoleSelect = {
     id: true,
-    name: true,
-    description: true,
-    isGlobal: true,
+    organizationId: true,
+    roleId: true,
 
-    organizationRoles: {
+    role: {
         select: {
             id: true,
-
-            organization: {
-                select: {
-                    id: true,
-                    name: true,
-                },
-            },
+            name: true,
+            description: true,
+            isGlobal: true,
         },
     },
 
@@ -65,18 +40,13 @@ export const roleWithOrganizationsSelect = {
     updatedAt: true,
 } as const;
 
-export type RoleWithOrganizations = Prisma.RoleGetPayload<{
-    select: typeof roleWithOrganizationsSelect;
+export type OrganizationRole = Prisma.OrganizationRoleGetPayload<{
+    select: typeof organizationRoleSelect;
 }>;
 
-
-// ======================================================
-// ORGANIZATION ROLE WITH PERMISSIONS
-// ======================================================
-
+// Organization Role with permissions
 export const organizationRoleWithPermissionsSelect = {
     id: true,
-
     organizationId: true,
     roleId: true,
 

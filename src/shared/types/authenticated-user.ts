@@ -6,10 +6,16 @@ export const authenticatedUserSelect = {
     email: true,
     phone: true,
     organizationId: true,
-    role: {
+    systemRole: true,
+    organizationRole: {
         select: {
             id: true,
-            name: true,
+            role: {
+                select: {
+                    id: true,
+                    name: true,
+                },
+            },
         },
     },
 } as const;

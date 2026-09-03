@@ -8,7 +8,11 @@ export const findUserByEmail = async (email: string) => {
             email,
         },
         include: {
-            role: true,
+            organizationRole: {
+                include: {
+                    role: true,
+                },
+            },
         },
     });
 };
@@ -22,9 +26,10 @@ export const findUserByPhone = async (phone: string) => {
 };
 
 export const findRoleByName = async (name: string) => {
-    return await prisma.role.findUnique({
+    return await prisma.role.findFirst({
         where: {
             name,
+            isGlobal: true,
         },
     });
 };

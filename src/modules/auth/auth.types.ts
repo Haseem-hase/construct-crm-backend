@@ -19,7 +19,7 @@ export interface CreateUserInput {
     email: string;
     phone: string;
     password: string; // hashed password
-    roleId: string;
+    organizationRoleId?: string;
 }
 
 export interface AuthUser {

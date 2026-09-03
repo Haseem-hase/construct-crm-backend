@@ -1,154 +1,124 @@
 import { Request, Response, NextFunction } from "express";
 
 import {
-    createRoleService,
-    getRolesService,
-    getRoleService,
-    updateRoleService,
-    deleteRoleService,
+    createGlobalRoleService,
+    getGlobalRolesService,
+    getGlobalRoleService,
+    updateGlobalRoleService,
+    deleteGlobalRoleService,
+    createOrganizationRoleService,
+    getOrganizationRolesService,
+    getOrganizationRoleService,
+    updateOrganizationRoleService,
+    deleteOrganizationRoleService,
 } from "./role.service";
 
+// ==========================================
+// GLOBAL ROLE CONTROLLERS
+// ==========================================
 
-/**
- * Create Role
- */
-export const createRoleController = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
+export const createGlobalRoleController = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const organizationId = req.user!.organizationId!;
-
-        const role = await createRoleService(
-            organizationId,
-            req.body
-        );
-
-        return res.status(201).json({
-            success: true,
-            data: {
-                role,
-            },
-        });
-
+        const role = await createGlobalRoleService(req.body);
+        return res.status(201).json({ success: true, data: { role } });
     } catch (error) {
         next(error);
     }
 };
 
-
-/**
- * Get all organization roles
- */
-export const getRolesController = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
+export const getGlobalRolesController = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const organizationId = req.user!.organizationId!;
-
-        const roles = await getRolesService(
-            organizationId
-        );
-
-        return res.status(200).json({
-            success: true,
-            data: {
-                roles,
-            },
-        });
-
+        const roles = await getGlobalRolesService();
+        return res.status(200).json({ success: true, data: { roles } });
     } catch (error) {
         next(error);
     }
 };
 
-
-/**
- * Get a single role
- */
-export const getRoleController = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
+export const getGlobalRoleController = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const organizationId = req.user!.organizationId!;
-
-        const role = await getRoleService(
-            req.params.id as string,
-            organizationId
-        );
-
-        return res.status(200).json({
-            success: true,
-            data: {
-                role,
-            },
-        });
-
+        const role = await getGlobalRoleService(req.params.id as string);
+        return res.status(200).json({ success: true, data: { role } });
     } catch (error) {
         next(error);
     }
 };
 
-
-/**
- * Update Role
- */
-export const updateRoleController = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
+export const updateGlobalRoleController = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const organizationId = req.user!.organizationId!;
-
-        const role = await updateRoleService(
-            req.params.id as string,
-            organizationId,
-            req.body
-        );
-
-        return res.status(200).json({
-            success: true,
-            data: {
-                role,
-            },
-        });
-
+        const role = await updateGlobalRoleService(req.params.id as string, req.body);
+        return res.status(200).json({ success: true, data: { role } });
     } catch (error) {
         next(error);
     }
 };
 
-
-/**
- * Delete Role
- */
-export const deleteRoleController = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
+export const deleteGlobalRoleController = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const organizationId = req.user!.organizationId!;
-
-        const role = await deleteRoleService(
-            req.params.id as string,
-            organizationId
-        );
-
+        const role = await deleteGlobalRoleService(req.params.id as string);
         return res.status(200).json({
             success: true,
-            message: "Role deleted successfully.",
-            data: {
-                role,
-            },
+            message: "Global role deleted successfully.",
+            data: { role },
         });
+    } catch (error) {
+        next(error);
+    }
+};
 
+// ==========================================
+// ORGANIZATION ROLE CONTROLLERS
+// ==========================================
+
+export const createOrganizationRoleController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const organizationId = req.user!.organizationId!;
+        const role = await createOrganizationRoleService(organizationId, req.body);
+        return res.status(201).json({ success: true, data: { role } });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getOrganizationRolesController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const organizationId = req.user!.organizationId!;
+        const roles = await getOrganizationRolesService(organizationId);
+        return res.status(200).json({ success: true, data: { roles } });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getOrganizationRoleController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const organizationId = req.user!.organizationId!;
+        const role = await getOrganizationRoleService(req.params.id as string, organizationId);
+        return res.status(200).json({ success: true, data: { role } });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const updateOrganizationRoleController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const organizationId = req.user!.organizationId!;
+        const role = await updateOrganizationRoleService(req.params.id as string, organizationId, req.body);
+        return res.status(200).json({ success: true, data: { role } });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const deleteOrganizationRoleController = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const organizationId = req.user!.organizationId!;
+        const role = await deleteOrganizationRoleService(req.params.id as string, organizationId);
+        return res.status(200).json({
+            success: true,
+            message: "Organization role deleted successfully.",
+            data: { role },
+        });
     } catch (error) {
         next(error);
     }

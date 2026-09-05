@@ -43,14 +43,23 @@ export const createGlobalRole = async (
             },
         });
 
-        // Create this role for every organization
+        // Create this role for every organization with the provided permissions
         if (organizations.length > 0) {
-            await tx.organizationRole.createMany({
-                data: organizations.map((organization) => ({
-                    organizationId: organization.id,
-                    roleId: role.id,
-                })),
-            });
+            for (const organization of organizations) {
+                await tx.organizationRole.create({
+                    data: {
+                        organizationId: organization.id,
+                        roleId: role.id,
+                        rolePermissions: data.permissionIds?.length
+                            ? {
+                                  create: data.permissionIds.map((permissionId) => ({
+                                      permissionId,
+                                  })),
+                              }
+                            : undefined,
+                    },
+                });
+            }
         }
 
         return role;

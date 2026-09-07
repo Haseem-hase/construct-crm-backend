@@ -85,3 +85,7 @@ export const updateCustomerSchema = z.object({
         .boolean()
         .optional(),
 });
+
+export const customerIdSchema = z.object({
+    id: z.string().uuid("Invalid customer ID."),
+});

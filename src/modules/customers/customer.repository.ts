@@ -14,17 +14,15 @@ export const createCustomer = async (
     return await prisma.customer.create({
         data: {
             name: data.name,
-            customerCode: data.customerCode,
-            description: data.description,
-
-            email: data.email,
-            phone: data.phone,
-
-            address: data.address,
-            city: data.city,
+            type: data.type,
+            profileImageUrl: data.profileImageUrl,
+            
             country: data.country,
-            postalCode: data.postalCode,
-
+            city: data.city,
+            address: data.address,
+            
+            parentCustomerId: data.parentCustomerId,
+            
             organizationId: data.organizationId,
         },
     });
@@ -58,40 +56,45 @@ export const findCustomerByIdAndOrganization = async (
 };
 
 
-export const findCustomerByCodeAndOrganization = async (
-    customerCode: string,
-    organizationId: string
-) => {
-    return await prisma.customer.findFirst({
-        where: {
-            customerCode,
-            organizationId,
-        },
-    });
-};
-
 
 export const updateCustomer = async (
     customerId: string,
+    organizationId: string,
     data: UpdateCustomerInput
 ) => {
-    return await prisma.customer.update({
+    const result = await prisma.customer.updateMany({
         where: {
             id: customerId,
+            organizationId,
         },
         data: {
             ...data,
         },
     });
+
+    if (result.count === 0) {
+        return null;
+    }
+
+    return await prisma.customer.findFirst({
+        where: { 
+            id: customerId,
+            organizationId
+        }
+    });
 };
 
 
 export const deleteCustomer = async (
-    customerId: string
+    customerId: string,
+    organizationId: string
 ) => {
-    return await prisma.customer.delete({
+    const result = await prisma.customer.deleteMany({
         where: {
             id: customerId,
+            organizationId,
         },
     });
+    
+    return result.count > 0;
 };

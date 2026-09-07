@@ -1,54 +1,51 @@
 import { Router } from "express";
-
-import * as customerController from "./customer.controller";
 import { authenticate } from "../../middlewares/authenticate";
-import { authorize } from "../../middlewares/authorize";
 import { validate } from "../../middlewares/validate";
-import { createCustomerSchema, updateCustomerSchema } from "./customer.validation";
+import {
+    createCustomerSchema,
+    updateCustomerSchema,
+    customerIdSchema,
+} from "./customer.validation";
+import {
+    createCustomer,
+    getCustomers,
+    getCustomerById,
+    updateCustomer,
+    deleteCustomer,
+} from "./customer.controller";
 
 const router = Router();
 
+router.use(authenticate);
 
 router.post(
     "/",
-    authenticate,
-    authorize("ORGANIZATION_OWNER", "CONTRACTOR"),
-    validate(createCustomerSchema),
-    customerController.createCustomer
+    validate(createCustomerSchema, "body"),
+    createCustomer
 );
-
 
 router.get(
     "/",
-    authenticate,
-    authorize("ORGANIZATION_OWNER", "CONTRACTOR"),
-    customerController.getCustomers
+    getCustomers
 );
-
 
 router.get(
     "/:id",
-    authenticate,
-    authorize("ORGANIZATION_OWNER", "CONTRACTOR"),
-    customerController.getCustomerById
+    validate(customerIdSchema, "params"),
+    getCustomerById
 );
-
 
 router.patch(
     "/:id",
-    authenticate,
-    authorize("ORGANIZATION_OWNER", "CONTRACTOR"),
-    validate(updateCustomerSchema),
-    customerController.updateCustomer
+    validate(customerIdSchema, "params"),
+    validate(updateCustomerSchema, "body"),
+    updateCustomer
 );
-
 
 router.delete(
     "/:id",
-    authenticate,
-    authorize("ORGANIZATION_OWNER"),
-    customerController.deleteCustomer
+    validate(customerIdSchema, "params"),
+    deleteCustomer
 );
-
 
 export default router;

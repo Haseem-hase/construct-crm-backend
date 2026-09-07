@@ -214,6 +214,13 @@ model Organization {
   @@map("organizations")
 }
 
+enum CustomerType {
+  COMPANY
+  GOVERNMENT
+  INDIVIDUAL
+  OTHER
+}
+
 /////////////////////////////////////////////////
 // CUSTOMER
 /////////////////////////////////////////////////
@@ -221,20 +228,24 @@ model Organization {
 model Customer {
   id String @id @default(uuid())
 
-  name         String
-  customerCode String  @unique
-  description  String?
-
-  email String?
-  phone String?
-
-  address    String?
-  city       String?
-  country    String?
-  postalCode String?
-
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  customerCode String @unique @default(dbgenerated("('CUS-'::text || lpad((nextval('customer_code_seq'::regclass))::text, 3, '0'::text))"))
+
+  name            String
+  type            CustomerType
+  profileImageUrl String?
+
+  country String
+  city    String
+  address String?
+
+  parentCustomerId String?
+  parentCustomer   Customer?  @relation("CustomerHierarchy", fields: [parentCustomerId], references: [id])
+  childCustomers   Customer[] @relation("CustomerHierarchy")
+
+  isActive Boolean @default(true)
 
   projects Project[]
 
@@ -242,6 +253,7 @@ model Customer {
   updatedAt DateTime @updatedAt
 
   @@index([organizationId])
+  @@index([parentCustomerId])
   @@map("customers")
 }
 

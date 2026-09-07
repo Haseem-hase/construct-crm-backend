@@ -6,9 +6,7 @@ import { AuthenticatedUser } from "../../shared/types/authenticated-user";
 
 import { UnauthorizedError } from "../../errors/UnauthorizedError";
 import { NotFoundError } from "../../errors/NotFoundError";
-import { ConflictError } from "../../errors/ConflictError";
 
-//create customer
 export const createCustomer = async (
     data: CreateCustomerInput,
     user: AuthenticatedUser
@@ -22,18 +20,6 @@ export const createCustomer = async (
 
     const organizationId = user.organizationId;
 
-    const existingCustomer =
-        await customerRepository.findCustomerByCodeAndOrganization(
-            data.customerCode,
-            organizationId
-        );
-
-    if (existingCustomer) {
-        throw new ConflictError(
-            "Customer code already exists."
-        );
-    }
-
     const customer = await customerRepository.createCustomer({
         ...data,
         organizationId,
@@ -42,7 +28,6 @@ export const createCustomer = async (
     return customer;
 };
 
-//get customers 
 export const getCustomers = async (
     user: AuthenticatedUser
 ) => {
@@ -58,7 +43,6 @@ export const getCustomers = async (
     );
 };
 
-//get a customer
 export const getCustomerById = async (
     customerId: string,
     user: AuthenticatedUser
@@ -85,7 +69,6 @@ export const getCustomerById = async (
     return customer;
 };
 
-//update customer
 export const updateCustomer = async (
     customerId: string,
     data: UpdateCustomerInput,
@@ -110,24 +93,16 @@ export const updateCustomer = async (
         );
     }
 
-    if (
-        data.email &&
-        data.email !== customer.email
-    ) {
-        // We will add email uniqueness checking
-        // when customer portal authentication is implemented.
-    }
-
     const updatedCustomer =
         await customerRepository.updateCustomer(
             customerId,
+            user.organizationId,
             data
         );
 
     return updatedCustomer;
 };
 
-//deleyte acustomer
 export const deleteCustomer = async (
     customerId: string,
     user: AuthenticatedUser
@@ -151,7 +126,7 @@ export const deleteCustomer = async (
         );
     }
 
-    await customerRepository.deleteCustomer(customerId);
+    await customerRepository.deleteCustomer(customerId, user.organizationId);
 
     return {
         message: "Customer deleted successfully.",

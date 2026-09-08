@@ -10,6 +10,7 @@ import {
     createCustomer,
     getCustomers,
     getCustomerById,
+    getCustomerChildren,
     updateCustomer,
     deleteCustomer,
 } from "./customer.controller";
@@ -33,6 +34,12 @@ router.get(
     "/:id",
     validate(customerIdSchema, "params"),
     getCustomerById
+);
+
+router.get(
+    "/:id/children",
+    validate(customerIdSchema, "params"),
+    getCustomerChildren
 );
 
 router.patch(

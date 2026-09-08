@@ -82,6 +82,32 @@ export const getCustomerById = async (
 };
 
 
+// Get Customer Children
+export const getCustomerChildren = async (
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const user = req.user as AuthenticatedUser;
+
+        const customers = await customerService.getCustomerChildren(
+            req.params.id,
+            user
+        );
+
+        res.status(200).json({
+            success: true,
+            data: {
+                customers,
+            },
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+
 // Update Customer
 export const updateCustomer = async (
     req: Request<{ id: string }>,

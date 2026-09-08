@@ -69,6 +69,37 @@ export const getCustomerById = async (
     return customer;
 };
 
+export const getCustomerChildren = async (
+    customerId: string,
+    user: AuthenticatedUser
+) => {
+
+    if (!user.organizationId) {
+        throw new UnauthorizedError(
+            "User is not associated with an organization."
+        );
+    }
+
+    const customer =
+        await customerRepository.findCustomerByIdAndOrganization(
+            customerId,
+            user.organizationId
+        );
+
+    if (!customer) {
+        throw new NotFoundError(
+            "Customer not found."
+        );
+    }
+
+    const descendants = await customerRepository.findCustomerDescendants(
+        customerId,
+        user.organizationId
+    );
+
+    return descendants;
+};
+
 export const updateCustomer = async (
     customerId: string,
     data: UpdateCustomerInput,

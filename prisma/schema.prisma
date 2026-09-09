@@ -242,7 +242,7 @@ model Customer {
   address String?
 
   parentCustomerId String?
-  parentCustomer   Customer?  @relation("CustomerHierarchy", fields: [parentCustomerId], references: [id])
+  parentCustomer   Customer?  @relation("CustomerHierarchy", fields: [parentCustomerId, organizationId], references: [id, organizationId], onDelete: Cascade)
   childCustomers   Customer[] @relation("CustomerHierarchy")
 
   isActive Boolean @default(true)
@@ -252,6 +252,7 @@ model Customer {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([id, organizationId])
   @@index([organizationId])
   @@index([parentCustomerId])
   @@map("customers")

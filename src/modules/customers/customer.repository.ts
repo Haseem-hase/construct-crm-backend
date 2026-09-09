@@ -55,6 +55,34 @@ export const findCustomerByIdAndOrganization = async (
     });
 };
 
+export const findCustomerDescendants = async (
+    customerId: string,
+    organizationId: string
+) => {
+    // We use a PostgreSQL Recursive CTE to fetch all descendants.
+    // The UNION (without ALL) automatically deduplicates, protecting against infinite loops if a data cycle exists.
+    // The organizationId filter is rigidly applied at every recursion step to guarantee tenant isolation.
+    const descendants = await prisma.$queryRaw`
+        WITH RECURSIVE CustomerHierarchy AS (
+            -- Anchor member: immediate children of the requested customer
+            SELECT *
+            FROM "customers"
+            WHERE "parentCustomerId" = ${customerId} AND "organizationId" = ${organizationId}
+            
+            UNION
+            
+            -- Recursive member: children of the customers found in the previous step
+            SELECT c.*
+            FROM "customers" c
+            INNER JOIN CustomerHierarchy ch ON c."parentCustomerId" = ch.id
+            WHERE c."organizationId" = ${organizationId}
+        )
+        SELECT * FROM CustomerHierarchy;
+    `;
+
+    return descendants;
+};
+
 
 
 export const updateCustomer = async (

@@ -14,10 +14,13 @@ import {
     updateCustomer,
     deleteCustomer,
 } from "./customer.controller";
+import customerContactRoutes from "./customer-contact.routes";
 
 const router = Router();
 
 router.use(authenticate);
+
+router.use("/:customerId/contacts", customerContactRoutes);
 
 router.post(
     "/",

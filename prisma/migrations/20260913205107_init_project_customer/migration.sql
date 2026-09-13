@@ -44,5 +44,9 @@ CREATE UNIQUE INDEX "project_customers_projectId_customerId_relationshipType_key
 -- AddForeignKey
 ALTER TABLE "project_customers" ADD CONSTRAINT "project_customers_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "projects"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
+
 -- AddForeignKey
 ALTER TABLE "project_customers" ADD CONSTRAINT "project_customers_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "customers"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- Create partial unique index to ensure only one primary customer per project
+CREATE UNIQUE INDEX "project_customers_projectId_isPrimary_key" ON "project_customers"("projectId") WHERE "isPrimary" = true;

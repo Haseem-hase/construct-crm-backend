@@ -1,12 +1,6 @@
 import { z } from "zod";
 
 export const createProjectSchema = z.object({
-    projectCode: z
-        .string()
-        .trim()
-        .min(2, "Project code is required.")
-        .max(50),
-
     name: z
         .string()
         .trim()
@@ -19,20 +13,31 @@ export const createProjectSchema = z.object({
         .max(1000)
         .optional(),
 
-    customerId: z
+    imageUrl: z
         .string()
-        .uuid("Invalid customer ID."),
+        .url("Invalid image URL")
+        .optional(),
 
-    address: z
+    status: z
+        .enum(["PLANNING", "ACTIVE", "ON_HOLD", "COMPLETED", "CANCELLED"])
+        .default("PLANNING")
+        .optional(),
+
+    country: z
         .string()
         .trim()
-        .max(255)
-        .optional(),
+        .max(100),
 
     city: z
         .string()
         .trim()
         .max(100)
+        .optional(),
+
+    address: z
+        .string()
+        .trim()
+        .max(255)
         .optional(),
 
     latitude: z
@@ -47,23 +52,59 @@ export const createProjectSchema = z.object({
         .max(180)
         .optional(),
 
-    startDate: z
+    plannedStartDate: z
         .coerce
-        .date(),
+        .date()
+        .optional(),
 
-    scheduledEndDate: z
+    plannedEndDate: z
         .coerce
-        .date(),
+        .date()
+        .optional(),
+
+    actualStartDate: z
+        .coerce
+        .date()
+        .optional(),
+
+    actualEndDate: z
+        .coerce
+        .date()
+        .optional(),
+
+    progress: z
+        .number()
+        .int()
+        .min(0)
+        .max(100)
+        .default(0)
+        .optional(),
 
     budget: z
         .number()
         .nonnegative("Budget cannot be negative.")
         .optional(),
 }).refine(
-    (data) => data.scheduledEndDate >= data.startDate,
+    (data) => {
+        if (data.plannedStartDate && data.plannedEndDate) {
+            return data.plannedEndDate >= data.plannedStartDate;
+        }
+        return true;
+    },
     {
-        message: "Scheduled end date must be after start date.",
-        path: ["scheduledEndDate"],
+        message: "Planned end date must be after planned start date.",
+        path: ["plannedEndDate"],
+    }
+).refine(
+    (data) => {
+        if (data.actualStartDate && data.actualEndDate) {
+            return data.actualEndDate >= data.actualStartDate;
+        }
+        return true;
+    },
+    {
+        message: "Actual end date must be after actual start date.",
+        path: ["actualEndDate"],
     }
 );
 
@@ -81,16 +122,31 @@ export const updateProjectSchema = z.object({
         .max(1000)
         .optional(),
 
-    address: z
+    imageUrl: z
+        .string()
+        .url("Invalid image URL")
+        .optional(),
+
+    status: z
+        .enum(["PLANNING", "ACTIVE", "ON_HOLD", "COMPLETED", "CANCELLED"])
+        .optional(),
+
+    country: z
         .string()
         .trim()
-        .max(255)
+        .max(100)
         .optional(),
 
     city: z
         .string()
         .trim()
         .max(100)
+        .optional(),
+
+    address: z
+        .string()
+        .trim()
+        .max(255)
         .optional(),
 
     latitude: z
@@ -105,12 +161,17 @@ export const updateProjectSchema = z.object({
         .max(180)
         .optional(),
 
-    startDate: z
+    plannedStartDate: z
         .coerce
         .date()
         .optional(),
 
-    scheduledEndDate: z
+    plannedEndDate: z
+        .coerce
+        .date()
+        .optional(),
+
+    actualStartDate: z
         .coerce
         .date()
         .optional(),
@@ -120,7 +181,7 @@ export const updateProjectSchema = z.object({
         .date()
         .optional(),
 
-    progressPercentage: z
+    progress: z
         .number()
         .int()
         .min(0)
@@ -131,4 +192,26 @@ export const updateProjectSchema = z.object({
         .number()
         .nonnegative()
         .optional(),
-});
+}).refine(
+    (data) => {
+        if (data.plannedStartDate && data.plannedEndDate) {
+            return data.plannedEndDate >= data.plannedStartDate;
+        }
+        return true;
+    },
+    {
+        message: "Planned end date must be after planned start date.",
+        path: ["plannedEndDate"],
+    }
+).refine(
+    (data) => {
+        if (data.actualStartDate && data.actualEndDate) {
+            return data.actualEndDate >= data.actualStartDate;
+        }
+        return true;
+    },
+    {
+        message: "Actual end date must be after actual start date.",
+        path: ["actualEndDate"],
+    }
+);

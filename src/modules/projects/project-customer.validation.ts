@@ -10,6 +10,7 @@ const RelationshipTypeEnum = z.enum([
 ]);
 
 export const createProjectCustomerSchema = z.object({
+    customerId: z.string().uuid("Invalid customer ID."),
     relationshipType: RelationshipTypeEnum,
 
     isPrimary: z
@@ -26,7 +27,7 @@ export const updateProjectCustomerSchema = z.object({
         .optional(),
 });
 
-export const projectIdAndCustomerIdParamsSchema = z.object({
+export const projectIdAndProjectCustomerIdParamsSchema = z.object({
     projectId: z.string().uuid("Invalid project ID."),
-    customerId: z.string().uuid("Invalid customer ID."),
+    projectCustomerId: z.string().uuid("Invalid project customer ID."),
 });

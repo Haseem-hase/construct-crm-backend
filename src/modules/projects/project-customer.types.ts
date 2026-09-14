@@ -2,9 +2,9 @@ import { z } from "zod";
 import {
     createProjectCustomerSchema,
     updateProjectCustomerSchema,
-    projectIdAndCustomerIdParamsSchema
+    projectIdAndProjectCustomerIdParamsSchema
 } from "./project-customer.validation";
 
 export type CreateProjectCustomerInput = z.infer<typeof createProjectCustomerSchema>;
 export type UpdateProjectCustomerInput = z.infer<typeof updateProjectCustomerSchema>;
-export type ProjectIdAndCustomerIdParams = z.infer<typeof projectIdAndCustomerIdParamsSchema>;
+export type ProjectIdAndProjectCustomerIdParams = z.infer<typeof projectIdAndProjectCustomerIdParamsSchema>;

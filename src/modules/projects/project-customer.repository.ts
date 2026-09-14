@@ -46,9 +46,39 @@ export const findProjectCustomerByProjectAndCustomer = async (
     });
 };
 
-export const updateProjectCustomer = async (
+export const findProjectCustomerById = async (
+    projectId: string,
+    projectCustomerId: string,
+    tx?: Prisma.TransactionClient
+) => {
+    const db = tx || prisma;
+    return await db.projectCustomer.findFirst({
+        where: {
+            id: projectCustomerId,
+            projectId,
+        },
+    });
+};
+
+export const findProjectCustomerByRelationship = async (
     projectId: string,
     customerId: string,
+    relationshipType: ProjectCustomerRelationshipType,
+    tx?: Prisma.TransactionClient
+) => {
+    const db = tx || prisma;
+    return await db.projectCustomer.findFirst({
+        where: {
+            projectId,
+            customerId,
+            relationshipType,
+        },
+    });
+};
+
+export const updateProjectCustomer = async (
+    projectId: string,
+    projectCustomerId: string,
     data: UpdateProjectCustomerInput,
     tx?: Prisma.TransactionClient
 ) => {
@@ -66,8 +96,8 @@ export const updateProjectCustomer = async (
 
     const result = await db.projectCustomer.updateMany({
         where: {
+            id: projectCustomerId,
             projectId,
-            customerId,
         },
         data: updateData,
     });
@@ -78,22 +108,22 @@ export const updateProjectCustomer = async (
 
     return await db.projectCustomer.findFirst({
         where: {
+            id: projectCustomerId,
             projectId,
-            customerId,
         },
     });
 };
 
 export const deleteProjectCustomer = async (
     projectId: string,
-    customerId: string,
+    projectCustomerId: string,
     tx?: Prisma.TransactionClient
 ) => {
     const db = tx || prisma;
     const result = await db.projectCustomer.deleteMany({
         where: {
+            id: projectCustomerId,
             projectId,
-            customerId,
         },
     });
 

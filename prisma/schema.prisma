@@ -247,7 +247,6 @@ model Customer {
 
   isActive Boolean @default(true)
 
-  projects Project[]
   projectCustomers ProjectCustomer[]
   contacts CustomerContact[]
 
@@ -307,10 +306,6 @@ model Project {
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
 
-  // Customer who owns/gave the project
-  customerId String
-  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
-
   // Location
   country   String
   city      String?
@@ -319,15 +314,12 @@ model Project {
   longitude Decimal? @db.Decimal(10, 7)
 
   // Timeline
-  startDate        DateTime
-  scheduledEndDate DateTime
   plannedStartDate DateTime?
   plannedEndDate   DateTime?
   actualStartDate  DateTime?
   actualEndDate    DateTime?
 
   // Progress
-  progressPercentage Int @default(0)
   progress           Int @default(0)
 
   // Financial
@@ -343,7 +335,6 @@ model Project {
   updatedAt DateTime @updatedAt
 
   @@index([organizationId])
-  @@index([customerId])
   @@index([status])
   @@map("projects")
 }

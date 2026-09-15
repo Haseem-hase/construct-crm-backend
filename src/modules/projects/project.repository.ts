@@ -1,30 +1,34 @@
+import { Prisma } from "@prisma/client";
 import prisma from "../../lib/prisma";
 
-import { CreateProjectInput } from "./project.types";
+import { CreateProjectInput, UpdateProjectInput } from "./project.types";
 
 export const createProject = async (
     data: CreateProjectInput & {
         organizationId: string;
-    }
+    },
+    tx?: Prisma.TransactionClient
 ) => {
-    return await prisma.project.create({
+    const db = tx || prisma;
+    return await db.project.create({
         data: {
-            projectCode: data.projectCode,
             name: data.name,
             description: data.description,
-
-            organizationId: data.organizationId,
-            customerId: data.customerId,
-
-            address: data.address,
+            imageUrl: data.imageUrl,
+            status: data.status,
+            country: data.country,
             city: data.city,
+            address: data.address,
             latitude: data.latitude,
             longitude: data.longitude,
-
-            startDate: data.startDate,
-            scheduledEndDate: data.scheduledEndDate,
-
+            plannedStartDate: data.plannedStartDate,
+            plannedEndDate: data.plannedEndDate,
+            actualStartDate: data.actualStartDate,
+            actualEndDate: data.actualEndDate,
+            progress: data.progress,
             budget: data.budget,
+
+            organizationId: data.organizationId,
         },
     });
 };
@@ -62,4 +66,62 @@ export const findProjectByIdAndOrganization = async (
             organizationId,
         },
     });
+};
+
+export const updateProject = async (
+    projectId: string,
+    organizationId: string,
+    data: UpdateProjectInput
+) => {
+    const [updateResult, updatedProject] = await prisma.$transaction([
+        prisma.project.updateMany({
+            where: {
+                id: projectId,
+                organizationId,
+            },
+            data: {
+                name: data.name,
+                description: data.description,
+                imageUrl: data.imageUrl,
+                status: data.status,
+                country: data.country,
+                city: data.city,
+                address: data.address,
+                latitude: data.latitude,
+                longitude: data.longitude,
+                plannedStartDate: data.plannedStartDate,
+                plannedEndDate: data.plannedEndDate,
+                actualStartDate: data.actualStartDate,
+                actualEndDate: data.actualEndDate,
+                progress: data.progress,
+                budget: data.budget,
+            },
+        }),
+        prisma.project.findFirst({
+            where: {
+                id: projectId,
+                organizationId,
+            },
+        }),
+    ]);
+
+    if (updateResult.count === 0) {
+        return null;
+    }
+
+    return updatedProject;
+};
+
+export const deleteProject = async (
+    projectId: string,
+    organizationId: string
+) => {
+    const result = await prisma.project.deleteMany({
+        where: {
+            id: projectId,
+            organizationId,
+        },
+    });
+
+    return result.count > 0;
 };

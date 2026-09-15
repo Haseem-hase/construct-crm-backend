@@ -1,29 +1,50 @@
 import { Request, Response, NextFunction } from "express";
 import { ForbiddenError } from "../errors/ForbiddenError";
+import { Module, Action } from "@prisma/client";
+import prisma from "../lib/prisma";
 
-export const authorize = (...roles: string[]) => {
-    return (
+export const authorize = (module: Module, action: Action) => {
+    return async (
         req: Request,
         res: Response,
         next: NextFunction
     ) => {
-        const user = req.user!;
+        try {
+            const user = req.user!;
 
-        if (user.systemRole === "SUPER_ADMIN") {
-            // SUPER_ADMIN has access to routes that allow SUPER_ADMIN explicitly
-            if (roles.includes("SUPER_ADMIN") || roles.length === 0) {
+            if (user.systemRole === "SUPER_ADMIN") {
                 return next();
             }
+
+            if (!user.organizationId || !user.organizationRole?.id) {
+                throw new ForbiddenError(
+                    "You are not assigned a role in an organization."
+                );
+            }
+
+            const hasPermission = await prisma.rolePermission.findFirst({
+                where: {
+                    organizationRoleId: user.organizationRole.id,
+                    organizationRole: {
+                        organizationId: user.organizationId,
+                    },
+                    permission: {
+                        module,
+                        action,
+                    },
+                },
+                select: { id: true },
+            });
+
+            if (!hasPermission) {
+                throw new ForbiddenError(
+                    "You do not have permission to perform this action."
+                );
+            }
+
+            next();
+        } catch (error) {
+            next(error);
         }
-
-        const userRole = user.systemRole || user.organizationRole?.role.name;
-
-        if (!userRole || !roles.includes(userRole)) {
-            throw new ForbiddenError(
-                "You are not authorized to perform this action."
-            );
-        }
-
-        next();
-    }
-}
+    };
+};

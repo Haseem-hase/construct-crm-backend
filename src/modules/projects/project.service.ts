@@ -1,4 +1,7 @@
 import * as projectRepository from "./project.repository";
+import * as projectCustomerRepository from "./project-customer.repository";
+import * as customerRepository from "../customers/customer.repository";
+import prisma from "../../lib/prisma";
 import { CreateProjectInput, UpdateProjectInput } from "./project.types";
 import { AuthenticatedUser } from "../../shared/types/authenticated-user";
 import { UnauthorizedError } from "../../errors/UnauthorizedError";
@@ -13,17 +16,45 @@ export const createProject = async (
         throw new UnauthorizedError("User is not associated with an organization.");
     }
 
-    // IMPORTANT: ProjectCustomer infrastructure does not exist yet.
-    // The transaction to create Project + ProjectCustomer atomically 
-    // is halted here to avoid modifying unrelated modules or inventing missing architecture.
-    
-    // For now, we create the project without the customer association.
-    const project = await projectRepository.createProject({
-        ...data,
+    const { customerId, ...projectData } = data;
+
+    if (customerId) {
+        const customer = await customerRepository.findCustomerByIdAndOrganization(
+            customerId,
+            user.organizationId
+        );
+
+        if (!customer) {
+            throw new NotFoundError("Customer not found.");
+        }
+
+        return await prisma.$transaction(async (tx) => {
+            const project = await projectRepository.createProject(
+                {
+                    ...projectData,
+                    organizationId: user.organizationId as string,
+                },
+                tx
+            );
+
+            await projectCustomerRepository.createProjectCustomer(
+                {
+                    projectId: project.id,
+                    customerId,
+                    relationshipType: "OWNER",
+                    isPrimary: true,
+                },
+                tx
+            );
+
+            return project;
+        });
+    }
+
+    return await projectRepository.createProject({
+        ...projectData,
         organizationId: user.organizationId,
     });
-
-    return project;
 };
 
 // get all project under organization

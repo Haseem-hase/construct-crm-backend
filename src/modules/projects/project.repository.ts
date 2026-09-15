@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import prisma from "../../lib/prisma";
 
 import { CreateProjectInput, UpdateProjectInput } from "./project.types";
@@ -5,9 +6,11 @@ import { CreateProjectInput, UpdateProjectInput } from "./project.types";
 export const createProject = async (
     data: CreateProjectInput & {
         organizationId: string;
-    }
+    },
+    tx?: Prisma.TransactionClient
 ) => {
-    return await prisma.project.create({
+    const db = tx || prisma;
+    return await db.project.create({
         data: {
             name: data.name,
             description: data.description,

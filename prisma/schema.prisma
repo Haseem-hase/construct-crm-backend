@@ -415,6 +415,8 @@ model Profession {
   description String?
   isActive    Boolean  @default(true)
 
+  labours Labour[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -441,6 +443,9 @@ model Labour {
 
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  professionId String
+  profession   Profession @relation(fields: [professionId], references: [id], onDelete: Restrict)
 
   fullName String
   phone    String

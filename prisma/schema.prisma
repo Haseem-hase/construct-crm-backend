@@ -169,8 +169,6 @@ model User {
 
   projectMemberships ProjectMember[]
 
-  labourAssignments ProjectLabour[]
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -329,8 +327,6 @@ model Project {
 
   members ProjectMember[]
 
-  labourAssignments ProjectLabour[]
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -371,31 +367,6 @@ model ProjectMember {
   @@index([projectId])
   @@index([userId])
   @@map("project_members")
-}
-
-/////////////////////////////////////////////////
-// PROJECT LABOURS
-/////////////////////////////////////////////////
-
-model ProjectLabour {
-  id String @id @default(uuid())
-
-  projectId String
-  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-
-  labourId String
-  labour   User   @relation(fields: [labourId], references: [id], onDelete: Cascade)
-
-  assignedAt DateTime  @default(now())
-  removedAt  DateTime?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([projectId, labourId])
-  @@index([projectId])
-  @@index([labourId])
-  @@map("project_labour")
 }
 
 /////////////////////////////////////////////////

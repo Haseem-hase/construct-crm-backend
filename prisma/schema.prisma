@@ -205,6 +205,7 @@ model Organization {
   organizationRoles OrganizationRole[]
   customers         Customer[]
   projects          Project[]
+  labours           Labour[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -402,4 +403,70 @@ model ProjectCustomer {
   @@index([projectId])
   @@index([customerId])
   @@map("project_customers")
+}
+
+/////////////////////////////////////////////////
+// GLOBALS
+/////////////////////////////////////////////////
+
+model Profession {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  isActive    Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("professions")
+}
+
+enum Weekday {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+enum LabourStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model Labour {
+  id String @id @default(uuid())
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  fullName String
+  phone    String
+  email    String?
+
+  dateOfBirth DateTime?
+
+  profileImageUrl String?
+
+  country String
+  city    String
+  address String?
+
+  emergencyContactName  String?
+  emergencyContactPhone String?
+
+  joiningDate DateTime?
+
+  status LabourStatus @default(ACTIVE)
+
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([organizationId, status])
+  @@map("labours")
 }

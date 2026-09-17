@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { AppError } from "../errors/AppError";
 import { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
+import { Prisma } from "@prisma/client";
 
 export const errorHandler = (
     err: Error,
@@ -28,6 +29,18 @@ export const errorHandler = (
             success: false,
             message: "Invalid token.",
         });
+    }
+
+    if (err instanceof Prisma.PrismaClientKnownRequestError) {
+        if (err.code === "P2002") {
+            const target = err.meta?.target as string[] | undefined;
+            if (target && target.includes("organizationId") && target.includes("phone")) {
+                return res.status(409).json({
+                    success: false,
+                    message: "A labour with this phone number already exists in this organization.",
+                });
+            }
+        }
     }
 
     console.error(err);

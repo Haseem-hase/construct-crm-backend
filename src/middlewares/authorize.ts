@@ -22,6 +22,10 @@ export const authorize = (module: Module, action: Action) => {
                 );
             }
 
+            if (user.organizationRole.role.name === "ORGANIZATION_OWNER") {
+                return next();
+            }
+
             const hasPermission = await prisma.rolePermission.findFirst({
                 where: {
                     organizationRoleId: user.organizationRole.id,

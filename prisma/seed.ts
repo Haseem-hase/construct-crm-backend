@@ -320,6 +320,41 @@ async function main() {
     console.log("✅ Permissions Seeded");
 
 //////////////////////////////////////////////////
+// GLOBAL ROLES
+//////////////////////////////////////////////////
+
+const orgOwnerRoleName = "ORGANIZATION_OWNER";
+const existingOrgOwnerRole = await prisma.role.findFirst({
+    where: {
+        name: orgOwnerRoleName,
+        organizationId: null,
+    },
+});
+
+if (!existingOrgOwnerRole) {
+    await prisma.role.create({
+        data: {
+            name: orgOwnerRoleName,
+            description: "Default organization owner role",
+            isGlobal: true,
+            organizationId: null,
+        },
+    });
+    console.log("✅ ORGANIZATION_OWNER Role Created");
+} else {
+    await prisma.role.update({
+        where: {
+            id: existingOrgOwnerRole.id,
+        },
+        data: {
+            description: "Default organization owner role",
+            isGlobal: true,
+        },
+    });
+    console.log("✅ ORGANIZATION_OWNER Role Updated");
+}
+
+//////////////////////////////////////////////////
 // SUPER ADMIN USER
 //////////////////////////////////////////////////
 

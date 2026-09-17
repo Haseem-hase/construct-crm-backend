@@ -1,0 +1,6 @@
+#!/usr/bin/expect -f
+set timeout -1
+spawn npx prisma migrate dev --name add_unique_labour_phone_per_organization
+expect -re ".*"
+send "y\r"
+expect eof

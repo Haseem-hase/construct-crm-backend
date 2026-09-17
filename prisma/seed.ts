@@ -384,6 +384,40 @@ if (!existingAdmin) {
 }
 
     //////////////////////////////////////////////////
+    // SEED PROFESSIONS
+    //////////////////////////////////////////////////
+
+    const professions = [
+        { name: "Mason", description: "Builds structures from individual units, often laid in and bound together by mortar." },
+        { name: "Electrician", description: "Specializes in electrical wiring of buildings, stationary machines, and related equipment." },
+        { name: "Plumber", description: "Installs and maintains systems used for potable water, sewage and drainage." },
+        { name: "Carpenter", description: "Works with timber to construct, install and maintain buildings, furniture, and other objects." },
+        { name: "Welder", description: "Fuses materials together using high heat to melt the parts together." },
+        { name: "Painter", description: "Applies paint, pigment, color or other mediums to solid surfaces." },
+        { name: "Steel Fixer", description: "Positions and secures steel reinforcing bars and mesh used in reinforced concrete." },
+        { name: "Tile Worker", description: "Applies hard tile, marble, and wood tile to walls, floors, ceilings, and roof decks." },
+    ];
+
+    for (const prof of professions) {
+        await prisma.profession.upsert({
+            where: {
+                name: prof.name,
+            },
+            update: {
+                description: prof.description,
+                isActive: true,
+            },
+            create: {
+                name: prof.name,
+                description: prof.description,
+                isActive: true,
+            },
+        });
+    }
+
+    console.log("✅ Professions Seeded");
+
+    //////////////////////////////////////////////////
     // COMPLETE
     //////////////////////////////////////////////////
 

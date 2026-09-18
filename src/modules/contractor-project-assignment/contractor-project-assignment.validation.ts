@@ -30,3 +30,30 @@ export const createContractorProjectAssignmentSchema = z.object({
         .trim()
         .optional(),
 }).strict();
+
+export const updateContractorProjectAssignmentSchema = z.object({
+    responsibilityIds: z
+        .array(z.string().uuid("Invalid responsibility ID."))
+        .refine((ids) => new Set(ids).size === ids.length, {
+            message: "Responsibility IDs must not contain duplicates.",
+        })
+        .optional(),
+        
+    scopeDescription: z
+        .string()
+        .trim()
+        .optional(),
+        
+    startDate: z
+        .coerce.date()
+        .optional(),
+        
+    endDate: z
+        .coerce.date()
+        .optional(),
+        
+    notes: z
+        .string()
+        .trim()
+        .optional(),
+}).strict();

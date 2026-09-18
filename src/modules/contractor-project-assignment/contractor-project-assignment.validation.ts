@@ -42,18 +42,25 @@ export const updateContractorProjectAssignmentSchema = z.object({
     scopeDescription: z
         .string()
         .trim()
+        .nullable()
         .optional(),
         
     startDate: z
         .coerce.date()
+        .nullable()
         .optional(),
         
     endDate: z
         .coerce.date()
+        .nullable()
         .optional(),
         
     notes: z
         .string()
         .trim()
+        .nullable()
         .optional(),
-}).strict();
+}).strict().refine(
+    (data) => Object.keys(data).length > 0,
+    { message: "At least one field must be provided for update." }
+);

@@ -18,13 +18,16 @@ export const findById = async (id: string) => {
     });
 };
 
-export const findMany = async (filters: {
+export const findMany = async (organizationId: string, filters: {
     projectId?: string;
     contractorId?: string;
     status?: ContractorAssignmentStatus;
 } = {}) => {
     return await prisma.contractorProjectAssignment.findMany({
         where: {
+            project: {
+                organizationId,
+            },
             ...(filters.projectId && { projectId: filters.projectId }),
             ...(filters.contractorId && { contractorId: filters.contractorId }),
             ...(filters.status && { status: filters.status }),
@@ -89,10 +92,10 @@ export const create = async (data: {
 export const update = async (
     assignmentId: string,
     data: {
-        scopeDescription?: string;
-        startDate?: Date;
-        endDate?: Date;
-        notes?: string;
+        scopeDescription?: string | null;
+        startDate?: Date | null;
+        endDate?: Date | null;
+        notes?: string | null;
         responsibilityIds?: string[];
     }
 ) => {

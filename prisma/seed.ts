@@ -322,6 +322,11 @@ async function main() {
             action: Action.DELETE,
             description: "Delete contractor records",
         },
+        {
+            module: Module.CONTRACTOR,
+            action: Action.ASSIGN,
+            description: "Assign contractors to projects",
+        },
     ];
 
     for (const permission of permissions) {

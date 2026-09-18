@@ -300,6 +300,28 @@ async function main() {
             action: Action.ASSIGN,
             description: "Assign roles to users",
         },
+
+        // CONTRACTOR
+        {
+            module: Module.CONTRACTOR,
+            action: Action.CREATE,
+            description: "Create contractor records",
+        },
+        {
+            module: Module.CONTRACTOR,
+            action: Action.VIEW,
+            description: "View contractor records",
+        },
+        {
+            module: Module.CONTRACTOR,
+            action: Action.UPDATE,
+            description: "Update contractor records",
+        },
+        {
+            module: Module.CONTRACTOR,
+            action: Action.DELETE,
+            description: "Delete contractor records",
+        },
     ];
 
     for (const permission of permissions) {

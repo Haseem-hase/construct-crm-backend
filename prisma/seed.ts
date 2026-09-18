@@ -475,6 +475,40 @@ if (!existingAdmin) {
     console.log("✅ Professions Seeded");
 
     //////////////////////////////////////////////////
+    // SEED RESPONSIBILITIES
+    //////////////////////////////////////////////////
+
+    const responsibilities = [
+        { name: "SITE_SUPERVISION", description: "Supervising and coordinating activities at the project site." },
+        { name: "PROJECT_COORDINATION", description: "Coordinating project activities, teams, schedules, and execution." },
+        { name: "QUALITY_CONTROL", description: "Monitoring and maintaining required construction quality standards." },
+        { name: "SAFETY_MANAGEMENT", description: "Managing and monitoring health and safety requirements on the project." },
+        { name: "MATERIAL_COORDINATION", description: "Coordinating construction materials, deliveries, and material requirements." },
+        { name: "SUBCONTRACTOR_MANAGEMENT", description: "Managing and coordinating subcontractors involved in project execution." },
+        { name: "WORK_PROGRESS_TRACKING", description: "Monitoring and reporting project work progress and completion." },
+        { name: "SITE_INSPECTION", description: "Inspecting site activities and verifying compliance with project requirements." },
+    ];
+
+    for (const resp of responsibilities) {
+        await prisma.responsibility.upsert({
+            where: {
+                name: resp.name,
+            },
+            update: {
+                description: resp.description,
+                isActive: true,
+            },
+            create: {
+                name: resp.name,
+                description: resp.description,
+                isActive: true,
+            },
+        });
+    }
+
+    console.log("✅ Responsibilities Seeded");
+
+    //////////////////////////////////////////////////
     // COMPLETE
     //////////////////////////////////////////////////
 

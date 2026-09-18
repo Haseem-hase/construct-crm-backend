@@ -2,6 +2,7 @@ import * as labourRepository from "./labour.repository";
 import { CreateLabourInput, UpdateLabourInput } from "./labour.types";
 import { NotFoundError } from "../../errors/NotFoundError";
 import { BadRequestError } from "../../errors/BadRequestError";
+import { ConflictError } from "../../errors/ConflictError";
 
 export const createLabour = async (
     organizationId: string,
@@ -16,6 +17,11 @@ export const createLabour = async (
     
     if (!profession.isActive) {
         throw new BadRequestError("Cannot assign an inactive profession to a labour.");
+    }
+
+    const existingLabour = await labourRepository.findLabourByPhone(organizationId, data.phone);
+    if (existingLabour) {
+        throw new ConflictError("A labour with this phone number already exists in this organization.");
     }
 
     const labour = await labourRepository.createLabour({
@@ -65,6 +71,13 @@ export const updateLabour = async (
         
         if (!profession.isActive) {
             throw new BadRequestError("Cannot assign an inactive profession to a labour.");
+        }
+    }
+
+    if (data.phone && data.phone !== existingLabour.phone) {
+        const phoneOwner = await labourRepository.findLabourByPhone(organizationId, data.phone);
+        if (phoneOwner) {
+            throw new ConflictError("A labour with this phone number already exists in this organization.");
         }
     }
 

@@ -8,7 +8,9 @@ import customerRoutes from "../modules/customers/customer.routes";
 import projectRoutes from "../modules/projects/project.routes";
 import labourRoutes from "../modules/labour/labour.routes";
 import professionRoutes from "../modules/profession/profession.routes";
-
+import contractorRoutes from "../modules/contractor/contractor.routes";
+import contractorProjectAssignmentRoutes from "../modules/contractor-project-assignment/contractor-project-assignment.routes";
+import responsibilityRoutes from "../modules/responsibility/responsibility.routes";
 const router = Router();
 
 router.use("/auth", authRoutes);
@@ -19,5 +21,8 @@ router.use("/customers", customerRoutes);
 router.use("/projects", projectRoutes);
 router.use("/labours", labourRoutes);
 router.use("/professions", professionRoutes);
+router.use("/contractors", contractorRoutes);
+router.use("/contractor-project-assignments", contractorProjectAssignmentRoutes);
+router.use("/responsibilities", responsibilityRoutes);
 
 export default router;

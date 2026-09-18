@@ -81,6 +81,7 @@ enum Module {
   REPORT
   ROLE
   USER
+  CONTRACTOR
 }
 
 enum Action {
@@ -206,6 +207,7 @@ model Organization {
   customers         Customer[]
   projects          Project[]
   labours           Labour[]
+  contractors       Contractor[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -247,7 +249,7 @@ model Customer {
   isActive Boolean @default(true)
 
   projectCustomers ProjectCustomer[]
-  contacts CustomerContact[]
+  contacts         CustomerContact[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -259,21 +261,21 @@ model Customer {
 }
 
 model CustomerContact {
-  id              String   @id @default(uuid())
-  
-  customerId      String
-  customer        Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  
+  id String @id @default(uuid())
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
   name            String
   designation     String
   phone           String
   otherPhone      String?
   email           String
   profileImageUrl String?
-  isPrimary       Boolean  @default(false)
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  isPrimary       Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([customerId])
   @@map("customer_contacts")
@@ -319,7 +321,7 @@ model Project {
   actualEndDate    DateTime?
 
   // Progress
-  progress           Int @default(0)
+  progress Int @default(0)
 
   // Financial
   budget Decimal? @db.Decimal(15, 2)
@@ -327,6 +329,7 @@ model Project {
   projectCustomers ProjectCustomer[]
 
   members ProjectMember[]
+  contractorAssignments ContractorProjectAssignment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -410,10 +413,10 @@ model ProjectCustomer {
 /////////////////////////////////////////////////
 
 model Profession {
-  id          String   @id @default(uuid())
-  name        String   @unique
+  id          String  @id @default(uuid())
+  name        String  @unique
   description String?
-  isActive    Boolean  @default(true)
+  isActive    Boolean @default(true)
 
   labours Labour[]
 
@@ -475,4 +478,129 @@ model Labour {
   @@index([organizationId])
   @@index([organizationId, status])
   @@map("labours")
+}
+
+/////////////////////////////////////////////////
+// CONTRACTOR
+/////////////////////////////////////////////////
+
+enum ContractorStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  INACTIVE
+  TERMINATED
+}
+
+model Contractor {
+  id String @id @default(uuid())
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  contractorCode String @unique @default(dbgenerated("('CON-'::text || lpad((nextval('contractor_code_seq'::regclass))::text, 4, '0'::text))"))
+
+  fullName String
+
+  profileImageUrl String?
+
+  email            String?
+  phone            String
+  alternativePhone String?
+
+  country String
+  city    String
+  address String?
+
+  nationalId        String?
+  licenseNumber     String?
+  licenseExpiryDate DateTime?
+
+  status ContractorStatus @default(PENDING)
+
+  notes String?
+
+  projectAssignments ContractorProjectAssignment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([organizationId, phone])
+  @@unique([organizationId, email])
+  @@index([organizationId])
+  @@index([organizationId, status])
+  @@map("contractors")
+}
+
+/////////////////////////////////////////////////
+// CONTRACTOR PROJECT ASSIGNMENT
+/////////////////////////////////////////////////
+
+enum ContractorAssignmentStatus {
+  PENDING
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  TERMINATED
+  CANCELLED
+}
+
+model Responsibility {
+  id          String  @id @default(uuid())
+  name        String  @unique
+  description String?
+  isActive    Boolean @default(true)
+
+  assignmentResponsibilities ContractorProjectAssignmentResponsibility[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("responsibilities")
+}
+
+model ContractorProjectAssignment {
+  id String @id @default(uuid())
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Restrict)
+
+  contractorId String
+  contractor   Contractor @relation(fields: [contractorId], references: [id], onDelete: Restrict)
+
+  responsibilities ContractorProjectAssignmentResponsibility[]
+
+  scopeDescription String?
+
+  startDate DateTime?
+  endDate   DateTime?
+
+  status ContractorAssignmentStatus @default(PENDING)
+  notes  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([projectId, contractorId])
+  @@index([projectId])
+  @@index([contractorId])
+  @@index([status])
+  @@map("contractor_project_assignments")
+}
+
+model ContractorProjectAssignmentResponsibility {
+  id String @id @default(uuid())
+
+  assignmentId String
+  assignment   ContractorProjectAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+
+  responsibilityId String
+  responsibility   Responsibility @relation(fields: [responsibilityId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+
+  @@unique([assignmentId, responsibilityId])
+  @@index([assignmentId])
+  @@index([responsibilityId])
+  @@map("contractor_project_assignment_responsibilities")
 }

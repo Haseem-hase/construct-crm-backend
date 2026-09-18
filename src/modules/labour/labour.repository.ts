@@ -96,3 +96,17 @@ export const findProfessionById = async (
         },
     });
 };
+
+export const findLabourByPhone = async (
+    organizationId: string,
+    phone: string
+) => {
+    return await prisma.labour.findUnique({
+        where: {
+            organizationId_phone: {
+                organizationId,
+                phone,
+            },
+        },
+    });
+};

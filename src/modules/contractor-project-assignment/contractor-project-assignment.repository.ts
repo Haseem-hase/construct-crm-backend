@@ -96,6 +96,7 @@ export const update = async (
         startDate?: Date | null;
         endDate?: Date | null;
         notes?: string | null;
+        status?: ContractorAssignmentStatus;
         responsibilityIds?: string[];
     }
 ) => {
@@ -107,6 +108,7 @@ export const update = async (
                 ...(data.startDate !== undefined && { startDate: data.startDate }),
                 ...(data.endDate !== undefined && { endDate: data.endDate }),
                 ...(data.notes !== undefined && { notes: data.notes }),
+                ...(data.status !== undefined && { status: data.status }),
             },
         });
 

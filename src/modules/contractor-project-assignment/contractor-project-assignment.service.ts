@@ -157,12 +157,31 @@ export const updateAssignment = async (
         }
     }
 
+    if (data.status !== undefined && data.status !== assignment.status) {
+        const currentStatus = assignment.status;
+        const requestedStatus = data.status;
+
+        const allowedTransitions: Record<ContractorAssignmentStatus, ContractorAssignmentStatus[]> = {
+            [ContractorAssignmentStatus.PENDING]: [ContractorAssignmentStatus.ACTIVE, ContractorAssignmentStatus.CANCELLED],
+            [ContractorAssignmentStatus.ACTIVE]: [ContractorAssignmentStatus.ON_HOLD, ContractorAssignmentStatus.COMPLETED, ContractorAssignmentStatus.TERMINATED],
+            [ContractorAssignmentStatus.ON_HOLD]: [ContractorAssignmentStatus.ACTIVE],
+            [ContractorAssignmentStatus.COMPLETED]: [],
+            [ContractorAssignmentStatus.CANCELLED]: [],
+            [ContractorAssignmentStatus.TERMINATED]: [],
+        };
+
+        if (!allowedTransitions[currentStatus].includes(requestedStatus)) {
+            throw new BadRequestError(`Cannot change assignment status from ${currentStatus} to ${requestedStatus}.`);
+        }
+    }
+
     // 4. Execute Update
     return await assignmentRepository.update(assignmentId, {
         scopeDescription: data.scopeDescription,
         startDate: data.startDate,
         endDate: data.endDate,
         notes: data.notes,
+        status: data.status,
         responsibilityIds: data.responsibilityIds,
     });
 };

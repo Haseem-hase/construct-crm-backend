@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ContractorAssignmentStatus } from "@prisma/client";
 
 export const createContractorProjectAssignmentSchema = z.object({
     projectId: z.string().uuid("Invalid project ID."),
@@ -59,6 +60,12 @@ export const updateContractorProjectAssignmentSchema = z.object({
         .string()
         .trim()
         .nullable()
+        .optional(),
+        
+    status: z
+        .nativeEnum(ContractorAssignmentStatus, {
+            message: "Invalid status.",
+        })
         .optional(),
 }).strict().refine(
     (data) => Object.keys(data).length > 0,

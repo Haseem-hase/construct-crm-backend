@@ -5,6 +5,7 @@ import { UnauthorizedError } from "../../errors/UnauthorizedError";
 import {
     createContractorProjectAssignmentSchema,
     updateContractorProjectAssignmentSchema,
+    contractorProjectAssignmentIdSchema,
 } from "./contractor-project-assignment.validation";
 import { ContractorAssignmentStatus } from "@prisma/client";
 
@@ -89,9 +90,11 @@ export const getAssignmentById = async (
             );
         }
 
+        const params = contractorProjectAssignmentIdSchema.parse(req.params);
+
         const assignment = await assignmentService.getAssignmentById(
             user.organizationId,
-            req.params.id as string
+            params.id
         );
 
         res.status(200).json({
@@ -120,9 +123,11 @@ export const updateAssignment = async (
             );
         }
 
+        const params = contractorProjectAssignmentIdSchema.parse(req.params);
+
         const assignment = await assignmentService.updateAssignment(
             user.organizationId,
-            req.params.id as string,
+            params.id,
             validatedData
         );
 

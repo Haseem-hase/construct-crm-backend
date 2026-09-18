@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { ContractorAssignmentStatus } from "@prisma/client";
 
+export const contractorProjectAssignmentIdSchema = z.object({
+    id: z.string().uuid("Invalid assignment ID."),
+});
+
 export const createContractorProjectAssignmentSchema = z.object({
     projectId: z.string().uuid("Invalid project ID."),
     

@@ -1,5 +1,5 @@
 import * as customerContactRepository from "./customer-contact.repository";
-import * as customerRepository from "./customer.repository";
+import * as customerRepository from "../customers/customer.repository";
 import { CreateCustomerContactInput, UpdateCustomerContactInput } from "./customer-contact.types";
 import { AuthenticatedUser } from "../../shared/types/authenticated-user";
 import { UnauthorizedError } from "../../errors/UnauthorizedError";

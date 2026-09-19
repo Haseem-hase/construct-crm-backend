@@ -84,7 +84,12 @@ export const createProjectSchema = z.object({
         .number()
         .nonnegative("Budget cannot be negative.")
         .optional(),
-}).refine(
+
+    customerId: z
+        .string()
+        .uuid("Invalid customer ID.")
+        .optional(),
+}).strict().refine(
     (data) => {
         if (data.plannedStartDate && data.plannedEndDate) {
             return data.plannedEndDate >= data.plannedStartDate;
@@ -120,11 +125,13 @@ export const updateProjectSchema = z.object({
         .string()
         .trim()
         .max(1000)
+        .nullable()
         .optional(),
 
     imageUrl: z
         .string()
         .url("Invalid image URL")
+        .nullable()
         .optional(),
 
     status: z
@@ -141,44 +148,52 @@ export const updateProjectSchema = z.object({
         .string()
         .trim()
         .max(100)
+        .nullable()
         .optional(),
 
     address: z
         .string()
         .trim()
         .max(255)
+        .nullable()
         .optional(),
 
     latitude: z
         .number()
         .min(-90)
         .max(90)
+        .nullable()
         .optional(),
 
     longitude: z
         .number()
         .min(-180)
         .max(180)
+        .nullable()
         .optional(),
 
     plannedStartDate: z
         .coerce
         .date()
+        .nullable()
         .optional(),
 
     plannedEndDate: z
         .coerce
         .date()
+        .nullable()
         .optional(),
 
     actualStartDate: z
         .coerce
         .date()
+        .nullable()
         .optional(),
 
     actualEndDate: z
         .coerce
         .date()
+        .nullable()
         .optional(),
 
     progress: z
@@ -191,8 +206,14 @@ export const updateProjectSchema = z.object({
     budget: z
         .number()
         .nonnegative()
+        .nullable()
         .optional(),
-}).refine(
+}).strict().refine(
+    (data) => Object.keys(data).length > 0,
+    {
+        message: "At least one field must be provided for update.",
+    }
+).refine(
     (data) => {
         if (data.plannedStartDate && data.plannedEndDate) {
             return data.plannedEndDate >= data.plannedStartDate;
@@ -215,3 +236,7 @@ export const updateProjectSchema = z.object({
         path: ["actualEndDate"],
     }
 );
+
+export const projectIdSchema = z.object({
+    projectId: z.string().uuid("Invalid project ID."),
+});

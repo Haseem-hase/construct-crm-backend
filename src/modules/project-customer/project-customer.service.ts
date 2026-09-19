@@ -1,5 +1,5 @@
 import * as projectCustomerRepository from "./project-customer.repository";
-import * as projectRepository from "./project.repository";
+import * as projectRepository from "../projects/project.repository";
 import * as customerRepository from "../customers/customer.repository";
 import prisma from "../../lib/prisma";
 

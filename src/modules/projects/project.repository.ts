@@ -46,16 +46,6 @@ export const findProjectsByOrganizationId = async (
     });
 };
 
-export const findProjectById = async (
-    projectId: string
-) => {
-    return await prisma.project.findUnique({
-        where: {
-            id: projectId,
-        },
-    });
-};
-
 export const findProjectByIdAndOrganization = async (
     projectId: string,
     organizationId: string
@@ -73,8 +63,8 @@ export const updateProject = async (
     organizationId: string,
     data: UpdateProjectInput
 ) => {
-    const [updateResult, updatedProject] = await prisma.$transaction([
-        prisma.project.updateMany({
+    return await prisma.$transaction(async (tx) => {
+        const updateResult = await tx.project.updateMany({
             where: {
                 id: projectId,
                 organizationId,
@@ -96,20 +86,19 @@ export const updateProject = async (
                 progress: data.progress,
                 budget: data.budget,
             },
-        }),
-        prisma.project.findFirst({
+        });
+
+        if (updateResult.count === 0) {
+            return null;
+        }
+
+        return await tx.project.findFirst({
             where: {
                 id: projectId,
                 organizationId,
             },
-        }),
-    ]);
-
-    if (updateResult.count === 0) {
-        return null;
-    }
-
-    return updatedProject;
+        });
+    });
 };
 
 export const deleteProject = async (

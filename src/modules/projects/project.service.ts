@@ -6,10 +6,11 @@ import { CreateProjectInput, UpdateProjectInput } from "./project.types";
 import { AuthenticatedUser } from "../../shared/types/authenticated-user";
 import { UnauthorizedError } from "../../errors/UnauthorizedError";
 import { NotFoundError } from "../../errors/NotFoundError";
+import { BadRequestError } from "../../errors/BadRequestError";
 
 // create project
 export const createProject = async (
-    data: CreateProjectInput & { customerId?: string },
+    data: CreateProjectInput,
     user: AuthenticatedUser
 ) => {
     if (!user.organizationId) {
@@ -101,17 +102,58 @@ export const updateProject = async (
         throw new UnauthorizedError("User is not associated with an organization.");
     }
 
-    const project = await projectRepository.updateProject(
+    const project = await projectRepository.findProjectByIdAndOrganization(
         projectId,
-        user.organizationId,
-        data
+        user.organizationId
     );
 
     if (!project) {
         throw new NotFoundError("Project not found.");
     }
 
-    return project;
+    const resultingPlannedStartDate =
+        data.plannedStartDate !== undefined
+            ? data.plannedStartDate
+            : project.plannedStartDate;
+
+    const resultingPlannedEndDate =
+        data.plannedEndDate !== undefined
+            ? data.plannedEndDate
+            : project.plannedEndDate;
+
+    if (resultingPlannedStartDate !== null && resultingPlannedEndDate !== null) {
+        if (resultingPlannedEndDate < resultingPlannedStartDate) {
+            throw new BadRequestError("Planned end date must be on or after planned start date.");
+        }
+    }
+
+    const resultingActualStartDate =
+        data.actualStartDate !== undefined
+            ? data.actualStartDate
+            : project.actualStartDate;
+
+    const resultingActualEndDate =
+        data.actualEndDate !== undefined
+            ? data.actualEndDate
+            : project.actualEndDate;
+
+    if (resultingActualStartDate !== null && resultingActualEndDate !== null) {
+        if (resultingActualEndDate < resultingActualStartDate) {
+            throw new BadRequestError("Actual end date must be on or after actual start date.");
+        }
+    }
+
+    const updatedProject = await projectRepository.updateProject(
+        projectId,
+        user.organizationId,
+        data
+    );
+
+    if (!updatedProject) {
+        throw new NotFoundError("Project not found.");
+    }
+
+    return updatedProject;
 };
 
 // delete project

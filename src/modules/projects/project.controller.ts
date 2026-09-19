@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import * as projectService from "./project.service";
 import { AuthenticatedUser } from "../../shared/types/authenticated-user";
+import { createProjectSchema, updateProjectSchema, projectIdSchema } from "./project.validation";
 
 export const createProject = async (
     req: Request,
@@ -9,7 +10,8 @@ export const createProject = async (
 ) => {
     try {
         const user = req.user as AuthenticatedUser;
-        const result = await projectService.createProject(req.body, user);
+        const validatedData = createProjectSchema.parse(req.body);
+        const result = await projectService.createProject(validatedData, user);
         res.status(201).json({
             success: true,
             data: result,
@@ -43,7 +45,8 @@ export const getProjectById = async (
 ) => {
     try {
         const user = req.user as AuthenticatedUser;
-        const result = await projectService.getProjectById(req.params.projectId, user);
+        const validatedParams = projectIdSchema.parse(req.params);
+        const result = await projectService.getProjectById(validatedParams.projectId, user);
         res.status(200).json({
             success: true,
             data: result,
@@ -60,9 +63,11 @@ export const updateProject = async (
 ) => {
     try {
         const user = req.user as AuthenticatedUser;
+        const validatedParams = projectIdSchema.parse(req.params);
+        const validatedData = updateProjectSchema.parse(req.body);
         const result = await projectService.updateProject(
-            req.params.projectId,
-            req.body,
+            validatedParams.projectId,
+            validatedData,
             user
         );
         res.status(200).json({
@@ -81,8 +86,9 @@ export const deleteProject = async (
 ) => {
     try {
         const user = req.user as AuthenticatedUser;
+        const validatedParams = projectIdSchema.parse(req.params);
         const result = await projectService.deleteProject(
-            req.params.projectId,
+            validatedParams.projectId,
             user
         );
         res.status(200).json({

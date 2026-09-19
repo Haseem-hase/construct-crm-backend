@@ -14,7 +14,7 @@ import {
     updateCustomer,
     deleteCustomer,
 } from "./customer.controller";
-import customerContactRoutes from "./customer-contact.routes";
+import customerContactRoutes from "../customer-contact/customer-contact.routes";
 
 const router = Router();
 

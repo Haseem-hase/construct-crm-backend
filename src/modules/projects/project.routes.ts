@@ -2,7 +2,7 @@ import { Router } from "express";
 import { Module, Action } from "@prisma/client";
 import { authorize } from "../../middlewares/authorize";
 import * as projectController from "./project.controller";
-import projectCustomerRoutes from "./project-customer.routes";
+import projectCustomerRoutes from "../project-customer/project-customer.routes";
 
 const router = Router();
 

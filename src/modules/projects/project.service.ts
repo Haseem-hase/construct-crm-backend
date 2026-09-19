@@ -1,5 +1,5 @@
 import * as projectRepository from "./project.repository";
-import * as projectCustomerRepository from "./project-customer.repository";
+import * as projectCustomerRepository from "../project-customer/project-customer.repository";
 import * as customerRepository from "../customers/customer.repository";
 import prisma from "../../lib/prisma";
 import { CreateProjectInput, UpdateProjectInput } from "./project.types";

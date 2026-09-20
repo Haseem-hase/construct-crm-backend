@@ -328,7 +328,7 @@ model Project {
 
   projectCustomers ProjectCustomer[]
 
-  members ProjectMember[]
+  members               ProjectMember[]
   contractorAssignments ContractorProjectAssignment[]
 
   createdAt DateTime @default(now())
@@ -471,6 +471,8 @@ model Labour {
 
   notes String?
 
+  assignments LabourAssignment[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -578,6 +580,8 @@ model ContractorProjectAssignment {
   status ContractorAssignmentStatus @default(PENDING)
   notes  String?
 
+  labourAssignments LabourAssignment[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -603,4 +607,40 @@ model ContractorProjectAssignmentResponsibility {
   @@index([assignmentId])
   @@index([responsibilityId])
   @@map("contractor_project_assignment_responsibilities")
+}
+
+/////////////////////////////////////////////////
+// LABOUR ASSIGNMENT
+/////////////////////////////////////////////////
+
+enum LabourAssignmentStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+model LabourAssignment {
+  id String @id @default(uuid())
+
+  labourId String
+  labour   Labour @relation(fields: [labourId], references: [id], onDelete: Restrict)
+
+  contractorProjectAssignmentId String
+  assignment                    ContractorProjectAssignment @relation(fields: [contractorProjectAssignmentId], references: [id], onDelete: Restrict)
+
+  startDate DateTime
+  endDate   DateTime
+
+  status LabourAssignmentStatus @default(ACTIVE)
+
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([labourId])
+  @@index([contractorProjectAssignmentId])
+  @@index([status])
+  @@index([startDate, endDate])
+  @@map("labour_assignments")
 }

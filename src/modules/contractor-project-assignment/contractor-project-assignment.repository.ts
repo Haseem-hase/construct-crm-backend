@@ -98,6 +98,7 @@ export const update = async (
         notes?: string | null;
         status?: ContractorAssignmentStatus;
         responsibilityIds?: string[];
+        cancelActiveLabourAssignments?: boolean;
     }
 ) => {
     return await prisma.$transaction(async (tx) => {
@@ -111,6 +112,18 @@ export const update = async (
                 ...(data.status !== undefined && { status: data.status }),
             },
         });
+
+        if (data.cancelActiveLabourAssignments) {
+            await tx.labourAssignment.updateMany({
+                where: {
+                    contractorProjectAssignmentId: assignmentId,
+                    status: "ACTIVE",
+                },
+                data: {
+                    status: "CANCELLED",
+                },
+            });
+        }
 
         if (data.responsibilityIds !== undefined) {
             // Remove existing responsibilities

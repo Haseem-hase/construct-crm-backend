@@ -192,6 +192,17 @@ export const updateAssignment = async (
         }
     }
 
+    let cancelActiveLabourAssignments = false;
+    if (data.status !== undefined && data.status !== assignment.status) {
+        if (
+            data.status === ContractorAssignmentStatus.COMPLETED ||
+            data.status === ContractorAssignmentStatus.TERMINATED ||
+            data.status === ContractorAssignmentStatus.CANCELLED
+        ) {
+            cancelActiveLabourAssignments = true;
+        }
+    }
+
     // 4. Execute Update
     return await assignmentRepository.update(assignmentId, {
         scopeDescription: data.scopeDescription,
@@ -200,5 +211,6 @@ export const updateAssignment = async (
         notes: data.notes,
         status: data.status,
         responsibilityIds: data.responsibilityIds,
+        cancelActiveLabourAssignments,
     });
 };

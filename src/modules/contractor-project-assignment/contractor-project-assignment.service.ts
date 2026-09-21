@@ -1,6 +1,7 @@
 import * as assignmentRepository from "./contractor-project-assignment.repository";
 import { findContractorById } from "../contractor/contractor.repository";
 import { findProjectByIdAndOrganization } from "../projects/project.repository";
+import * as labourAssignmentRepository from "../labour-assignment/labour-assignment.repository";
 import prisma from "../../lib/prisma";
 import { 
     CreateContractorProjectAssignmentBody, 
@@ -156,6 +157,22 @@ export const updateAssignment = async (
             throw new BadRequestError("Resulting end date cannot be before start date.");
         }
     }
+
+    if (data.startDate !== undefined || data.endDate !== undefined) {
+        const childLabourAssignments = await labourAssignmentRepository.findMany(organizationId, {
+            contractorProjectAssignmentId: assignmentId,
+        });
+
+        for (const la of childLabourAssignments) {
+            if (resultingStartDate !== null && la.startDate < resultingStartDate) {
+                throw new ConflictError("Contractor project assignment dates cannot be changed because they would invalidate existing labour assignments.");
+            }
+            if (resultingEndDate !== null && la.endDate > resultingEndDate) {
+                throw new ConflictError("Contractor project assignment dates cannot be changed because they would invalidate existing labour assignments.");
+            }
+        }
+    }
+
 
     if (data.status !== undefined && data.status !== assignment.status) {
         const currentStatus = assignment.status;

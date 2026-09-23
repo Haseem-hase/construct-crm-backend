@@ -15,6 +15,7 @@ import {
 
 import { authenticate } from "../../middlewares/authenticate";
 import { authorize } from "../../middlewares/authorize";
+import { Module, Action } from "@prisma/client";
 import { validate } from "../../middlewares/validate";
 import { createRoleSchema, roleIdSchema, updateRoleSchema } from "./role.validation";
 
@@ -29,27 +30,27 @@ router.use(authenticate);
 
 router.post(
     "/global",
-    authorize("SUPER_ADMIN"),
+    authorize(Module.ROLE, Action.CREATE),
     validate(createRoleSchema, "body"),
     createGlobalRoleController
 );
 
 router.get(
     "/global",
-    authorize("SUPER_ADMIN"),
+    authorize(Module.ROLE, Action.VIEW),
     getGlobalRolesController
 );
 
 router.get(
     "/global/:id",
-    authorize("SUPER_ADMIN"),
+    authorize(Module.ROLE, Action.VIEW),
     validate(roleIdSchema, "params"),
     getGlobalRoleController
 );
 
 router.patch(
     "/global/:id",
-    authorize("SUPER_ADMIN"),
+    authorize(Module.ROLE, Action.UPDATE),
     validate(roleIdSchema, "params"),
     validate(updateRoleSchema, "body"),
     updateGlobalRoleController
@@ -57,7 +58,7 @@ router.patch(
 
 router.delete(
     "/global/:id",
-    authorize("SUPER_ADMIN"),
+    authorize(Module.ROLE, Action.DELETE),
     validate(roleIdSchema, "params"),
     deleteGlobalRoleController
 );
@@ -68,27 +69,27 @@ router.delete(
 
 router.post(
     "/",
-    authorize("ORGANIZATION_OWNER"),
+    authorize(Module.ROLE, Action.CREATE),
     validate(createRoleSchema, "body"),
     createOrganizationRoleController
 );
 
 router.get(
     "/",
-    authorize("ORGANIZATION_OWNER"),
+    authorize(Module.ROLE, Action.VIEW),
     getOrganizationRolesController
 );
 
 router.get(
     "/:id",
-    authorize("ORGANIZATION_OWNER"),
+    authorize(Module.ROLE, Action.VIEW),
     validate(roleIdSchema, "params"),
     getOrganizationRoleController
 );
 
 router.patch(
     "/:id",
-    authorize("ORGANIZATION_OWNER"),
+    authorize(Module.ROLE, Action.UPDATE),
     validate(roleIdSchema, "params"),
     validate(updateRoleSchema, "body"),
     updateOrganizationRoleController
@@ -96,7 +97,7 @@ router.patch(
 
 router.delete(
     "/:id",
-    authorize("ORGANIZATION_OWNER"),
+    authorize(Module.ROLE, Action.DELETE),
     validate(roleIdSchema, "params"),
     deleteOrganizationRoleController
 );

@@ -1,6 +1,7 @@
 import * as assignmentRepository from "./contractor-project-assignment.repository";
 import { findContractorById } from "../contractor/contractor.repository";
 import { findProjectByIdAndOrganization } from "../projects/project.repository";
+import * as labourAssignmentRepository from "../labour-assignment/labour-assignment.repository";
 import prisma from "../../lib/prisma";
 import { 
     CreateContractorProjectAssignmentBody, 
@@ -157,6 +158,22 @@ export const updateAssignment = async (
         }
     }
 
+    if (data.startDate !== undefined || data.endDate !== undefined) {
+        const childLabourAssignments = await labourAssignmentRepository.findMany(organizationId, {
+            contractorProjectAssignmentId: assignmentId,
+        });
+
+        for (const la of childLabourAssignments) {
+            if (resultingStartDate !== null && la.startDate < resultingStartDate) {
+                throw new ConflictError("Contractor project assignment dates cannot be changed because they would invalidate existing labour assignments.");
+            }
+            if (resultingEndDate !== null && la.endDate > resultingEndDate) {
+                throw new ConflictError("Contractor project assignment dates cannot be changed because they would invalidate existing labour assignments.");
+            }
+        }
+    }
+
+
     if (data.status !== undefined && data.status !== assignment.status) {
         const currentStatus = assignment.status;
         const requestedStatus = data.status;
@@ -175,6 +192,17 @@ export const updateAssignment = async (
         }
     }
 
+    let cancelActiveLabourAssignments = false;
+    if (data.status !== undefined && data.status !== assignment.status) {
+        if (
+            data.status === ContractorAssignmentStatus.COMPLETED ||
+            data.status === ContractorAssignmentStatus.TERMINATED ||
+            data.status === ContractorAssignmentStatus.CANCELLED
+        ) {
+            cancelActiveLabourAssignments = true;
+        }
+    }
+
     // 4. Execute Update
     return await assignmentRepository.update(assignmentId, {
         scopeDescription: data.scopeDescription,
@@ -183,5 +211,6 @@ export const updateAssignment = async (
         notes: data.notes,
         status: data.status,
         responsibilityIds: data.responsibilityIds,
+        cancelActiveLabourAssignments,
     });
 };

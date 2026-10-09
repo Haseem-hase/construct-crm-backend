@@ -21,6 +21,7 @@ export const createCustomer = async (
 
         res.status(201).json({
             success: true,
+            message: "Customer created successfully.",
             data: {
                 customer,
             },
@@ -46,6 +47,7 @@ export const getCustomers = async (
 
         res.status(200).json({
             success: true,
+            message: "Customers retrieved successfully.",
             data: {
                 customers,
             },
@@ -72,6 +74,7 @@ export const getCustomerById = async (
 
         res.status(200).json({
             success: true,
+            message: "Customer retrieved successfully.",
             data: {
                 customer,
             },
@@ -98,6 +101,7 @@ export const getCustomerChildren = async (
 
         res.status(200).json({
             success: true,
+            message: "Customer children retrieved successfully.",
             data: {
                 customers,
             },
@@ -125,6 +129,7 @@ export const updateCustomer = async (
 
         res.status(200).json({
             success: true,
+            message: "Customer updated successfully.",
             data: {
                 customer,
             },
@@ -151,6 +156,7 @@ export const deleteCustomer = async (
 
         res.status(200).json({
             success: true,
+            message: "Customer deleted successfully.",
             data: result,
         });
     } catch (error) {

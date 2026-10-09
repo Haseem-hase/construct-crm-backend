@@ -34,6 +34,7 @@ export const createLabour = async (
 
         res.status(201).json({
             success: true,
+            message: "Labour created successfully.",
             data: {
                 labour,
             },
@@ -64,6 +65,7 @@ export const getOrganizationLabours = async (
 
         res.status(200).json({
             success: true,
+            message: "Labours retrieved successfully.",
             data: {
                 labours,
             },
@@ -96,6 +98,7 @@ export const getLabourById = async (
 
         res.status(200).json({
             success: true,
+            message: "Labour retrieved successfully.",
             data: {
                 labour,
             },
@@ -130,6 +133,7 @@ export const updateLabour = async (
 
         res.status(200).json({
             success: true,
+            message: "Labour updated successfully.",
             data: {
                 labour,
             },

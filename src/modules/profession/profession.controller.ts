@@ -11,6 +11,7 @@ export const getProfessions = async (
 
         res.status(200).json({
             success: true,
+            message: "Professions retrieved successfully.",
             data: {
                 professions,
             },

@@ -12,6 +12,7 @@ export const getResponsibilities = async (
 
         res.status(200).json({
             success: true,
+            message: "Responsibilities retrieved successfully.",
             data: {
                 responsibilities,
             },

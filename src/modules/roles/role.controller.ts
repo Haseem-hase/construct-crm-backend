@@ -20,7 +20,7 @@ import {
 export const createGlobalRoleController = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const role = await createGlobalRoleService(req.body);
-        return res.status(201).json({ success: true, data: { role } });
+        return res.status(201).json({ success: true, message: "Global role created successfully.", data: { role } });
     } catch (error) {
         next(error);
     }
@@ -29,7 +29,7 @@ export const createGlobalRoleController = async (req: Request, res: Response, ne
 export const getGlobalRolesController = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const roles = await getGlobalRolesService();
-        return res.status(200).json({ success: true, data: { roles } });
+        return res.status(200).json({ success: true, message: "Global roles retrieved successfully.", data: { roles } });
     } catch (error) {
         next(error);
     }
@@ -38,7 +38,7 @@ export const getGlobalRolesController = async (req: Request, res: Response, next
 export const getGlobalRoleController = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const role = await getGlobalRoleService(req.params.id as string);
-        return res.status(200).json({ success: true, data: { role } });
+        return res.status(200).json({ success: true, message: "Global role retrieved successfully.", data: { role } });
     } catch (error) {
         next(error);
     }
@@ -47,7 +47,7 @@ export const getGlobalRoleController = async (req: Request, res: Response, next:
 export const updateGlobalRoleController = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const role = await updateGlobalRoleService(req.params.id as string, req.body);
-        return res.status(200).json({ success: true, data: { role } });
+        return res.status(200).json({ success: true, message: "Global role updated successfully.", data: { role } });
     } catch (error) {
         next(error);
     }
@@ -74,7 +74,7 @@ export const createOrganizationRoleController = async (req: Request, res: Respon
     try {
         const organizationId = req.user!.organizationId!;
         const role = await createOrganizationRoleService(organizationId, req.body);
-        return res.status(201).json({ success: true, data: { role } });
+        return res.status(201).json({ success: true, message: "Organization role created successfully.", data: { role } });
     } catch (error) {
         next(error);
     }
@@ -84,7 +84,7 @@ export const getOrganizationRolesController = async (req: Request, res: Response
     try {
         const organizationId = req.user!.organizationId!;
         const roles = await getOrganizationRolesService(organizationId);
-        return res.status(200).json({ success: true, data: { roles } });
+        return res.status(200).json({ success: true, message: "Organization roles retrieved successfully.", data: { roles } });
     } catch (error) {
         next(error);
     }
@@ -94,7 +94,7 @@ export const getOrganizationRoleController = async (req: Request, res: Response,
     try {
         const organizationId = req.user!.organizationId!;
         const role = await getOrganizationRoleService(req.params.id as string, organizationId);
-        return res.status(200).json({ success: true, data: { role } });
+        return res.status(200).json({ success: true, message: "Organization role retrieved successfully.", data: { role } });
     } catch (error) {
         next(error);
     }
@@ -104,7 +104,7 @@ export const updateOrganizationRoleController = async (req: Request, res: Respon
     try {
         const organizationId = req.user!.organizationId!;
         const role = await updateOrganizationRoleService(req.params.id as string, organizationId, req.body);
-        return res.status(200).json({ success: true, data: { role } });
+        return res.status(200).json({ success: true, message: "Organization role updated successfully.", data: { role } });
     } catch (error) {
         next(error);
     }

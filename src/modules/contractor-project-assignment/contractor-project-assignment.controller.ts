@@ -31,6 +31,7 @@ export const createAssignment = async (
 
         res.status(201).json({
             success: true,
+            message: "Assignment created successfully.",
             data: {
                 assignment,
             },
@@ -67,6 +68,7 @@ export const getAssignments = async (
 
         res.status(200).json({
             success: true,
+            message: "Assignments retrieved successfully.",
             data: {
                 assignments,
             },
@@ -99,6 +101,7 @@ export const getAssignmentById = async (
 
         res.status(200).json({
             success: true,
+            message: "Assignment retrieved successfully.",
             data: {
                 assignment,
             },
@@ -133,6 +136,7 @@ export const updateAssignment = async (
 
         res.status(200).json({
             success: true,
+            message: "Assignment updated successfully.",
             data: {
                 assignment,
             },

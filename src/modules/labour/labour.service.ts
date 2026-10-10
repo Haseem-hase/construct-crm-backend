@@ -3,6 +3,7 @@ import { CreateLabourInput, UpdateLabourInput } from "./labour.types";
 import { NotFoundError } from "../../errors/NotFoundError";
 import { BadRequestError } from "../../errors/BadRequestError";
 import { ConflictError } from "../../errors/ConflictError";
+import { Prisma } from "@prisma/client";
 
 export const createLabour = async (
     organizationId: string,
@@ -24,12 +25,22 @@ export const createLabour = async (
         throw new ConflictError("A labour with this phone number already exists in this organization.");
     }
 
-    const labour = await labourRepository.createLabour({
-        ...data,
-        organizationId,
-    });
+    try {
+        const labour = await labourRepository.createLabour({
+            ...data,
+            organizationId,
+        });
 
-    return labour;
+        return labour;
+    } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+            const target = error.meta?.target as string[] | undefined;
+            if (target && target.includes("organizationId") && target.includes("phone")) {
+                throw new ConflictError("A labour with this phone number already exists in this organization.");
+            }
+        }
+        throw error;
+    }
 };
 
 export const getOrganizationLabours = async (
@@ -81,11 +92,21 @@ export const updateLabour = async (
         }
     }
 
-    const updatedLabour = await labourRepository.updateLabour(
-        labourId,
-        organizationId,
-        data
-    );
+    try {
+        const updatedLabour = await labourRepository.updateLabour(
+            labourId,
+            organizationId,
+            data
+        );
 
-    return updatedLabour;
+        return updatedLabour;
+    } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+            const target = error.meta?.target as string[] | undefined;
+            if (target && target.includes("organizationId") && target.includes("phone")) {
+                throw new ConflictError("A labour with this phone number already exists in this organization.");
+            }
+        }
+        throw error;
+    }
 };

@@ -31,6 +31,7 @@ export const login = async (
 
         res.status(200).json({
             success: true,
+            message: "Logged in successfully.",
             data: result,
         });
     } catch (error) {
@@ -49,6 +50,7 @@ export const getMe = async (
 
         res.status(200).json({
             success: true,
+            message: "User profile retrieved successfully.",
             data: result,
         });
     } catch (error) {

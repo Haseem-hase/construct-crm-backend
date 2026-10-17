@@ -19,6 +19,7 @@ export const createCustomerContact = async (
 
         res.status(201).json({
             success: true,
+            message: "Customer contact created successfully.",
             data: {
                 contact,
             },
@@ -43,6 +44,7 @@ export const getCustomerContacts = async (
 
         res.status(200).json({
             success: true,
+            message: "Customer contacts retrieved successfully.",
             data: {
                 contacts,
             },
@@ -68,6 +70,7 @@ export const getCustomerContactById = async (
 
         res.status(200).json({
             success: true,
+            message: "Customer contact retrieved successfully.",
             data: {
                 contact,
             },
@@ -94,6 +97,7 @@ export const updateCustomerContact = async (
 
         res.status(200).json({
             success: true,
+            message: "Customer contact updated successfully.",
             data: {
                 contact,
             },
@@ -119,6 +123,7 @@ export const deleteCustomerContact = async (
 
         res.status(200).json({
             success: true,
+            message: "Customer contact deleted successfully.",
             data: result,
         });
     } catch (error) {

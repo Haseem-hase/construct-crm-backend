@@ -1,5 +1,7 @@
 import { Router } from "express";
+import { Module, Action } from "@prisma/client";
 import { authenticate } from "../../middlewares/authenticate";
+import { authorize } from "../../middlewares/authorize";
 import { validate } from "../../middlewares/validate";
 import {
     createCustomerContactSchema,
@@ -23,6 +25,7 @@ const customerIdOnlySchema = customerAndContactIdParamsSchema.pick({ customerId:
 
 router.post(
     "/",
+    authorize(Module.CUSTOMER, Action.CREATE),
     validate(customerIdOnlySchema, "params"),
     validate(createCustomerContactSchema, "body"),
     createCustomerContact
@@ -30,18 +33,21 @@ router.post(
 
 router.get(
     "/",
+    authorize(Module.CUSTOMER, Action.VIEW),
     validate(customerIdOnlySchema, "params"),
     getCustomerContacts
 );
 
 router.get(
     "/:contactId",
+    authorize(Module.CUSTOMER, Action.VIEW),
     validate(customerAndContactIdParamsSchema, "params"),
     getCustomerContactById
 );
 
 router.patch(
     "/:contactId",
+    authorize(Module.CUSTOMER, Action.UPDATE),
     validate(customerAndContactIdParamsSchema, "params"),
     validate(updateCustomerContactSchema, "body"),
     updateCustomerContact
@@ -49,6 +55,7 @@ router.patch(
 
 router.delete(
     "/:contactId",
+    authorize(Module.CUSTOMER, Action.DELETE),
     validate(customerAndContactIdParamsSchema, "params"),
     deleteCustomerContact
 );

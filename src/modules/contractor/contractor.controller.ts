@@ -33,6 +33,7 @@ export const createContractor = async (
 
         res.status(201).json({
             success: true,
+            message: "Contractor created successfully.",
             data: {
                 contractor,
             },
@@ -62,6 +63,7 @@ export const getOrganizationContractors = async (
 
         res.status(200).json({
             success: true,
+            message: "Contractors retrieved successfully.",
             data: {
                 contractors,
             },
@@ -93,6 +95,7 @@ export const getContractorById = async (
 
         res.status(200).json({
             success: true,
+            message: "Contractor retrieved successfully.",
             data: {
                 contractor,
             },
@@ -126,6 +129,7 @@ export const updateContractor = async (
 
         res.status(200).json({
             success: true,
+            message: "Contractor updated successfully.",
             data: {
                 contractor,
             },

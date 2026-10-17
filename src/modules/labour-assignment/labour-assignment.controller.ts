@@ -31,6 +31,7 @@ export const createLabourAssignment = async (
 
         res.status(201).json({
             success: true,
+            message: "Labour assignment created successfully.",
             data: {
                 assignment,
             },
@@ -67,6 +68,7 @@ export const getLabourAssignments = async (
 
         res.status(200).json({
             success: true,
+            message: "Labour assignments retrieved successfully.",
             data: {
                 assignments,
             },
@@ -99,6 +101,7 @@ export const getLabourAssignmentById = async (
 
         res.status(200).json({
             success: true,
+            message: "Labour assignment retrieved successfully.",
             data: {
                 assignment,
             },
@@ -133,6 +136,7 @@ export const updateLabourAssignment = async (
 
         res.status(200).json({
             success: true,
+            message: "Labour assignment updated successfully.",
             data: {
                 assignment,
             },

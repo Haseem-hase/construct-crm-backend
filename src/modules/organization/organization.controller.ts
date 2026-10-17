@@ -15,6 +15,7 @@ export const registerOrganization = async (
 
         res.status(201).json({
             success: true,
+            message: "Organization registered successfully.",
             data: result,
         });
     } catch (error) {

@@ -14,6 +14,7 @@ export const createProject = async (
         const result = await projectService.createProject(validatedData, user);
         res.status(201).json({
             success: true,
+            message: "Project created successfully.",
             data: result,
         });
     } catch (error) {
@@ -31,6 +32,7 @@ export const getOrganizationProjects = async (
         const result = await projectService.getOrganizationProjects(user);
         res.status(200).json({
             success: true,
+            message: "Projects retrieved successfully.",
             data: result,
         });
     } catch (error) {
@@ -49,6 +51,7 @@ export const getProjectById = async (
         const result = await projectService.getProjectById(validatedParams.projectId, user);
         res.status(200).json({
             success: true,
+            message: "Project retrieved successfully.",
             data: result,
         });
     } catch (error) {
@@ -72,6 +75,7 @@ export const updateProject = async (
         );
         res.status(200).json({
             success: true,
+            message: "Project updated successfully.",
             data: result,
         });
     } catch (error) {
@@ -93,6 +97,7 @@ export const deleteProject = async (
         );
         res.status(200).json({
             success: true,
+            message: "Project deleted successfully.",
             data: result,
         });
     } catch (error) {

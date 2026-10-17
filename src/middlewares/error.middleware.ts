@@ -45,13 +45,10 @@ export const errorHandler = (
 
     if (err instanceof Prisma.PrismaClientKnownRequestError) {
         if (err.code === "P2002") {
-            const target = err.meta?.target as string[] | undefined;
-            if (target && target.includes("organizationId") && target.includes("phone")) {
-                return res.status(409).json({
-                    success: false,
-                    message: "A labour with this phone number already exists in this organization.",
-                });
-            }
+            return res.status(409).json({
+                success: false,
+                message: "Unique constraint failed. A record with this value already exists.",
+            });
         }
     }
 

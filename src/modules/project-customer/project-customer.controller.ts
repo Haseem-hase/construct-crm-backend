@@ -28,6 +28,7 @@ export const createProjectCustomer = async (
 
         res.status(201).json({
             success: true,
+            message: "Project customer created successfully.",
             data: result,
         });
     } catch (error) {
@@ -51,6 +52,7 @@ export const getProjectCustomers = async (
 
         res.status(200).json({
             success: true,
+            message: "Project customers retrieved successfully.",
             data: result,
         });
     } catch (error) {
@@ -75,6 +77,7 @@ export const getProjectCustomer = async (
 
         res.status(200).json({
             success: true,
+            message: "Project customer retrieved successfully.",
             data: result,
         });
     } catch (error) {
@@ -101,6 +104,7 @@ export const updateProjectCustomer = async (
 
         res.status(200).json({
             success: true,
+            message: "Project customer updated successfully.",
             data: result,
         });
     } catch (error) {
@@ -125,6 +129,7 @@ export const deleteProjectCustomer = async (
 
         res.status(200).json({
             success: true,
+            message: "Project customer deleted successfully.",
             data: result,
         });
     } catch (error) {

@@ -48,11 +48,7 @@ export const registerCustomer = async (
 
     const { password, ...userWithoutPassword } = user;
 
-    return {
-        success: true,
-        message: "Customer registered successfully.",
-        data: userWithoutPassword,
-    };
+    return userWithoutPassword;
 };
 
 //login
@@ -195,10 +191,6 @@ export const logout = async (
     }
 
     await revokeRefreshToken(matchedToken.id);
-
-    return {
-        message: "Logged out successfully."
-    };
 };
 
 

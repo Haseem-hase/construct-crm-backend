@@ -146,6 +146,7 @@ export const updateContractorSchema = z.object({
 
     licenseExpiryDate: z
         .coerce.date()
+        .nullable()
         .optional(),
 
     status: z.enum(["PENDING", "ACTIVE", "SUSPENDED", "INACTIVE", "TERMINATED"], {

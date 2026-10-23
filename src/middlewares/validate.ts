@@ -10,13 +10,19 @@ export const validate = (
 ) => {
     return (
         req: Request,
-        _res: Response,
+        res: Response,
         next: NextFunction
     ) => {
         try {
             const validatedData = schema.parse(req[source]);
 
-            req[source] = validatedData;
+            // Express 5 exposes req.query through a getter, so keep parsed
+            // query values in res.locals instead of assigning to req.query.
+            if (source === "query") {
+                res.locals.validatedQuery = validatedData;
+            } else {
+                req[source] = validatedData;
+            }
 
             next();
         } catch (error) {

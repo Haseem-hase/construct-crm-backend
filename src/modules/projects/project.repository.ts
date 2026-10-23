@@ -43,6 +43,9 @@ export const findProjectsByOrganizationId = async (
         orderBy: {
             createdAt: "desc",
         },
+        include: {
+            projectCustomers: { include: { customer: true } },
+        },
     });
 };
 
@@ -54,6 +57,9 @@ export const findProjectByIdAndOrganization = async (
         where: {
             id: projectId,
             organizationId,
+        },
+        include: {
+            projectCustomers: { include: { customer: true } },
         },
     });
 };

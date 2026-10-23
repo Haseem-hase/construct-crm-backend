@@ -1,6 +1,14 @@
 import prisma from "../../lib/prisma";
 import { CreateOrganizationInput } from "./organization.types";
 
+const organizationSelect = {
+    id: true,
+    name: true,
+    description: true,
+    createdAt: true,
+    updatedAt: true,
+} as const;
+
 export const createOrganizationWithOwner = async (
     data: CreateOrganizationInput
 ) => {
@@ -8,7 +16,9 @@ export const createOrganizationWithOwner = async (
         const organization = await tx.organization.create({
             data: {
                 name: data.organizationName,
+                ...(data.description !== undefined ? { description: data.description } : {}),
             },
+            select: organizationSelect,
         });
 
         // Fetch all global roles
@@ -54,4 +64,36 @@ export const createOrganizationWithOwner = async (
             user,
         };
     });
+};
+
+export const findOrganizations = async ({ search, page, pageSize }: {
+    search?: string;
+    page: number;
+    pageSize: number;
+}) => {
+    const where = search
+        ? { name: { contains: search, mode: "insensitive" as const } }
+        : {};
+    const skip = (page - 1) * pageSize;
+
+    const [organizations, total] = await prisma.$transaction([
+        prisma.organization.findMany({
+            where,
+            select: organizationSelect,
+            orderBy: [{ createdAt: "desc" }, { id: "asc" }],
+            skip,
+            take: pageSize,
+        }),
+        prisma.organization.count({ where }),
+    ]);
+
+    return {
+        organizations,
+        pagination: {
+            page,
+            pageSize,
+            total,
+            totalPages: Math.ceil(total / pageSize),
+        },
+    };
 };

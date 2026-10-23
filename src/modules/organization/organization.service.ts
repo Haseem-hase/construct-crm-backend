@@ -4,10 +4,14 @@ import * as authRepository from "../auth/auth.repository";
 import * as organizationRepository from "./organization.repository";
 
 import { ConflictError } from "../../errors/ConflictError";
-import { RegisterOrganizationInput } from "./organization.types";
+import {
+    CreateOrganizationRequest,
+    ListOrganizationsQuery,
+    RegisterOrganizationInput,
+} from "./organization.types";
 
-export const registerOrganization = async (
-    data: RegisterOrganizationInput
+const createOrganizationWithOwner = async (
+    data: RegisterOrganizationInput & { description?: string }
 ) => {
     const existingEmail = await authRepository.findUserByEmail(
         data.email
@@ -47,6 +51,7 @@ export const registerOrganization = async (
     const result =
         await organizationRepository.createOrganizationWithOwner({
             organizationName: data.organizationName,
+            ...(data.description !== undefined ? { description: data.description } : {}),
             fullName: data.fullName,
             email: data.email,
             phone: data.phone,
@@ -54,10 +59,38 @@ export const registerOrganization = async (
             roleId: ownerRole.id,
         });
 
+    return result;
+};
+
+export const registerOrganization = async (data: RegisterOrganizationInput) => {
+    const result = await createOrganizationWithOwner(data);
     const { password, ...userWithoutPassword } = result.user;
 
     return {
         organization: result.organization,
         user: userWithoutPassword,
+    };
+};
+
+export const listOrganizations = async (query: ListOrganizationsQuery) => {
+    return organizationRepository.findOrganizations(query);
+};
+
+export const createOrganization = async (data: CreateOrganizationRequest) => {
+    const result = await createOrganizationWithOwner(data);
+    const { id, fullName, email, phone, organizationId, organizationRoleId, createdAt, updatedAt } = result.user;
+
+    return {
+        organization: result.organization,
+        owner: {
+            id,
+            fullName,
+            email,
+            phone,
+            organizationId,
+            organizationRoleId,
+            createdAt,
+            updatedAt,
+        },
     };
 };

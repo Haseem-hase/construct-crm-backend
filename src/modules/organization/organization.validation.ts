@@ -35,3 +35,17 @@ export const registerOrganizationSchema = z
     message: "Passwords do not match.",
     path: ["confirmPassword"],
   });
+
+export const createOrganizationSchema = registerOrganizationSchema
+  .safeExtend({
+    description: z.string().trim().optional(),
+  })
+  .strict();
+
+export const listOrganizationsQuerySchema = z
+  .object({
+    search: z.string().trim().max(150, "Search must not exceed 150 characters.").optional(),
+    page: z.coerce.number().int().min(1).max(1_000_000).default(1),
+    pageSize: z.coerce.number().int().min(1).max(100).default(10),
+  })
+  .strict();

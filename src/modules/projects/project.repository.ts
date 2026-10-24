@@ -49,6 +49,22 @@ export const findProjectsByOrganizationId = async (
     });
 };
 
+export const findAllPlatformProjects = async () => prisma.project.findMany({
+    include: {
+        organization: { select: { id: true, name: true } },
+        projectCustomers: { include: { customer: true } },
+    },
+    orderBy: { createdAt: "desc" },
+});
+
+export const findPlatformProjectById = async (projectId: string) => prisma.project.findUnique({
+    where: { id: projectId },
+    include: {
+        organization: { select: { id: true, name: true } },
+        projectCustomers: { include: { customer: true } },
+    },
+});
+
 export const findProjectByIdAndOrganization = async (
     projectId: string,
     organizationId: string

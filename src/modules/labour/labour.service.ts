@@ -49,6 +49,13 @@ export const getOrganizationLabours = async (
     return await labourRepository.findLabours(organizationId);
 };
 
+export const getPlatformLabours = async () => labourRepository.findAllPlatformLabours();
+export const getPlatformLabourById = async (labourId: string) => {
+    const labour = await labourRepository.findPlatformLabourById(labourId);
+    if (!labour) throw new NotFoundError("Labour not found.");
+    return labour;
+};
+
 export const getLabourById = async (
     labourId: string,
     organizationId: string

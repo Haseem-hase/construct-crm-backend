@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import * as assignmentService from "./contractor-project-assignment.service";
 import { AuthenticatedUser } from "../../shared/types/authenticated-user";
-import { UnauthorizedError } from "../../errors/UnauthorizedError";
+import { ForbiddenError } from "../../errors/ForbiddenError";
 import {
     createContractorProjectAssignmentSchema,
     updateContractorProjectAssignmentSchema,
@@ -19,7 +19,7 @@ export const createAssignment = async (
         const user = req.user as AuthenticatedUser;
 
         if (!user.organizationId) {
-            throw new UnauthorizedError(
+            throw new ForbiddenError(
                 "User is not associated with an organization."
             );
         }
@@ -49,22 +49,16 @@ export const getAssignments = async (
     try {
         const user = req.user as AuthenticatedUser;
 
-        if (!user.organizationId) {
-            throw new UnauthorizedError(
-                "User is not associated with an organization."
-            );
-        }
-
         const filters = {
             projectId: req.query.projectId as string | undefined,
             contractorId: req.query.contractorId as string | undefined,
             status: req.query.status as ContractorAssignmentStatus | undefined,
         };
 
-        const assignments = await assignmentService.getAssignments(
-            user.organizationId,
-            filters
-        );
+        if (!user.organizationId && user.systemRole !== "SUPER_ADMIN") throw new ForbiddenError("This operation requires an organization context.");
+        const assignments = user.systemRole === "SUPER_ADMIN"
+            ? await assignmentService.getPlatformAssignments(filters)
+            : await assignmentService.getAssignments(user.organizationId!, filters);
 
         res.status(200).json({
             success: true,
@@ -86,18 +80,11 @@ export const getAssignmentById = async (
     try {
         const user = req.user as AuthenticatedUser;
 
-        if (!user.organizationId) {
-            throw new UnauthorizedError(
-                "User is not associated with an organization."
-            );
-        }
-
         const params = contractorProjectAssignmentIdSchema.parse(req.params);
-
-        const assignment = await assignmentService.getAssignmentById(
-            user.organizationId,
-            params.id
-        );
+        if (!user.organizationId && user.systemRole !== "SUPER_ADMIN") throw new ForbiddenError("This operation requires an organization context.");
+        const assignment = user.systemRole === "SUPER_ADMIN"
+            ? await assignmentService.getPlatformAssignmentById(params.id)
+            : await assignmentService.getAssignmentById(user.organizationId!, params.id);
 
         res.status(200).json({
             success: true,
@@ -121,7 +108,7 @@ export const updateAssignment = async (
         const user = req.user as AuthenticatedUser;
 
         if (!user.organizationId) {
-            throw new UnauthorizedError(
+            throw new ForbiddenError(
                 "User is not associated with an organization."
             );
         }

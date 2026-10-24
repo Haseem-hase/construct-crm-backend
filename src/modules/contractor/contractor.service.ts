@@ -43,6 +43,13 @@ export const getOrganizationContractors = async (
     return await contractorRepository.findContractors(organizationId);
 };
 
+export const getPlatformContractors = async () => contractorRepository.findAllPlatformContractors();
+export const getPlatformContractorById = async (contractorId: string) => {
+    const contractor = await contractorRepository.findPlatformContractorById(contractorId);
+    if (!contractor) throw new NotFoundError("Contractor not found.");
+    return contractor;
+};
+
 export const getContractorById = async (
     contractorId: string,
     organizationId: string

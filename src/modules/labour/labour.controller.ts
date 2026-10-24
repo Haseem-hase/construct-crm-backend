@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from "express";
 import * as labourService from "./labour.service";
 
 import { AuthenticatedUser } from "../../shared/types/authenticated-user";
-import { UnauthorizedError } from "../../errors/UnauthorizedError";
+import { ForbiddenError } from "../../errors/ForbiddenError";
 
 import {
     createLabourSchema,
@@ -22,7 +22,7 @@ export const createLabour = async (
         const user = req.user as AuthenticatedUser;
 
         if (!user.organizationId) {
-            throw new UnauthorizedError(
+            throw new ForbiddenError(
                 "User is not associated with an organization."
             );
         }
@@ -53,8 +53,13 @@ export const getOrganizationLabours = async (
     try {
         const user = req.user as AuthenticatedUser;
 
+        if (user.systemRole === "SUPER_ADMIN") {
+            const labours = await labourService.getPlatformLabours();
+            res.status(200).json({ success: true, message: "Labours retrieved successfully.", data: { labours } });
+            return;
+        }
         if (!user.organizationId) {
-            throw new UnauthorizedError(
+            throw new ForbiddenError(
                 "User is not associated with an organization."
             );
         }
@@ -85,8 +90,13 @@ export const getLabourById = async (
         const params = labourIdSchema.parse(req.params);
         const user = req.user as AuthenticatedUser;
 
+        if (user.systemRole === "SUPER_ADMIN") {
+            const labour = await labourService.getPlatformLabourById(params.id);
+            res.status(200).json({ success: true, message: "Labour retrieved successfully.", data: { labour } });
+            return;
+        }
         if (!user.organizationId) {
-            throw new UnauthorizedError(
+            throw new ForbiddenError(
                 "User is not associated with an organization."
             );
         }
@@ -120,7 +130,7 @@ export const updateLabour = async (
         const user = req.user as AuthenticatedUser;
 
         if (!user.organizationId) {
-            throw new UnauthorizedError(
+            throw new ForbiddenError(
                 "User is not associated with an organization."
             );
         }

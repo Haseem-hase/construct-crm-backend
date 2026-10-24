@@ -42,6 +42,16 @@ export const findCustomersByOrganizationId = async (
     });
 };
 
+export const findAllPlatformCustomers = async () => prisma.customer.findMany({
+    include: { organization: { select: { id: true, name: true } } },
+    orderBy: { createdAt: "desc" },
+});
+
+export const findPlatformCustomerById = async (customerId: string) => prisma.customer.findUnique({
+    where: { id: customerId },
+    include: { organization: { select: { id: true, name: true } } },
+});
+
 
 export const findCustomerByIdAndOrganization = async (
     customerId: string,

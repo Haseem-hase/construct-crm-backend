@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from "express";
 import * as contractorService from "./contractor.service";
 
 import { AuthenticatedUser } from "../../shared/types/authenticated-user";
-import { UnauthorizedError } from "../../errors/UnauthorizedError";
+import { ForbiddenError } from "../../errors/ForbiddenError";
 
 import {
     createContractorSchema,
@@ -21,7 +21,7 @@ export const createContractor = async (
         const user = req.user as AuthenticatedUser;
 
         if (!user.organizationId) {
-            throw new UnauthorizedError(
+            throw new ForbiddenError(
                 "User is not associated with an organization."
             );
         }
@@ -51,8 +51,13 @@ export const getOrganizationContractors = async (
     try {
         const user = req.user as AuthenticatedUser;
 
+        if (user.systemRole === "SUPER_ADMIN") {
+            const contractors = await contractorService.getPlatformContractors();
+            res.status(200).json({ success: true, message: "Contractors retrieved successfully.", data: { contractors } });
+            return;
+        }
         if (!user.organizationId) {
-            throw new UnauthorizedError(
+            throw new ForbiddenError(
                 "User is not associated with an organization."
             );
         }
@@ -82,8 +87,13 @@ export const getContractorById = async (
         const params = contractorIdSchema.parse(req.params);
         const user = req.user as AuthenticatedUser;
 
+        if (user.systemRole === "SUPER_ADMIN") {
+            const contractor = await contractorService.getPlatformContractorById(params.id);
+            res.status(200).json({ success: true, message: "Contractor retrieved successfully.", data: { contractor } });
+            return;
+        }
         if (!user.organizationId) {
-            throw new UnauthorizedError(
+            throw new ForbiddenError(
                 "User is not associated with an organization."
             );
         }
@@ -116,7 +126,7 @@ export const updateContractor = async (
         const user = req.user as AuthenticatedUser;
 
         if (!user.organizationId) {
-            throw new UnauthorizedError(
+            throw new ForbiddenError(
                 "User is not associated with an organization."
             );
         }

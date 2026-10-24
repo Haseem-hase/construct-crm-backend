@@ -4,7 +4,7 @@ import { CreateCustomerInput, UpdateCustomerInput } from "./customer.types";
 
 import { AuthenticatedUser } from "../../shared/types/authenticated-user";
 
-import { UnauthorizedError } from "../../errors/UnauthorizedError";
+import { ForbiddenError } from "../../errors/ForbiddenError";
 import { NotFoundError } from "../../errors/NotFoundError";
 
 export const createCustomer = async (
@@ -13,7 +13,7 @@ export const createCustomer = async (
 ) => {
 
     if (!user.organizationId) {
-        throw new UnauthorizedError(
+        throw new ForbiddenError(
             "User is not associated with an organization."
         );
     }
@@ -32,8 +32,11 @@ export const getCustomers = async (
     user: AuthenticatedUser
 ) => {
 
+    if (user.systemRole === "SUPER_ADMIN") {
+        return customerRepository.findAllPlatformCustomers();
+    }
     if (!user.organizationId) {
-        throw new UnauthorizedError(
+        throw new ForbiddenError(
             "User is not associated with an organization."
         );
     }
@@ -48,8 +51,13 @@ export const getCustomerById = async (
     user: AuthenticatedUser
 ) => {
 
+    if (user.systemRole === "SUPER_ADMIN") {
+        const customer = await customerRepository.findPlatformCustomerById(customerId);
+        if (!customer) throw new NotFoundError("Customer not found.");
+        return customer;
+    }
     if (!user.organizationId) {
-        throw new UnauthorizedError(
+        throw new ForbiddenError(
             "User is not associated with an organization."
         );
     }
@@ -74,8 +82,13 @@ export const getCustomerChildren = async (
     user: AuthenticatedUser
 ) => {
 
+    if (user.systemRole === "SUPER_ADMIN") {
+        const customer = await customerRepository.findPlatformCustomerById(customerId);
+        if (!customer) throw new NotFoundError("Customer not found.");
+        return customerRepository.findCustomerDescendants(customerId, customer.organizationId);
+    }
     if (!user.organizationId) {
-        throw new UnauthorizedError(
+        throw new ForbiddenError(
             "User is not associated with an organization."
         );
     }
@@ -107,7 +120,7 @@ export const updateCustomer = async (
 ) => {
 
     if (!user.organizationId) {
-        throw new UnauthorizedError(
+        throw new ForbiddenError(
             "User is not associated with an organization."
         );
     }
@@ -140,7 +153,7 @@ export const deleteCustomer = async (
 ) => {
 
     if (!user.organizationId) {
-        throw new UnauthorizedError(
+        throw new ForbiddenError(
             "User is not associated with an organization."
         );
     }

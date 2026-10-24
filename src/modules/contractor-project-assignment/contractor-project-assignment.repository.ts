@@ -2,8 +2,8 @@ import prisma from "../../lib/prisma";
 import { ContractorAssignmentStatus } from "@prisma/client";
 
 const defaultIncludes = {
-    project: true,
-    contractor: true,
+    project: { include: { organization: { select: { id: true, name: true } } } },
+    contractor: { include: { organization: { select: { id: true, name: true } } } },
     responsibilities: {
         include: {
             responsibility: true,
@@ -38,6 +38,20 @@ export const findMany = async (organizationId: string, filters: {
         },
     });
 };
+
+export const findAllPlatform = async (filters: {
+    projectId?: string;
+    contractorId?: string;
+    status?: ContractorAssignmentStatus;
+} = {}) => prisma.contractorProjectAssignment.findMany({
+    where: {
+        ...(filters.projectId && { projectId: filters.projectId }),
+        ...(filters.contractorId && { contractorId: filters.contractorId }),
+        ...(filters.status && { status: filters.status }),
+    },
+    include: defaultIncludes,
+    orderBy: { createdAt: "desc" },
+});
 
 export const findByProjectAndContractor = async (projectId: string, contractorId: string) => {
     return await prisma.contractorProjectAssignment.findUnique({

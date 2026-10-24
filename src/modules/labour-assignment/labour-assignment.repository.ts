@@ -2,11 +2,11 @@ import prisma from "../../lib/prisma";
 import { Prisma } from "@prisma/client";
 
 const defaultIncludes = {
-    labour: true,
+    labour: { include: { organization: { select: { id: true, name: true } } } },
     assignment: {
         include: {
-            project: true,
-            contractor: true,
+            project: { include: { organization: { select: { id: true, name: true } } } },
+            contractor: { include: { organization: { select: { id: true, name: true } } } },
         },
     },
 };
@@ -50,6 +50,25 @@ export const findMany = async (
         },
     });
 };
+
+export const findAllPlatform = async (filters: {
+    labourId?: string;
+    contractorProjectAssignmentId?: string;
+    status?: Prisma.EnumLabourAssignmentStatusFilter | "ACTIVE" | "COMPLETED" | "CANCELLED";
+} = {}) => prisma.labourAssignment.findMany({
+    where: {
+        ...(filters.labourId && { labourId: filters.labourId }),
+        ...(filters.contractorProjectAssignmentId && { contractorProjectAssignmentId: filters.contractorProjectAssignmentId }),
+        ...(filters.status && { status: filters.status }),
+    },
+    include: defaultIncludes,
+    orderBy: { startDate: "desc" },
+});
+
+export const findPlatformById = async (id: string) => prisma.labourAssignment.findUnique({
+    where: { id },
+    include: defaultIncludes,
+});
 
 export const findByLabour = async (labourId: string, organizationId: string) => {
     return await prisma.labourAssignment.findMany({

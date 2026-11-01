@@ -207,34 +207,6 @@ async function main() {
             action: Action.DELETE,
             description: "Delete inventory",
         },
-        {
-            module: Module.INVENTORY,
-            action: Action.EXPORT,
-            description: "Export inventory data",
-        },
-
-        // SUPPLIER
-        {
-            module: Module.SUPPLIER,
-            action: Action.CREATE,
-            description: "Create suppliers",
-        },
-        {
-            module: Module.SUPPLIER,
-            action: Action.VIEW,
-            description: "View suppliers",
-        },
-        {
-            module: Module.SUPPLIER,
-            action: Action.UPDATE,
-            description: "Update suppliers",
-        },
-        {
-            module: Module.SUPPLIER,
-            action: Action.DELETE,
-            description: "Delete suppliers",
-        },
-
         // REPORT
         {
             module: Module.REPORT,

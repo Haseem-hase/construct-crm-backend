@@ -170,6 +170,15 @@ model User {
 
   projectMemberships ProjectMember[]
 
+  createdStockDocuments StockDocument[] @relation("StockDocumentCreatedBy")
+  postedStockDocuments StockDocument[] @relation("StockDocumentPostedBy")
+  approvedStockDocuments StockDocument[] @relation("StockDocumentApprovedBy")
+  rejectedStockDocuments StockDocument[] @relation("StockDocumentRejectedBy")
+  cancelledStockDocuments StockDocument[] @relation("StockDocumentCancelledBy")
+  stockMovements StockMovement[]
+  createdAllocations ProjectMaterialAllocation[] @relation("AllocationCreatedBy")
+  updatedAllocations ProjectMaterialAllocation[] @relation("AllocationUpdatedBy")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -208,6 +217,18 @@ model Organization {
   projects          Project[]
   labours           Labour[]
   contractors       Contractor[]
+
+  inventoryCategories InventoryCategory[]
+  inventoryAssets InventoryAsset[]
+  inventoryItems InventoryItem[]
+  warehouses Warehouse[]
+  storageLocations StorageLocation[]
+  stockBalances StockBalance[]
+  stockDocuments StockDocument[]
+  stockDocumentLines StockDocumentLine[]
+  stockMovements StockMovement[]
+  projectMaterialAllocations ProjectMaterialAllocation[]
+  suppliers Supplier[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -330,13 +351,361 @@ model Project {
 
   members               ProjectMember[]
   contractorAssignments ContractorProjectAssignment[]
+  projectWarehouses Warehouse[]
+  materialAllocations ProjectMaterialAllocation[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([organizationId])
   @@index([status])
+  @@unique([id, organizationId])
   @@map("projects")
+}
+
+/////////////////////////////////////////////////
+// INVENTORY FOUNDATION
+/////////////////////////////////////////////////
+
+enum WarehouseType {
+  CENTRAL
+  PROJECT_SITE
+}
+
+enum StockDocumentType {
+  RECEIPT
+  ISSUE
+  TRANSFER
+  ADJUSTMENT
+}
+
+enum StockDocumentStatus {
+  DRAFT
+  PENDING_APPROVAL
+  POSTED
+  REJECTED
+  CANCELLED
+}
+
+enum StockMovementType {
+  RECEIPT
+  ISSUE
+  TRANSFER_OUT
+  TRANSFER_IN
+  ADJUSTMENT_IN
+  ADJUSTMENT_OUT
+}
+
+enum ProjectMaterialAllocationStatus {
+  ACTIVE
+  CONSUMED
+  RELEASED
+  CLOSED
+}
+
+enum InventoryAssetType {
+  MATERIAL
+  TOOL
+  MACHINERY
+}
+
+model InventoryAsset {
+  id String @id @default(uuid())
+  organizationId String
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  type InventoryAssetType
+  code String
+  name String
+  quantity Decimal @default(0) @db.Decimal(18, 4)
+  price Decimal @default(0) @db.Decimal(18, 4)
+  description String?
+  imageUrl String?
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([organizationId, code])
+  @@index([organizationId, type, isActive])
+  @@index([organizationId, name])
+  @@map("inventory_assets")
+}
+
+model InventoryCategory {
+  id String @id @default(uuid())
+  organizationId String
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name String
+  description String?
+  parentCategoryId String?
+  parentCategory InventoryCategory? @relation("InventoryCategoryTree", fields: [parentCategoryId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  childCategories InventoryCategory[] @relation("InventoryCategoryTree")
+  isActive Boolean @default(true)
+  items InventoryItem[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([id, organizationId])
+  @@unique([organizationId, name])
+  @@index([organizationId])
+  @@map("inventory_categories")
+}
+
+model UnitOfMeasure {
+  id String @id @default(uuid())
+  code String @unique
+  name String
+  symbol String
+  precision Int @default(4)
+  isActive Boolean @default(true)
+  items InventoryItem[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@map("units_of_measure")
+}
+
+model InventoryItem {
+  id String @id @default(uuid())
+  organizationId String
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  sku String
+  name String
+  description String?
+  categoryId String?
+  category InventoryCategory? @relation(fields: [categoryId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  unitOfMeasureId String
+  unitOfMeasure UnitOfMeasure @relation(fields: [unitOfMeasureId], references: [id], onDelete: Restrict)
+  reorderLevel Decimal @default(0) @db.Decimal(18, 4)
+  defaultCost Decimal? @db.Decimal(18, 4)
+  isActive Boolean @default(true)
+  stockBalances StockBalance[]
+  stockDocumentLines StockDocumentLine[]
+  stockMovements StockMovement[]
+  materialAllocations ProjectMaterialAllocation[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([id, organizationId])
+  @@unique([organizationId, sku])
+  @@index([organizationId])
+  @@index([organizationId, categoryId])
+  @@map("inventory_items")
+}
+
+model Warehouse {
+  id String @id @default(uuid())
+  organizationId String
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  code String
+  name String
+  type WarehouseType @default(CENTRAL)
+  projectId String?
+  project Project? @relation(fields: [projectId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  address String?
+  isActive Boolean @default(true)
+  storageLocations StorageLocation[]
+  stockBalances StockBalance[]
+  sourceDocumentLines StockDocumentLine[] @relation("StockLineSourceWarehouse")
+  destinationDocumentLines StockDocumentLine[] @relation("StockLineDestinationWarehouse")
+  stockMovements StockMovement[]
+  materialAllocations ProjectMaterialAllocation[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([id, organizationId])
+  @@unique([organizationId, code])
+  @@index([organizationId])
+  @@index([organizationId, projectId])
+  @@map("warehouses")
+}
+
+model StorageLocation {
+  id String @id @default(uuid())
+  organizationId String
+  warehouseId String
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  warehouse Warehouse @relation(fields: [warehouseId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  code String
+  name String
+  isActive Boolean @default(true)
+  stockBalances StockBalance[]
+  sourceDocumentLines StockDocumentLine[] @relation("StockLineSourceLocation")
+  destinationDocumentLines StockDocumentLine[] @relation("StockLineDestinationLocation")
+  stockMovements StockMovement[]
+  materialAllocations ProjectMaterialAllocation[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([id, organizationId])
+  @@unique([id, warehouseId, organizationId])
+  @@unique([warehouseId, code])
+  @@index([organizationId])
+  @@index([warehouseId])
+  @@map("storage_locations")
+}
+
+model StockBalance {
+  id String @id @default(uuid())
+  organizationId String
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  itemId String
+  item InventoryItem @relation(fields: [itemId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  warehouseId String
+  warehouse Warehouse @relation(fields: [warehouseId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  storageLocationId String?
+  storageLocation StorageLocation? @relation(fields: [storageLocationId, warehouseId, organizationId], references: [id, warehouseId, organizationId], onDelete: Restrict)
+  onHandQty Decimal @default(0) @db.Decimal(18, 4)
+  reservedQty Decimal @default(0) @db.Decimal(18, 4)
+  weightedAverageUnitCost Decimal @default(0) @db.Decimal(18, 4)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([id, organizationId])
+  @@index([organizationId])
+  @@index([organizationId, itemId])
+  @@index([organizationId, warehouseId])
+  @@index([organizationId, warehouseId, storageLocationId])
+  @@map("stock_balances")
+}
+
+model StockDocument {
+  id String @id @default(uuid())
+  organizationId String
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  referenceNumber String
+  type StockDocumentType
+  status StockDocumentStatus @default(DRAFT)
+  reason String?
+  externalReference String?
+  supplierId String?
+  supplier Supplier? @relation(fields: [supplierId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  idempotencyKey String?
+  createdById String
+  createdBy User @relation("StockDocumentCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  postedById String?
+  postedBy User? @relation("StockDocumentPostedBy", fields: [postedById], references: [id], onDelete: Restrict)
+  approvedById String?
+  approvedBy User? @relation("StockDocumentApprovedBy", fields: [approvedById], references: [id], onDelete: Restrict)
+  rejectedById String?
+  rejectedBy User? @relation("StockDocumentRejectedBy", fields: [rejectedById], references: [id], onDelete: Restrict)
+  cancelledById String?
+  cancelledBy User? @relation("StockDocumentCancelledBy", fields: [cancelledById], references: [id], onDelete: Restrict)
+  postedAt DateTime?
+  approvedAt DateTime?
+  rejectedAt DateTime?
+  cancelledAt DateTime?
+  lines StockDocumentLine[]
+  movements StockMovement[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([id, organizationId])
+  @@unique([organizationId, referenceNumber])
+  @@unique([organizationId, idempotencyKey])
+  @@index([organizationId, type, status])
+  @@index([organizationId, createdAt])
+  @@map("stock_documents")
+}
+
+model StockDocumentLine {
+  id String @id @default(uuid())
+  organizationId String
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  documentId String
+  document StockDocument @relation(fields: [documentId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  itemId String
+  item InventoryItem @relation(fields: [itemId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  allocationId String?
+  allocation ProjectMaterialAllocation? @relation(fields: [allocationId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  quantity Decimal @db.Decimal(18, 4)
+  unitCost Decimal @default(0) @db.Decimal(18, 4)
+  sourceWarehouseId String?
+  sourceWarehouse Warehouse? @relation("StockLineSourceWarehouse", fields: [sourceWarehouseId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  sourceStorageLocationId String?
+  sourceStorageLocation StorageLocation? @relation("StockLineSourceLocation", fields: [sourceStorageLocationId, sourceWarehouseId, organizationId], references: [id, warehouseId, organizationId], onDelete: Restrict)
+  destinationWarehouseId String?
+  destinationWarehouse Warehouse? @relation("StockLineDestinationWarehouse", fields: [destinationWarehouseId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  destinationStorageLocationId String?
+  destinationStorageLocation StorageLocation? @relation("StockLineDestinationLocation", fields: [destinationStorageLocationId, destinationWarehouseId, organizationId], references: [id, warehouseId, organizationId], onDelete: Restrict)
+  movements StockMovement[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([id, organizationId])
+  @@index([organizationId, documentId])
+  @@index([organizationId, itemId])
+  @@map("stock_document_lines")
+}
+
+model StockMovement {
+  id String @id @default(uuid())
+  organizationId String
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  itemId String
+  item InventoryItem @relation(fields: [itemId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  warehouseId String
+  warehouse Warehouse @relation(fields: [warehouseId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  storageLocationId String?
+  storageLocation StorageLocation? @relation(fields: [storageLocationId, warehouseId, organizationId], references: [id, warehouseId, organizationId], onDelete: Restrict)
+  documentId String
+  document StockDocument @relation(fields: [documentId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  documentLineId String?
+  documentLine StockDocumentLine? @relation(fields: [documentLineId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  type StockMovementType
+  quantityDelta Decimal @db.Decimal(18, 4)
+  unitCost Decimal @db.Decimal(18, 4)
+  actorId String
+  actor User @relation(fields: [actorId], references: [id], onDelete: Restrict)
+  idempotencyKey String?
+  occurredAt DateTime @default(now())
+  @@unique([organizationId, idempotencyKey])
+  @@index([organizationId, itemId, occurredAt])
+  @@index([organizationId, warehouseId, occurredAt])
+  @@index([organizationId, documentId])
+  @@map("stock_movements")
+}
+
+model ProjectMaterialAllocation {
+  id String @id @default(uuid())
+  organizationId String
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  projectId String
+  project Project @relation(fields: [projectId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  itemId String
+  item InventoryItem @relation(fields: [itemId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  warehouseId String
+  warehouse Warehouse @relation(fields: [warehouseId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  storageLocationId String?
+  storageLocation StorageLocation? @relation(fields: [storageLocationId, warehouseId, organizationId], references: [id, warehouseId, organizationId], onDelete: Restrict)
+  allocatedQty Decimal @db.Decimal(18, 4)
+  consumedQty Decimal @default(0) @db.Decimal(18, 4)
+  releasedQty Decimal @default(0) @db.Decimal(18, 4)
+  status ProjectMaterialAllocationStatus @default(ACTIVE)
+  createdById String
+  createdBy User @relation("AllocationCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  updatedById String?
+  updatedBy User? @relation("AllocationUpdatedBy", fields: [updatedById], references: [id], onDelete: Restrict)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  stockDocumentLines StockDocumentLine[]
+  @@unique([id, organizationId])
+  @@index([organizationId, projectId])
+  @@index([organizationId, itemId])
+  @@index([organizationId, warehouseId])
+  @@index([organizationId, warehouseId, storageLocationId])
+  @@map("project_material_allocations")
+}
+
+model Supplier {
+  id String @id @default(uuid())
+  organizationId String
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  supplierCode String?
+  name String
+  contactName String?
+  email String?
+  phone String?
+  address String?
+  isActive Boolean @default(true)
+  stockDocuments StockDocument[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([id, organizationId])
+  @@unique([organizationId, supplierCode])
+  @@index([organizationId])
+  @@map("suppliers")
 }
 
 /////////////////////////////////////////////////

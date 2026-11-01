@@ -17,6 +17,11 @@ const id = (req: Request) => idParamsSchema.parse(req.params).id;
 
 export const listInventoryAssets = handle("Inventory records retrieved.", 200, "result", (req, res) => service.listInventoryAssets(organization(req, res), inventoryAssetListSchema.parse(req.query)));
 export const getInventoryAsset = handle("Inventory record retrieved.", 200, "asset", (req, res) => service.getInventoryAsset(organization(req, res), id(req)));
-export const createInventoryAsset = handle("Inventory record created.", 201, "asset", (req, res) => service.createInventoryAsset(organization(req, res), inventoryAssetSchema.parse(req.body)));
-export const updateInventoryAsset = handle("Inventory record updated.", 200, "asset", (req, res) => service.updateInventoryAsset(organization(req, res), id(req), inventoryAssetUpdateSchema.parse(req.body)));
+const inventoryInput = (req: Request, res: Response) => ({
+    ...req.body,
+    ...(req.file ? { imageUrl: `/uploads/inventory/${inventoryOrganizationId(res)}/${req.file.filename}` } : {}),
+});
+
+export const createInventoryAsset = handle("Inventory record created.", 201, "asset", (req, res) => service.createInventoryAsset(organization(req, res), inventoryAssetSchema.parse(inventoryInput(req, res))));
+export const updateInventoryAsset = handle("Inventory record updated.", 200, "asset", (req, res) => service.updateInventoryAsset(organization(req, res), id(req), inventoryAssetUpdateSchema.parse(inventoryInput(req, res))));
 export const deleteInventoryAsset = handle("Inventory record deactivated.", 200, "asset", (req, res) => service.deactivateInventoryAsset(organization(req, res), id(req)));

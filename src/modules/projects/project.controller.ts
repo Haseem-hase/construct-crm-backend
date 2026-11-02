@@ -3,6 +3,13 @@ import * as projectService from "./project.service";
 import { AuthenticatedUser } from "../../shared/types/authenticated-user";
 import { createProjectSchema, updateProjectSchema, projectIdSchema } from "./project.validation";
 
+const projectInput = (req: Request) => ({
+    ...req.body,
+    ...(req.file && req.user?.organizationId
+        ? { imageUrl: `/uploads/projects/${req.user.organizationId}/${req.file.filename}` }
+        : {}),
+});
+
 export const createProject = async (
     req: Request,
     res: Response,
@@ -10,7 +17,7 @@ export const createProject = async (
 ) => {
     try {
         const user = req.user as AuthenticatedUser;
-        const validatedData = createProjectSchema.parse(req.body);
+        const validatedData = createProjectSchema.parse(projectInput(req));
         const result = await projectService.createProject(validatedData, user);
         res.status(201).json({
             success: true,
@@ -67,7 +74,7 @@ export const updateProject = async (
     try {
         const user = req.user as AuthenticatedUser;
         const validatedParams = projectIdSchema.parse(req.params);
-        const validatedData = updateProjectSchema.parse(req.body);
+        const validatedData = updateProjectSchema.parse(projectInput(req));
         const result = await projectService.updateProject(
             validatedParams.projectId,
             validatedData,

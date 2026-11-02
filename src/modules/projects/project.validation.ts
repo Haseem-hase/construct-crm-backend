@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+const formNullToNull = (value: unknown) => value === null || value === "null" ? null : value;
+const projectImageUrl = z.string().trim().max(2048).refine(
+    value => /^\/uploads\/projects\/[0-9a-f-]{36}\/[a-zA-Z0-9-]+\.(jpg|png|webp)$/i.test(value) || z.string().url().safeParse(value).success,
+    "Use a valid project image URL."
+);
+
 export const createProjectSchema = z.object({
     name: z
         .string()
@@ -13,10 +19,7 @@ export const createProjectSchema = z.object({
         .max(1000)
         .optional(),
 
-    imageUrl: z
-        .string()
-        .url("Invalid image URL")
-        .optional(),
+    imageUrl: projectImageUrl.optional(),
 
     status: z
         .enum(["PLANNING", "ACTIVE", "ON_HOLD", "COMPLETED", "CANCELLED"])
@@ -41,12 +44,14 @@ export const createProjectSchema = z.object({
         .optional(),
 
     latitude: z
+        .coerce
         .number()
         .min(-90)
         .max(90)
         .optional(),
 
     longitude: z
+        .coerce
         .number()
         .min(-180)
         .max(180)
@@ -73,6 +78,7 @@ export const createProjectSchema = z.object({
         .optional(),
 
     progress: z
+        .coerce
         .number()
         .int()
         .min(0)
@@ -81,6 +87,7 @@ export const createProjectSchema = z.object({
         .optional(),
 
     budget: z
+        .coerce
         .number()
         .nonnegative("Budget cannot be negative.")
         .optional(),
@@ -121,18 +128,14 @@ export const updateProjectSchema = z.object({
         .max(150)
         .optional(),
 
-    description: z
+    description: z.preprocess(formNullToNull, z
         .string()
         .trim()
         .max(1000)
         .nullable()
-        .optional(),
+        .optional()),
 
-    imageUrl: z
-        .string()
-        .url("Invalid image URL")
-        .nullable()
-        .optional(),
+    imageUrl: z.preprocess(formNullToNull, projectImageUrl.nullable().optional()),
 
     status: z
         .enum(["PLANNING", "ACTIVE", "ON_HOLD", "COMPLETED", "CANCELLED"])
@@ -144,70 +147,67 @@ export const updateProjectSchema = z.object({
         .max(100)
         .optional(),
 
-    city: z
+    city: z.preprocess(formNullToNull, z
         .string()
         .trim()
         .max(100)
         .nullable()
-        .optional(),
+        .optional()),
 
-    address: z
+    address: z.preprocess(formNullToNull, z
         .string()
         .trim()
         .max(255)
         .nullable()
-        .optional(),
+        .optional()),
 
-    latitude: z
-        .number()
+    latitude: z.preprocess(formNullToNull, z
+        .coerce.number()
         .min(-90)
         .max(90)
         .nullable()
-        .optional(),
+        .optional()),
 
-    longitude: z
-        .number()
+    longitude: z.preprocess(formNullToNull, z
+        .coerce.number()
         .min(-180)
         .max(180)
         .nullable()
-        .optional(),
+        .optional()),
 
-    plannedStartDate: z
-        .coerce
-        .date()
+    plannedStartDate: z.preprocess(formNullToNull, z
+        .coerce.date()
         .nullable()
-        .optional(),
+        .optional()),
 
-    plannedEndDate: z
-        .coerce
-        .date()
+    plannedEndDate: z.preprocess(formNullToNull, z
+        .coerce.date()
         .nullable()
-        .optional(),
+        .optional()),
 
-    actualStartDate: z
-        .coerce
-        .date()
+    actualStartDate: z.preprocess(formNullToNull, z
+        .coerce.date()
         .nullable()
-        .optional(),
+        .optional()),
 
-    actualEndDate: z
-        .coerce
-        .date()
+    actualEndDate: z.preprocess(formNullToNull, z
+        .coerce.date()
         .nullable()
-        .optional(),
+        .optional()),
 
     progress: z
+        .coerce
         .number()
         .int()
         .min(0)
         .max(100)
         .optional(),
 
-    budget: z
-        .number()
+    budget: z.preprocess(formNullToNull, z
+        .coerce.number()
         .nonnegative()
         .nullable()
-        .optional(),
+        .optional()),
 }).strict().refine(
     (data) => Object.keys(data).length > 0,
     {

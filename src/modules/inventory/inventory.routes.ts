@@ -4,7 +4,18 @@ import { authenticate } from "../../middlewares/authenticate";
 import { authorize } from "../../middlewares/authorize";
 import * as controller from "./inventory.controller";
 import { requireInventoryOrganization } from "./inventory-context.middleware";
-import { uploadInventoryImage } from "./inventory-upload.middleware";
+import { uploadSingleImage } from "../../middlewares/upload-image.middleware";
+import { BadRequestError } from "../../errors/BadRequestError";
+
+const uploadInventoryImage = uploadSingleImage({
+    directory: (req) => {
+        const organizationId = req.user?.systemRole === "SUPER_ADMIN"
+            ? req.header("x-organization-id")
+            : req.user?.organizationId;
+        if (!organizationId) throw new BadRequestError("Inventory organization context is missing.");
+        return `inventory/${organizationId}`;
+    },
+});
 
 const router = Router();
 router.use(authenticate, requireInventoryOrganization);

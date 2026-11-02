@@ -14,7 +14,7 @@ export const inventoryAssetSchema = z.object({
     quantity: nonnegativeDecimal,
     price: nonnegativeDecimal,
     description: z.string().trim().max(2000).nullable().optional(),
-    imageUrl: z.string().trim().url().max(2048).nullable().optional(),
+    imageUrl: z.string().trim().max(2048).refine(value => value.startsWith("/uploads/") || z.string().url().safeParse(value).success, "Use a valid image URL.").nullable().optional(),
 });
 
 export const inventoryAssetUpdateSchema = inventoryAssetSchema.partial()

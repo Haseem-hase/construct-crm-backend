@@ -88,6 +88,12 @@ export const getAssignmentById = async (organizationId: string, assignmentId: st
     return assignment;
 };
 
+export const getPlatformAssignmentById = async (assignmentId: string) => {
+    const assignment = await assignmentRepository.findById(assignmentId);
+    if (!assignment) throw new NotFoundError("Assignment not found.");
+    return assignment;
+};
+
 export const getAssignments = async (
     organizationId: string,
     filters: {
@@ -116,6 +122,12 @@ export const getAssignments = async (
     
     return assignments;
 };
+
+export const getPlatformAssignments = async (filters: {
+    projectId?: string;
+    contractorId?: string;
+    status?: ContractorAssignmentStatus;
+}) => assignmentRepository.findAllPlatform(filters);
 
 export const updateAssignment = async (
     organizationId: string,

@@ -4,7 +4,7 @@ import * as customerRepository from "../customers/customer.repository";
 import prisma from "../../lib/prisma";
 import { CreateProjectInput, UpdateProjectInput } from "./project.types";
 import { AuthenticatedUser } from "../../shared/types/authenticated-user";
-import { UnauthorizedError } from "../../errors/UnauthorizedError";
+import { ForbiddenError } from "../../errors/ForbiddenError";
 import { NotFoundError } from "../../errors/NotFoundError";
 import { BadRequestError } from "../../errors/BadRequestError";
 
@@ -14,7 +14,7 @@ export const createProject = async (
     user: AuthenticatedUser
 ) => {
     if (!user.organizationId) {
-        throw new UnauthorizedError("User is not associated with an organization.");
+        throw new ForbiddenError("This operation requires an organization context.");
     }
 
     const { customerId, ...projectData } = data;
@@ -62,8 +62,11 @@ export const createProject = async (
 export const getOrganizationProjects = async (
     user: AuthenticatedUser
 ) => {
+    if (user.systemRole === "SUPER_ADMIN") {
+        return await projectRepository.findAllPlatformProjects();
+    }
     if (!user.organizationId) {
-        throw new UnauthorizedError("User is not associated with an organization.");
+        throw new ForbiddenError("This operation requires an organization context.");
     }
 
     return await projectRepository.findProjectsByOrganizationId(
@@ -76,8 +79,13 @@ export const getProjectById = async (
     projectId: string,
     user: AuthenticatedUser
 ) => {
+    if (user.systemRole === "SUPER_ADMIN") {
+        const project = await projectRepository.findPlatformProjectById(projectId);
+        if (!project) throw new NotFoundError("Project not found.");
+        return project;
+    }
     if (!user.organizationId) {
-        throw new UnauthorizedError("User is not associated with an organization.");
+        throw new ForbiddenError("This operation requires an organization context.");
     }
 
     const project = await projectRepository.findProjectByIdAndOrganization(
@@ -99,7 +107,7 @@ export const updateProject = async (
     user: AuthenticatedUser
 ) => {
     if (!user.organizationId) {
-        throw new UnauthorizedError("User is not associated with an organization.");
+        throw new ForbiddenError("This operation requires an organization context.");
     }
 
     const project = await projectRepository.findProjectByIdAndOrganization(
@@ -162,7 +170,7 @@ export const deleteProject = async (
     user: AuthenticatedUser
 ) => {
     if (!user.organizationId) {
-        throw new UnauthorizedError("User is not associated with an organization.");
+        throw new ForbiddenError("This operation requires an organization context.");
     }
 
     const isDeleted = await projectRepository.deleteProject(

@@ -35,6 +35,22 @@ export const findLabours = async (
     });
 };
 
+export const findAllPlatformLabours = async () => prisma.labour.findMany({
+    include: {
+        profession: true,
+        organization: { select: { id: true, name: true } },
+    },
+    orderBy: { createdAt: "desc" },
+});
+
+export const findPlatformLabourById = async (labourId: string) => prisma.labour.findUnique({
+    where: { id: labourId },
+    include: {
+        profession: true,
+        organization: { select: { id: true, name: true } },
+    },
+});
+
 
 export const findLabourById = async (
     labourId: string,

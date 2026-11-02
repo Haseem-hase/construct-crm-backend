@@ -30,6 +30,16 @@ export const findContractors = async (
     });
 };
 
+export const findAllPlatformContractors = async () => prisma.contractor.findMany({
+    include: { organization: { select: { id: true, name: true } } },
+    orderBy: { createdAt: "desc" },
+});
+
+export const findPlatformContractorById = async (contractorId: string) => prisma.contractor.findUnique({
+    where: { id: contractorId },
+    include: { organization: { select: { id: true, name: true } } },
+});
+
 export const findContractorById = async (
     contractorId: string,
     organizationId: string

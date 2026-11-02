@@ -18,8 +18,17 @@ import { authorize } from "../../middlewares/authorize";
 import { Module, Action } from "@prisma/client";
 import { validate } from "../../middlewares/validate";
 import { createRoleSchema, roleIdSchema, updateRoleSchema } from "./role.validation";
+import { requireSuperAdmin } from "../../middlewares/require-super-admin";
+import { ForbiddenError } from "../../errors/ForbiddenError";
 
 const router = Router();
+
+const requireOrganizationContext = (req: import("express").Request, _res: import("express").Response, next: import("express").NextFunction) => {
+    if (req.user?.systemRole === "SUPER_ADMIN" || !req.user?.organizationId) {
+        return next(new ForbiddenError("Organization role APIs require organization membership."));
+    }
+    next();
+};
 
 //all role routes require authentication
 router.use(authenticate);
@@ -30,6 +39,7 @@ router.use(authenticate);
 
 router.post(
     "/global",
+    requireSuperAdmin,
     authorize(Module.ROLE, Action.CREATE),
     validate(createRoleSchema, "body"),
     createGlobalRoleController
@@ -37,12 +47,14 @@ router.post(
 
 router.get(
     "/global",
+    requireSuperAdmin,
     authorize(Module.ROLE, Action.VIEW),
     getGlobalRolesController
 );
 
 router.get(
     "/global/:id",
+    requireSuperAdmin,
     authorize(Module.ROLE, Action.VIEW),
     validate(roleIdSchema, "params"),
     getGlobalRoleController
@@ -50,6 +62,7 @@ router.get(
 
 router.patch(
     "/global/:id",
+    requireSuperAdmin,
     authorize(Module.ROLE, Action.UPDATE),
     validate(roleIdSchema, "params"),
     validate(updateRoleSchema, "body"),
@@ -58,6 +71,7 @@ router.patch(
 
 router.delete(
     "/global/:id",
+    requireSuperAdmin,
     authorize(Module.ROLE, Action.DELETE),
     validate(roleIdSchema, "params"),
     deleteGlobalRoleController
@@ -69,6 +83,7 @@ router.delete(
 
 router.post(
     "/",
+    requireOrganizationContext,
     authorize(Module.ROLE, Action.CREATE),
     validate(createRoleSchema, "body"),
     createOrganizationRoleController
@@ -76,12 +91,14 @@ router.post(
 
 router.get(
     "/",
+    requireOrganizationContext,
     authorize(Module.ROLE, Action.VIEW),
     getOrganizationRolesController
 );
 
 router.get(
     "/:id",
+    requireOrganizationContext,
     authorize(Module.ROLE, Action.VIEW),
     validate(roleIdSchema, "params"),
     getOrganizationRoleController
@@ -89,6 +106,7 @@ router.get(
 
 router.patch(
     "/:id",
+    requireOrganizationContext,
     authorize(Module.ROLE, Action.UPDATE),
     validate(roleIdSchema, "params"),
     validate(updateRoleSchema, "body"),
@@ -97,6 +115,7 @@ router.patch(
 
 router.delete(
     "/:id",
+    requireOrganizationContext,
     authorize(Module.ROLE, Action.DELETE),
     validate(roleIdSchema, "params"),
     deleteOrganizationRoleController

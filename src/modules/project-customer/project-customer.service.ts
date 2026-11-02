@@ -5,7 +5,7 @@ import prisma from "../../lib/prisma";
 
 import { CreateProjectCustomerInput, UpdateProjectCustomerInput } from "./project-customer.types";
 import { AuthenticatedUser } from "../../shared/types/authenticated-user";
-import { UnauthorizedError } from "../../errors/UnauthorizedError";
+import { ForbiddenError } from "../../errors/ForbiddenError";
 import { NotFoundError } from "../../errors/NotFoundError";
 import { ConflictError } from "../../errors/ConflictError";
 
@@ -16,7 +16,7 @@ export const createProjectCustomer = async (
     user: AuthenticatedUser
 ) => {
     if (!user.organizationId) {
-        throw new UnauthorizedError("User is not associated with an organization.");
+        throw new ForbiddenError("This operation requires an organization context.");
     }
 
     const project = await projectRepository.findProjectByIdAndOrganization(
@@ -72,14 +72,11 @@ export const getProjectCustomers = async (
     projectId: string,
     user: AuthenticatedUser
 ) => {
-    if (!user.organizationId) {
-        throw new UnauthorizedError("User is not associated with an organization.");
-    }
-
-    const project = await projectRepository.findProjectByIdAndOrganization(
-        projectId,
-        user.organizationId
-    );
+    const project = user.systemRole === "SUPER_ADMIN"
+        ? await projectRepository.findPlatformProjectById(projectId)
+        : user.organizationId
+            ? await projectRepository.findProjectByIdAndOrganization(projectId, user.organizationId)
+            : null;
     if (!project) {
         throw new NotFoundError("Project not found.");
     }
@@ -92,14 +89,11 @@ export const getProjectCustomer = async (
     projectCustomerId: string,
     user: AuthenticatedUser
 ) => {
-    if (!user.organizationId) {
-        throw new UnauthorizedError("User is not associated with an organization.");
-    }
-
-    const project = await projectRepository.findProjectByIdAndOrganization(
-        projectId,
-        user.organizationId
-    );
+    const project = user.systemRole === "SUPER_ADMIN"
+        ? await projectRepository.findPlatformProjectById(projectId)
+        : user.organizationId
+            ? await projectRepository.findProjectByIdAndOrganization(projectId, user.organizationId)
+            : null;
     if (!project) {
         throw new NotFoundError("Project not found.");
     }
@@ -122,9 +116,7 @@ export const updateProjectCustomer = async (
     data: UpdateProjectCustomerInput,
     user: AuthenticatedUser
 ) => {
-    if (!user.organizationId) {
-        throw new UnauthorizedError("User is not associated with an organization.");
-    }
+    if (!user.organizationId) throw new ForbiddenError("This operation requires an organization context.");
 
     const project = await projectRepository.findProjectByIdAndOrganization(
         projectId,
@@ -190,9 +182,7 @@ export const deleteProjectCustomer = async (
     projectCustomerId: string,
     user: AuthenticatedUser
 ) => {
-    if (!user.organizationId) {
-        throw new UnauthorizedError("User is not associated with an organization.");
-    }
+    if (!user.organizationId) throw new ForbiddenError("This operation requires an organization context.");
 
     const project = await projectRepository.findProjectByIdAndOrganization(
         projectId,

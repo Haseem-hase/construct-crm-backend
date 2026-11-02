@@ -12,6 +12,7 @@ import contractorRoutes from "../modules/contractor/contractor.routes";
 import contractorProjectAssignmentRoutes from "../modules/contractor-project-assignment/contractor-project-assignment.routes";
 import responsibilityRoutes from "../modules/responsibility/responsibility.routes";
 import labourAssignmentRoutes from "../modules/labour-assignment/labour-assignment.routes";
+import inventoryRoutes from "../modules/inventory/inventory.routes";
 const router = Router();
 
 router.use("/auth", authRoutes);
@@ -26,5 +27,6 @@ router.use("/contractors", contractorRoutes);
 router.use("/contractor-project-assignments", contractorProjectAssignmentRoutes);
 router.use("/responsibilities", responsibilityRoutes);
 router.use("/labour-assignments", labourAssignmentRoutes);
+router.use("/inventory", inventoryRoutes);
 
 export default router;

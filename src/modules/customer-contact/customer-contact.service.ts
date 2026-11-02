@@ -2,7 +2,7 @@ import * as customerContactRepository from "./customer-contact.repository";
 import * as customerRepository from "../customers/customer.repository";
 import { CreateCustomerContactInput, UpdateCustomerContactInput } from "./customer-contact.types";
 import { AuthenticatedUser } from "../../shared/types/authenticated-user";
-import { UnauthorizedError } from "../../errors/UnauthorizedError";
+import { ForbiddenError } from "../../errors/ForbiddenError";
 import { NotFoundError } from "../../errors/NotFoundError";
 import prisma from "../../lib/prisma";
 
@@ -12,7 +12,7 @@ export const createCustomerContact = async (
     user: AuthenticatedUser
 ) => {
     if (!user.organizationId) {
-        throw new UnauthorizedError("User is not associated with an organization.");
+        throw new ForbiddenError("This operation requires an organization context.");
     }
 
     const customer = await customerRepository.findCustomerByIdAndOrganization(
@@ -42,14 +42,11 @@ export const getCustomerContacts = async (
     customerId: string,
     user: AuthenticatedUser
 ) => {
-    if (!user.organizationId) {
-        throw new UnauthorizedError("User is not associated with an organization.");
-    }
-
-    const customer = await customerRepository.findCustomerByIdAndOrganization(
-        customerId,
-        user.organizationId
-    );
+    const customer = user.systemRole === "SUPER_ADMIN"
+        ? await customerRepository.findPlatformCustomerById(customerId)
+        : user.organizationId
+            ? await customerRepository.findCustomerByIdAndOrganization(customerId, user.organizationId)
+            : null;
 
     if (!customer) {
         throw new NotFoundError("Customer not found.");
@@ -63,14 +60,11 @@ export const getCustomerContactById = async (
     contactId: string,
     user: AuthenticatedUser
 ) => {
-    if (!user.organizationId) {
-        throw new UnauthorizedError("User is not associated with an organization.");
-    }
-
-    const customer = await customerRepository.findCustomerByIdAndOrganization(
-        customerId,
-        user.organizationId
-    );
+    const customer = user.systemRole === "SUPER_ADMIN"
+        ? await customerRepository.findPlatformCustomerById(customerId)
+        : user.organizationId
+            ? await customerRepository.findCustomerByIdAndOrganization(customerId, user.organizationId)
+            : null;
 
     if (!customer) {
         throw new NotFoundError("Customer not found.");
@@ -91,14 +85,8 @@ export const updateCustomerContact = async (
     data: UpdateCustomerContactInput,
     user: AuthenticatedUser
 ) => {
-    if (!user.organizationId) {
-        throw new UnauthorizedError("User is not associated with an organization.");
-    }
-
-    const customer = await customerRepository.findCustomerByIdAndOrganization(
-        customerId,
-        user.organizationId
-    );
+    if (!user.organizationId) throw new ForbiddenError("This operation requires an organization context.");
+    const customer = await customerRepository.findCustomerByIdAndOrganization(customerId, user.organizationId);
 
     if (!customer) {
         throw new NotFoundError("Customer not found.");
@@ -142,14 +130,8 @@ export const deleteCustomerContact = async (
     contactId: string,
     user: AuthenticatedUser
 ) => {
-    if (!user.organizationId) {
-        throw new UnauthorizedError("User is not associated with an organization.");
-    }
-
-    const customer = await customerRepository.findCustomerByIdAndOrganization(
-        customerId,
-        user.organizationId
-    );
+    if (!user.organizationId) throw new ForbiddenError("This operation requires an organization context.");
+    const customer = await customerRepository.findCustomerByIdAndOrganization(customerId, user.organizationId);
 
     if (!customer) {
         throw new NotFoundError("Customer not found.");

@@ -170,6 +170,7 @@ model User {
 
   projectMemberships ProjectMember[]
 
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -208,6 +209,8 @@ model Organization {
   projects          Project[]
   labours           Labour[]
   contractors       Contractor[]
+
+  inventoryAssets InventoryAsset[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -336,7 +339,39 @@ model Project {
 
   @@index([organizationId])
   @@index([status])
+  @@unique([id, organizationId])
   @@map("projects")
+}
+
+/////////////////////////////////////////////////
+// SIMPLE INVENTORY
+/////////////////////////////////////////////////
+
+enum InventoryAssetType {
+  MATERIAL
+  TOOL
+  MACHINERY
+}
+
+model InventoryAsset {
+  id String @id @default(uuid())
+  organizationId String
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  type InventoryAssetType
+  code String
+  name String
+  quantity Decimal @default(0) @db.Decimal(18, 4)
+  price Decimal @default(0) @db.Decimal(18, 4)
+  description String?
+  imageUrl String?
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([organizationId, code])
+  @@index([organizationId, type, isActive])
+  @@index([organizationId, name])
+  @@map("inventory_assets")
 }
 
 /////////////////////////////////////////////////

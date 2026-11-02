@@ -1,13 +1,20 @@
 import { Prisma } from "@prisma/client";
 import prisma from "../../lib/prisma";
 
-import { CreateProjectInput, UpdateProjectInput } from "./project.types";
+import { CreateProjectInput, ProjectImageMutation, UpdateProjectInput } from "./project.types";
+import { BadRequestError } from "../../errors/BadRequestError";
+
+const projectRelations = {
+    projectCustomers: { include: { customer: true } },
+    images: { orderBy: { position: "asc" as const } },
+};
 
 export const createProject = async (
     data: CreateProjectInput & {
         organizationId: string;
     },
-    tx?: Prisma.TransactionClient
+    tx?: Prisma.TransactionClient,
+    images: ProjectImageMutation[] = []
 ) => {
     const db = tx || prisma;
     return await db.project.create({
@@ -27,9 +34,18 @@ export const createProject = async (
             actualEndDate: data.actualEndDate,
             progress: data.progress,
             budget: data.budget,
+            images: {
+                create: images.map((image, position) => ({
+                    imageUrl: image.imageUrl!,
+                    alt: image.alt,
+                    isCover: image.isCover,
+                    position,
+                })),
+            },
 
             organizationId: data.organizationId,
         },
+        include: { images: { orderBy: { position: "asc" } }, projectCustomers: { include: { customer: true } } },
     });
 };
 
@@ -44,7 +60,7 @@ export const findProjectsByOrganizationId = async (
             createdAt: "desc",
         },
         include: {
-            projectCustomers: { include: { customer: true } },
+            ...projectRelations,
         },
     });
 };
@@ -52,7 +68,7 @@ export const findProjectsByOrganizationId = async (
 export const findAllPlatformProjects = async () => prisma.project.findMany({
     include: {
         organization: { select: { id: true, name: true } },
-        projectCustomers: { include: { customer: true } },
+        ...projectRelations,
     },
     orderBy: { createdAt: "desc" },
 });
@@ -61,7 +77,7 @@ export const findPlatformProjectById = async (projectId: string) => prisma.proje
     where: { id: projectId },
     include: {
         organization: { select: { id: true, name: true } },
-        projectCustomers: { include: { customer: true } },
+        ...projectRelations,
     },
 });
 
@@ -76,6 +92,7 @@ export const findProjectByIdAndOrganization = async (
         },
         include: {
             projectCustomers: { include: { customer: true } },
+            images: { orderBy: { position: "asc" } },
         },
     });
 };
@@ -83,9 +100,24 @@ export const findProjectByIdAndOrganization = async (
 export const updateProject = async (
     projectId: string,
     organizationId: string,
-    data: UpdateProjectInput
+    data: UpdateProjectInput,
+    images?: ProjectImageMutation[]
 ) => {
     return await prisma.$transaction(async (tx) => {
+        let coverImageUrl = data.imageUrl;
+        let currentImages: Array<{ id: string; imageUrl: string }> = [];
+        if (images !== undefined) {
+            currentImages = await tx.projectImage.findMany({ where: { projectId }, select: { id: true, imageUrl: true } });
+            const currentIds = new Set(currentImages.map(image => image.id));
+            if (images.some(image => image.id && !currentIds.has(image.id))) {
+                throw new BadRequestError("One or more selected images do not belong to this project.");
+            }
+            const cover = images.find(image => image.isCover);
+            coverImageUrl = cover?.id
+                ? currentImages.find(image => image.id === cover.id)?.imageUrl ?? null
+                : cover?.imageUrl ?? null;
+        }
+
         const updateResult = await tx.project.updateMany({
             where: {
                 id: projectId,
@@ -94,7 +126,7 @@ export const updateProject = async (
             data: {
                 name: data.name,
                 description: data.description,
-                imageUrl: data.imageUrl,
+                imageUrl: coverImageUrl,
                 status: data.status,
                 country: data.country,
                 city: data.city,
@@ -114,11 +146,31 @@ export const updateProject = async (
             return null;
         }
 
+        if (images !== undefined) {
+            const retainedIds = images.flatMap(image => image.id ? [image.id] : []);
+            await tx.projectImage.deleteMany({
+                where: { projectId, ...(retainedIds.length ? { id: { notIn: retainedIds } } : {}) },
+            });
+            for (const [position, image] of images.entries()) {
+                if (image.id) {
+                    await tx.projectImage.update({
+                        where: { id: image.id },
+                        data: { isCover: image.isCover, position },
+                    });
+                } else if (image.imageUrl) {
+                    await tx.projectImage.create({
+                        data: { projectId, imageUrl: image.imageUrl, alt: image.alt, isCover: image.isCover, position },
+                    });
+                }
+            }
+        }
+
         return await tx.project.findFirst({
             where: {
                 id: projectId,
                 organizationId,
             },
+            include: projectRelations,
         });
     });
 };

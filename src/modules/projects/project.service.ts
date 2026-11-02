@@ -2,7 +2,7 @@ import * as projectRepository from "./project.repository";
 import * as projectCustomerRepository from "../project-customer/project-customer.repository";
 import * as customerRepository from "../customers/customer.repository";
 import prisma from "../../lib/prisma";
-import { CreateProjectInput, UpdateProjectInput } from "./project.types";
+import { CreateProjectInput, ProjectImageMutation, UpdateProjectInput } from "./project.types";
 import { AuthenticatedUser } from "../../shared/types/authenticated-user";
 import { ForbiddenError } from "../../errors/ForbiddenError";
 import { NotFoundError } from "../../errors/NotFoundError";
@@ -11,13 +11,17 @@ import { BadRequestError } from "../../errors/BadRequestError";
 // create project
 export const createProject = async (
     data: CreateProjectInput,
-    user: AuthenticatedUser
+    user: AuthenticatedUser,
+    images?: ProjectImageMutation[]
 ) => {
     if (!user.organizationId) {
         throw new ForbiddenError("This operation requires an organization context.");
     }
 
     const { customerId, ...projectData } = data;
+    const imagesToSave = images ?? (data.imageUrl ? [{ imageUrl: data.imageUrl, alt: data.name, isCover: true }] : []);
+    const coverImage = imagesToSave.find(image => image.isCover);
+    const projectDataWithCover = { ...projectData, ...(images !== undefined ? { imageUrl: coverImage?.imageUrl } : {}) };
 
     if (customerId) {
         const customer = await customerRepository.findCustomerByIdAndOrganization(
@@ -32,10 +36,11 @@ export const createProject = async (
         return await prisma.$transaction(async (tx) => {
             const project = await projectRepository.createProject(
                 {
-                    ...projectData,
+                    ...projectDataWithCover,
                     organizationId: user.organizationId as string,
                 },
-                tx
+                tx,
+                imagesToSave
             );
 
             await projectCustomerRepository.createProjectCustomer(
@@ -53,9 +58,9 @@ export const createProject = async (
     }
 
     return await projectRepository.createProject({
-        ...projectData,
+        ...projectDataWithCover,
         organizationId: user.organizationId,
-    });
+    }, undefined, imagesToSave);
 };
 
 // get all project under organization
@@ -104,7 +109,8 @@ export const getProjectById = async (
 export const updateProject = async (
     projectId: string,
     data: UpdateProjectInput,
-    user: AuthenticatedUser
+    user: AuthenticatedUser,
+    images?: ProjectImageMutation[]
 ) => {
     if (!user.organizationId) {
         throw new ForbiddenError("This operation requires an organization context.");
@@ -117,6 +123,13 @@ export const updateProject = async (
 
     if (!project) {
         throw new NotFoundError("Project not found.");
+    }
+
+    if (images !== undefined) {
+        const currentImageIds = new Set(project.images.map(image => image.id));
+        if (images.some(image => image.id && !currentImageIds.has(image.id))) {
+            throw new BadRequestError("One or more selected images do not belong to this project.");
+        }
     }
 
     const resultingPlannedStartDate =
@@ -154,7 +167,8 @@ export const updateProject = async (
     const updatedProject = await projectRepository.updateProject(
         projectId,
         user.organizationId,
-        data
+        data,
+        images
     );
 
     if (!updatedProject) {

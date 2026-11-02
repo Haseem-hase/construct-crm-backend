@@ -1,5 +1,27 @@
 import { z } from "zod";
 
+const formNullToNull = (value: unknown) => value === null || value === "null" ? null : value;
+const projectImageUrl = z.string().trim().max(2048).refine(
+    value => /^\/uploads\/projects\/[0-9a-f-]{36}\/[a-zA-Z0-9-]+\.(jpg|png|webp)$/i.test(value) || z.string().url().safeParse(value).success,
+    "Use a valid project image URL."
+);
+
+export const projectGallerySchema = z.array(z.discriminatedUnion("source", [
+    z.object({ source: z.literal("existing"), id: z.string().uuid(), isCover: z.boolean() }).strict(),
+    z.object({ source: z.literal("upload"), uploadIndex: z.number().int().min(0).max(9), isCover: z.boolean(), alt: z.string().trim().max(255).optional() }).strict(),
+    z.object({ source: z.literal("url"), url: projectImageUrl, isCover: z.boolean(), alt: z.string().trim().max(255).optional() }).strict(),
+])).max(10).refine(images => images.length === 0 || images.filter(image => image.isCover).length === 1, "Choose exactly one cover image.")
+    .refine(images => {
+        const indexes = images.filter(image => image.source === "upload").map(image => image.uploadIndex);
+        return indexes.length === new Set(indexes).size;
+    }, "An uploaded image can only appear once.")
+    .refine(images => {
+        const ids = images.filter(image => image.source === "existing").map(image => image.id);
+        return ids.length === new Set(ids).size;
+    }, "An existing image can only appear once.");
+
+export type ProjectGalleryPlan = z.infer<typeof projectGallerySchema>;
+
 export const createProjectSchema = z.object({
     name: z
         .string()
@@ -13,10 +35,7 @@ export const createProjectSchema = z.object({
         .max(1000)
         .optional(),
 
-    imageUrl: z
-        .string()
-        .url("Invalid image URL")
-        .optional(),
+    imageUrl: projectImageUrl.optional(),
 
     status: z
         .enum(["PLANNING", "ACTIVE", "ON_HOLD", "COMPLETED", "CANCELLED"])
@@ -41,12 +60,14 @@ export const createProjectSchema = z.object({
         .optional(),
 
     latitude: z
+        .coerce
         .number()
         .min(-90)
         .max(90)
         .optional(),
 
     longitude: z
+        .coerce
         .number()
         .min(-180)
         .max(180)
@@ -73,6 +94,7 @@ export const createProjectSchema = z.object({
         .optional(),
 
     progress: z
+        .coerce
         .number()
         .int()
         .min(0)
@@ -81,6 +103,7 @@ export const createProjectSchema = z.object({
         .optional(),
 
     budget: z
+        .coerce
         .number()
         .nonnegative("Budget cannot be negative.")
         .optional(),
@@ -121,18 +144,14 @@ export const updateProjectSchema = z.object({
         .max(150)
         .optional(),
 
-    description: z
+    description: z.preprocess(formNullToNull, z
         .string()
         .trim()
         .max(1000)
         .nullable()
-        .optional(),
+        .optional()),
 
-    imageUrl: z
-        .string()
-        .url("Invalid image URL")
-        .nullable()
-        .optional(),
+    imageUrl: z.preprocess(formNullToNull, projectImageUrl.nullable().optional()),
 
     status: z
         .enum(["PLANNING", "ACTIVE", "ON_HOLD", "COMPLETED", "CANCELLED"])
@@ -144,70 +163,67 @@ export const updateProjectSchema = z.object({
         .max(100)
         .optional(),
 
-    city: z
+    city: z.preprocess(formNullToNull, z
         .string()
         .trim()
         .max(100)
         .nullable()
-        .optional(),
+        .optional()),
 
-    address: z
+    address: z.preprocess(formNullToNull, z
         .string()
         .trim()
         .max(255)
         .nullable()
-        .optional(),
+        .optional()),
 
-    latitude: z
-        .number()
+    latitude: z.preprocess(formNullToNull, z
+        .coerce.number()
         .min(-90)
         .max(90)
         .nullable()
-        .optional(),
+        .optional()),
 
-    longitude: z
-        .number()
+    longitude: z.preprocess(formNullToNull, z
+        .coerce.number()
         .min(-180)
         .max(180)
         .nullable()
-        .optional(),
+        .optional()),
 
-    plannedStartDate: z
-        .coerce
-        .date()
+    plannedStartDate: z.preprocess(formNullToNull, z
+        .coerce.date()
         .nullable()
-        .optional(),
+        .optional()),
 
-    plannedEndDate: z
-        .coerce
-        .date()
+    plannedEndDate: z.preprocess(formNullToNull, z
+        .coerce.date()
         .nullable()
-        .optional(),
+        .optional()),
 
-    actualStartDate: z
-        .coerce
-        .date()
+    actualStartDate: z.preprocess(formNullToNull, z
+        .coerce.date()
         .nullable()
-        .optional(),
+        .optional()),
 
-    actualEndDate: z
-        .coerce
-        .date()
+    actualEndDate: z.preprocess(formNullToNull, z
+        .coerce.date()
         .nullable()
-        .optional(),
+        .optional()),
 
     progress: z
+        .coerce
         .number()
         .int()
         .min(0)
         .max(100)
         .optional(),
 
-    budget: z
-        .number()
+    budget: z.preprocess(formNullToNull, z
+        .coerce.number()
         .nonnegative()
         .nullable()
-        .optional(),
+        .optional()),
 }).strict().refine(
     (data) => Object.keys(data).length > 0,
     {

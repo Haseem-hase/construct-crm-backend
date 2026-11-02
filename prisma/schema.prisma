@@ -330,6 +330,7 @@ model Project {
   budget Decimal? @db.Decimal(15, 2)
 
   projectCustomers ProjectCustomer[]
+  images            ProjectImage[]
 
   members               ProjectMember[]
   contractorAssignments ContractorProjectAssignment[]
@@ -341,6 +342,20 @@ model Project {
   @@index([status])
   @@unique([id, organizationId])
   @@map("projects")
+}
+
+model ProjectImage {
+  id        String   @id @default(uuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  imageUrl  String
+  alt       String?
+  isCover   Boolean  @default(false)
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([projectId, position])
+  @@map("project_images")
 }
 
 /////////////////////////////////////////////////

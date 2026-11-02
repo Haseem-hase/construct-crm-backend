@@ -12,11 +12,13 @@ const allowedMimeTypes: Record<string, string> = {
 };
 
 /** Creates a single-image upload middleware that stores files under uploads/<directory>. */
-export const uploadSingleImage = (options: {
+export const createImageUploadMiddleware = (options: {
     directory: (req: Request) => string;
     fieldName?: string;
     maxSizeBytes?: number;
+    maxFiles?: number;
 }) => {
+    const maxFiles = options.maxFiles ?? 1;
     const upload = multer({
         storage: multer.diskStorage({
             destination: (req, _file, callback) => {
@@ -37,16 +39,23 @@ export const uploadSingleImage = (options: {
                 callback(null, `${randomUUID()}${extension}`);
             },
         }),
-        limits: { fileSize: options.maxSizeBytes ?? 5 * 1024 * 1024, files: 1 },
+        limits: { fileSize: options.maxSizeBytes ?? 5 * 1024 * 1024, files: maxFiles },
     });
 
     return (req: Request, res: Response, next: NextFunction) => {
-        upload.single(options.fieldName ?? "image")(req, res, (error?: unknown) => {
+        const parser = maxFiles === 1
+            ? upload.single(options.fieldName ?? "image")
+            : upload.array(options.fieldName ?? "images", maxFiles);
+        parser(req, res, (error?: unknown) => {
             if (error instanceof MulterError && error.code === "LIMIT_FILE_SIZE") {
-                next(new BadRequestError("Images must be 5 MB or smaller."));
+                next(new BadRequestError("Each image must be 5 MB or smaller."));
                 return;
             }
             if (error instanceof MulterError) {
+                if (maxFiles > 1 && (error.code === "LIMIT_FILE_COUNT" || error.code === "LIMIT_UNEXPECTED_FILE")) {
+                    next(new BadRequestError(`Upload no more than ${maxFiles} images at a time.`));
+                    return;
+                }
                 next(new BadRequestError("Unable to process the selected image."));
                 return;
             }

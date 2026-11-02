@@ -8,3 +8,10 @@ export type CreateProjectInput = z.infer<
 export type UpdateProjectInput = z.infer<
     typeof updateProjectSchema
 >;
+
+export type ProjectImageMutation = {
+    id?: string;
+    imageUrl?: string;
+    alt?: string;
+    isCover: boolean;
+};

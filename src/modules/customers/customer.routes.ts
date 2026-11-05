@@ -17,6 +17,15 @@ import {
     deleteCustomer,
 } from "./customer.controller";
 import customerContactRoutes from "../customer-contact/customer-contact.routes";
+import { createImageUploadMiddleware } from "../../middlewares/upload-image.middleware";
+import { BadRequestError } from "../../errors/BadRequestError";
+
+const uploadCustomerImage = createImageUploadMiddleware({
+    directory: req => {
+        if (!req.user?.organizationId) throw new BadRequestError("Customer organization context is missing.");
+        return `customers/${req.user.organizationId}`;
+    },
+});
 
 const router = Router();
 
@@ -27,6 +36,7 @@ router.use("/:customerId/contacts", customerContactRoutes);
 router.post(
     "/",
     authorize(Module.CUSTOMER, Action.CREATE),
+    uploadCustomerImage,
     validate(createCustomerSchema, "body"),
     createCustomer
 );
@@ -55,6 +65,7 @@ router.patch(
     "/:id",
     authorize(Module.CUSTOMER, Action.UPDATE),
     validate(customerIdSchema, "params"),
+    uploadCustomerImage,
     validate(updateCustomerSchema, "body"),
     updateCustomer
 );

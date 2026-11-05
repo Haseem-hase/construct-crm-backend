@@ -47,7 +47,7 @@ export const createContractorSchema = z.object({
     profileImageUrl: z
         .string()
         .trim()
-        .url("Invalid URL for profile image.")
+        .refine(value => /^\/uploads\/contractors\/[0-9a-f-]{36}\/[a-zA-Z0-9-]+\.(jpg|png|webp)$/i.test(value) || z.string().url().safeParse(value).success, "Invalid URL for profile image.")
         .optional()
         .or(z.literal("")),
 
@@ -128,7 +128,7 @@ export const updateContractorSchema = z.object({
     profileImageUrl: z
         .string()
         .trim()
-        .url("Invalid URL for profile image.")
+        .refine(value => /^\/uploads\/contractors\/[0-9a-f-]{36}\/[a-zA-Z0-9-]+\.(jpg|png|webp)$/i.test(value) || z.string().url().safeParse(value).success, "Invalid URL for profile image.")
         .optional()
         .or(z.literal("")),
 
@@ -145,8 +145,7 @@ export const updateContractorSchema = z.object({
         .optional(),
 
     licenseExpiryDate: z
-        .coerce.date()
-        .nullable()
+        .preprocess(value => value === "" ? null : value, z.coerce.date().nullable())
         .optional(),
 
     status: z.enum(["PENDING", "ACTIVE", "SUSPENDED", "INACTIVE", "TERMINATED"], {

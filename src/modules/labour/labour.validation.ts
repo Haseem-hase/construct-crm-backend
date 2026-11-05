@@ -43,7 +43,7 @@ export const createLabourSchema = z.object({
     profileImageUrl: z
         .string()
         .trim()
-        .url("Invalid URL for profile image.")
+        .refine(value => /^\/uploads\/labour\/[0-9a-f-]{36}\/[a-zA-Z0-9-]+\.(jpg|png|webp)$/i.test(value) || z.string().url().safeParse(value).success, "Invalid URL for profile image.")
         .optional()
         .or(z.literal("")),
 
@@ -127,7 +127,7 @@ export const updateLabourSchema = z.object({
     profileImageUrl: z
         .string()
         .trim()
-        .url("Invalid URL for profile image.")
+        .refine(value => /^\/uploads\/labour\/[0-9a-f-]{36}\/[a-zA-Z0-9-]+\.(jpg|png|webp)$/i.test(value) || z.string().url().safeParse(value).success, "Invalid URL for profile image.")
         .optional()
         .or(z.literal("")),
 

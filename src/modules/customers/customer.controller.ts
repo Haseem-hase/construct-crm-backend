@@ -15,7 +15,10 @@ export const createCustomer = async (
         const user = req.user as AuthenticatedUser;
 
         const customer = await customerService.createCustomer(
-            req.body,
+            {
+                ...req.body,
+                ...(req.file && user.organizationId ? { profileImageUrl: `/uploads/customers/${user.organizationId}/${req.file.filename}` } : {}),
+            },
             user
         );
 
@@ -123,7 +126,10 @@ export const updateCustomer = async (
 
         const customer = await customerService.updateCustomer(
             req.params.id,
-            req.body,
+            {
+                ...req.body,
+                ...(req.file && user.organizationId ? { profileImageUrl: `/uploads/customers/${user.organizationId}/${req.file.filename}` } : {}),
+            },
             user
         );
 

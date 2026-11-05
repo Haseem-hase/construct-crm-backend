@@ -17,7 +17,6 @@ export const createContractor = async (
     next: NextFunction
 ) => {
     try {
-        const validatedData = createContractorSchema.parse(req.body);
         const user = req.user as AuthenticatedUser;
 
         if (!user.organizationId) {
@@ -25,6 +24,11 @@ export const createContractor = async (
                 "User is not associated with an organization."
             );
         }
+
+        const validatedData = createContractorSchema.parse({
+            ...req.body,
+            ...(req.file ? { profileImageUrl: `/uploads/contractors/${user.organizationId}/${req.file.filename}` } : {}),
+        });
 
         const contractor = await contractorService.createContractor(
             user.organizationId,
@@ -122,7 +126,6 @@ export const updateContractor = async (
 ) => {
     try {
         const params = contractorIdSchema.parse(req.params);
-        const validatedData = updateContractorSchema.parse(req.body);
         const user = req.user as AuthenticatedUser;
 
         if (!user.organizationId) {
@@ -130,6 +133,11 @@ export const updateContractor = async (
                 "User is not associated with an organization."
             );
         }
+
+        const validatedData = updateContractorSchema.parse({
+            ...req.body,
+            ...(req.file ? { profileImageUrl: `/uploads/contractors/${user.organizationId}/${req.file.filename}` } : {}),
+        });
 
         const contractor = await contractorService.updateContractor(
             params.id,

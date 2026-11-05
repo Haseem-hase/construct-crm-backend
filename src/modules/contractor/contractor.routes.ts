@@ -5,6 +5,15 @@ import * as contractorController from "./contractor.controller";
 import { authenticate } from "../../middlewares/authenticate";
 import { authorize } from "../../middlewares/authorize";
 import { Module, Action } from "@prisma/client";
+import { createImageUploadMiddleware } from "../../middlewares/upload-image.middleware";
+import { BadRequestError } from "../../errors/BadRequestError";
+
+const uploadContractorImage = createImageUploadMiddleware({
+    directory: req => {
+        if (!req.user?.organizationId) throw new BadRequestError("Contractor organization context is missing.");
+        return `contractors/${req.user.organizationId}`;
+    },
+});
 
 const router = Router();
 
@@ -13,6 +22,7 @@ router.post(
     "/",
     authenticate,
     authorize(Module.CONTRACTOR, Action.CREATE),
+    uploadContractorImage,
     contractorController.createContractor
 );
 
@@ -37,6 +47,7 @@ router.patch(
     "/:id",
     authenticate,
     authorize(Module.CONTRACTOR, Action.UPDATE),
+    uploadContractorImage,
     contractorController.updateContractor
 );
 

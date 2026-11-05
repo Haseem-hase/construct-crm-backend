@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+const customerProfileImageUrl = z.string().trim().refine(
+    value => /^\/uploads\/customers\/[0-9a-f-]{36}\/[a-zA-Z0-9-]+\.(jpg|png|webp)$/i.test(value),
+    "Upload a JPEG, PNG, or WebP customer photo.",
+);
+
 export const createCustomerSchema = z.object({
     name: z
         .string()
@@ -11,11 +16,7 @@ export const createCustomerSchema = z.object({
         message: "Invalid customer type.",
     }),
 
-    profileImageUrl: z
-        .string()
-        .trim()
-        .url("Invalid URL for profile image.")
-        .optional(),
+    profileImageUrl: customerProfileImageUrl.optional(),
 
     country: z
         .string()
@@ -52,11 +53,7 @@ export const updateCustomerSchema = z.object({
         message: "Invalid customer type.",
     }).optional(),
 
-    profileImageUrl: z
-        .string()
-        .trim()
-        .url("Invalid URL for profile image.")
-        .optional(),
+    profileImageUrl: customerProfileImageUrl.optional().or(z.literal("")),
 
     country: z
         .string()
@@ -82,7 +79,7 @@ export const updateCustomerSchema = z.object({
         .optional(),
 
     isActive: z
-        .boolean()
+        .preprocess(value => typeof value === "string" ? value === "true" : value, z.boolean())
         .optional(),
 });
 

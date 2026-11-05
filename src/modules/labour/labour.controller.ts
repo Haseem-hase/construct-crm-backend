@@ -18,7 +18,6 @@ export const createLabour = async (
     next: NextFunction
 ) => {
     try {
-        const validatedData = createLabourSchema.parse(req.body);
         const user = req.user as AuthenticatedUser;
 
         if (!user.organizationId) {
@@ -26,6 +25,11 @@ export const createLabour = async (
                 "User is not associated with an organization."
             );
         }
+
+        const validatedData = createLabourSchema.parse({
+            ...req.body,
+            ...(req.file ? { profileImageUrl: `/uploads/labour/${user.organizationId}/${req.file.filename}` } : {}),
+        });
 
         const labour = await labourService.createLabour(
             user.organizationId,
@@ -126,7 +130,6 @@ export const updateLabour = async (
 ) => {
     try {
         const params = labourIdSchema.parse(req.params);
-        const validatedData = updateLabourSchema.parse(req.body);
         const user = req.user as AuthenticatedUser;
 
         if (!user.organizationId) {
@@ -134,6 +137,11 @@ export const updateLabour = async (
                 "User is not associated with an organization."
             );
         }
+
+        const validatedData = updateLabourSchema.parse({
+            ...req.body,
+            ...(req.file ? { profileImageUrl: `/uploads/labour/${user.organizationId}/${req.file.filename}` } : {}),
+        });
 
         const labour = await labourService.updateLabour(
             params.id,

@@ -1,4 +1,7 @@
 import { Prisma } from "@prisma/client";
+import { randomUUID } from "crypto";
+import prisma from "../../lib/prisma";
+import { BadRequestError } from "../../errors/BadRequestError";
 import { ConflictError } from "../../errors/ConflictError";
 import { NotFoundError } from "../../errors/NotFoundError";
 import * as repository from "./inventory.repository";
@@ -35,25 +38,38 @@ export const getInventoryAsset = async (organizationId: string, id: string) => {
     return asset;
 };
 
-export const createInventoryAsset = async (organizationId: string, input: InventoryAssetInput) => {
+export const createInventoryAsset = async (organizationId: string, input: InventoryAssetInput, actorId?: string) => {
     try {
-        return await repository.createInventoryAsset({
-            organizationId,
-            type: input.type,
-            code: input.code,
-            name: input.name,
-            quantity: new Prisma.Decimal(input.quantity),
-            price: new Prisma.Decimal(input.price),
-            description: input.description ?? null,
-            imageUrl: input.imageUrl ?? null,
+        const warehouse = await ensureMainWarehouse(organizationId);
+        return await prisma.$transaction(async tx => {
+            const asset = await tx.inventoryAsset.create({ data: {
+                organizationId,
+                type: input.type,
+                code: input.code,
+                name: input.name,
+                quantity: new Prisma.Decimal(input.quantity),
+                price: new Prisma.Decimal(input.price),
+                description: input.description ?? null,
+                imageUrl: input.imageUrl ?? null,
+            } });
+            await tx.inventoryWarehouseStock.create({
+                data: { organizationId, assetId: asset.id, warehouseId: warehouse.id, onHandQty: new Prisma.Decimal(input.quantity) },
+            });
+            if (actorId && new Prisma.Decimal(input.quantity).isPositive()) {
+                await tx.inventoryStockMovement.create({
+                    data: { organizationId, assetId: asset.id, warehouseId: warehouse.id, type: "RECEIPT", quantityDelta: new Prisma.Decimal(input.quantity), reason: "Opening stock received", actorId },
+                });
+            }
+            return asset;
         });
     } catch (error) {
         return mapUniqueConflict(error);
     }
 };
 
-export const updateInventoryAsset = async (organizationId: string, id: string, input: InventoryAssetUpdate) => {
-    if (!(await repository.findInventoryAsset(organizationId, id))) throw new NotFoundError("Inventory record not found.");
+export const updateInventoryAsset = async (organizationId: string, id: string, input: InventoryAssetUpdate, actorId?: string) => {
+    const existing = await repository.findInventoryAsset(organizationId, id);
+    if (!existing) throw new NotFoundError("Inventory record not found.");
 
     const data: Prisma.InventoryAssetUpdateManyMutationInput = {
         ...(input.type !== undefined ? { type: input.type } : {}),
@@ -66,9 +82,36 @@ export const updateInventoryAsset = async (organizationId: string, id: string, i
     };
 
     try {
-        const updated = await repository.updateInventoryAsset(organizationId, id, data);
-        if (!updated.count) throw new NotFoundError("Inventory record not found.");
-        return await repository.findInventoryAsset(organizationId, id);
+        return await prisma.$transaction(async tx => {
+            if (input.quantity !== undefined) {
+                const nextQty = new Prisma.Decimal(input.quantity);
+                const delta = nextQty.minus(existing.quantity);
+                if (!delta.isZero()) {
+                    const warehouse = await tx.inventoryWarehouse.findFirst({ where: { organizationId, isDefault: true, isActive: true } });
+                    if (!warehouse) throw new BadRequestError("Create a default warehouse before changing stock.");
+                    const stock = await tx.inventoryWarehouseStock.upsert({
+                        where: { organizationId_assetId_warehouseId: { organizationId, assetId: id, warehouseId: warehouse.id } },
+                        create: { organizationId, assetId: id, warehouseId: warehouse.id },
+                        update: {},
+                    });
+                    const available = stock.onHandQty.minus(stock.reservedQty).minus(stock.maintenanceQty);
+                    if (delta.isNegative() && available.lessThan(delta.abs())) {
+                        throw new BadRequestError("The default warehouse does not have enough unreserved stock for this quantity change. Use a stock adjustment for a specific warehouse.");
+                    }
+                    await tx.inventoryWarehouseStock.update({ where: { id: stock.id }, data: { onHandQty: { increment: delta } } });
+                    if (actorId) await tx.inventoryStockMovement.create({
+                        data: {
+                            organizationId, assetId: id, warehouseId: warehouse.id,
+                            type: delta.isPositive() ? "ADJUSTMENT_IN" : "ADJUSTMENT_OUT",
+                            quantityDelta: delta, reason: "Inventory quantity updated", actorId,
+                        },
+                    });
+                }
+            }
+            const updated = await tx.inventoryAsset.updateMany({ where: { id, organizationId, isActive: true }, data });
+            if (!updated.count) throw new NotFoundError("Inventory record not found.");
+            return tx.inventoryAsset.findFirst({ where: { id, organizationId, isActive: true } });
+        }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
     } catch (error) {
         return mapUniqueConflict(error);
     }
@@ -78,4 +121,104 @@ export const deactivateInventoryAsset = async (organizationId: string, id: strin
     const result = await repository.deactivateInventoryAsset(organizationId, id);
     if (!result.count) throw new NotFoundError("Inventory record not found.");
     return { id, isActive: false };
+};
+
+export const ensureMainWarehouse = async (organizationId: string) => {
+    const existing = await prisma.inventoryWarehouse.findFirst({
+        where: { organizationId, isDefault: true, isActive: true },
+    });
+    if (existing) return existing;
+    try {
+        return await prisma.inventoryWarehouse.create({
+            data: { organizationId, code: "MAIN", name: "Main Warehouse", type: "CENTRAL", isDefault: true },
+        });
+    } catch (error) {
+        const raced = await prisma.inventoryWarehouse.findFirst({ where: { organizationId, isDefault: true, isActive: true } });
+        if (raced) return raced;
+        throw error;
+    }
+};
+
+export const listInventoryWarehouses = async (organizationId: string) => {
+    await ensureMainWarehouse(organizationId);
+    return prisma.inventoryWarehouse.findMany({
+        where: { organizationId, isActive: true },
+        include: { _count: { select: { stocks: true } }, project: { select: { id: true, name: true, projectCode: true } } },
+        orderBy: [{ isDefault: "desc" }, { name: "asc" }],
+    });
+};
+
+export const createInventoryWarehouse = async (organizationId: string, input: {
+    code: string; name: string; type: "CENTRAL" | "PROJECT_SITE"; projectId?: string; address?: string | null;
+}) => {
+    if (input.type === "PROJECT_SITE" && !input.projectId) throw new BadRequestError("Select the project served by this site warehouse.");
+    if (input.type === "CENTRAL" && input.projectId) throw new BadRequestError("Central warehouses cannot be linked to a project.");
+    if (input.projectId) {
+        const project = await prisma.project.findFirst({ where: { id: input.projectId, organizationId }, select: { id: true } });
+        if (!project) throw new BadRequestError("The selected project does not belong to this organization.");
+    }
+    try {
+        return await prisma.inventoryWarehouse.create({ data: { organizationId, ...input } });
+    } catch (error) {
+        return mapUniqueConflict(error);
+    }
+};
+
+export const listWarehouseStock = async (organizationId: string, warehouseId?: string, search?: string) => {
+    const rows = await prisma.inventoryWarehouseStock.findMany({
+        where: {
+            organizationId,
+            warehouse: { organizationId, isActive: true },
+            asset: { organizationId, isActive: true, ...(search ? { OR: [
+                { name: { contains: search, mode: "insensitive" } },
+                { code: { contains: search, mode: "insensitive" } },
+            ] } : {}) },
+            ...(warehouseId ? { warehouseId } : {}),
+        },
+        include: { asset: true, warehouse: true },
+        orderBy: [{ asset: { type: "asc" } }, { asset: { name: "asc" } }],
+    });
+    return rows.map(row => ({
+        ...row,
+        availableQty: row.onHandQty.minus(row.reservedQty).minus(row.maintenanceQty).toString(),
+    }));
+};
+
+export const adjustWarehouseStock = async (organizationId: string, actorId: string, input: {
+    assetId: string; warehouseId: string; quantityDelta: string; reason: string;
+}) => {
+    const delta = new Prisma.Decimal(input.quantityDelta);
+    return prisma.$transaction(async tx => {
+        const [asset, warehouse] = await Promise.all([
+            tx.inventoryAsset.findFirst({ where: { id: input.assetId, organizationId, isActive: true } }),
+            tx.inventoryWarehouse.findFirst({ where: { id: input.warehouseId, organizationId, isActive: true } }),
+        ]);
+        if (!asset) throw new NotFoundError("Inventory item not found.");
+        if (!warehouse) throw new NotFoundError("Warehouse not found.");
+
+        const stock = await tx.inventoryWarehouseStock.upsert({
+            where: { organizationId_assetId_warehouseId: { organizationId, assetId: input.assetId, warehouseId: input.warehouseId } },
+            create: { organizationId, assetId: input.assetId, warehouseId: input.warehouseId },
+            update: {},
+        });
+        const nextOnHand = stock.onHandQty.plus(delta);
+        const available = stock.onHandQty.minus(stock.reservedQty).minus(stock.maintenanceQty);
+        if (nextOnHand.isNegative() || (delta.isNegative() && available.lessThan(delta.abs()))) {
+            throw new BadRequestError("This adjustment would reduce stock below the quantity already reserved or under maintenance.");
+        }
+
+        await tx.inventoryWarehouseStock.update({
+            where: { id: stock.id },
+            data: { onHandQty: { increment: delta } },
+        });
+        await tx.inventoryAsset.update({ where: { id: asset.id }, data: { quantity: { increment: delta } } });
+        await tx.inventoryStockMovement.create({
+            data: {
+                organizationId, assetId: asset.id, warehouseId: warehouse.id,
+                type: delta.isPositive() ? "ADJUSTMENT_IN" : "ADJUSTMENT_OUT",
+                quantityDelta: delta, reason: input.reason, actorId,
+            },
+        });
+        return { ...stock, onHandQty: nextOnHand, availableQty: nextOnHand.minus(stock.reservedQty).minus(stock.maintenanceQty).toString(), reason: input.reason };
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
 };

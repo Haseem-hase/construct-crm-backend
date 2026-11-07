@@ -204,6 +204,11 @@ async function main() {
         },
         {
             module: Module.INVENTORY,
+            action: Action.APPROVE,
+            description: "Approve or reject inventory requests and returns",
+        },
+        {
+            module: Module.INVENTORY,
             action: Action.DELETE,
             description: "Delete inventory",
         },

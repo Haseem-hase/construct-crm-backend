@@ -168,8 +168,14 @@ model User {
 
   refreshTokens RefreshToken[]
 
-  projectMemberships ProjectMember[]
-
+  projectMemberships                ProjectMember[]
+  inventoryRequestsCreated          InventoryRequest[]         @relation("InventoryRequestCreator")
+  inventoryRequestsReviewed         InventoryRequest[]         @relation("InventoryRequestReviewer")
+  inventoryReturnsCreated           InventoryReturnRequest[]   @relation("InventoryReturnCreator")
+  inventoryReturnsReviewed          InventoryReturnRequest[]   @relation("InventoryReturnReviewer")
+  inventoryConditionReportsCreated  InventoryConditionReport[] @relation("InventoryConditionReporter")
+  inventoryConditionReportsReviewed InventoryConditionReport[] @relation("InventoryConditionReviewer")
+  inventoryMovements                InventoryStockMovement[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -210,7 +216,12 @@ model Organization {
   labours           Labour[]
   contractors       Contractor[]
 
-  inventoryAssets InventoryAsset[]
+  inventoryAssets           InventoryAsset[]
+  inventoryWarehouses       InventoryWarehouse[]
+  inventoryRequests         InventoryRequest[]
+  inventoryReturns          InventoryReturnRequest[]
+  inventoryConditionReports InventoryConditionReport[]
+  inventoryMovements        InventoryStockMovement[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -330,17 +341,19 @@ model Project {
   budget Decimal? @db.Decimal(15, 2)
 
   projectCustomers ProjectCustomer[]
-  images            ProjectImage[]
+  images           ProjectImage[]
 
   members               ProjectMember[]
   contractorAssignments ContractorProjectAssignment[]
+  inventoryRequests     InventoryRequest[]
+  inventoryWarehouses   InventoryWarehouse[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([id, organizationId])
   @@index([organizationId])
   @@index([status])
-  @@unique([id, organizationId])
   @@map("projects")
 }
 
@@ -369,24 +382,277 @@ enum InventoryAssetType {
 }
 
 model InventoryAsset {
-  id String @id @default(uuid())
+  id             String             @id @default(uuid())
   organizationId String
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  type InventoryAssetType
-  code String
-  name String
-  quantity Decimal @default(0) @db.Decimal(18, 4)
-  price Decimal @default(0) @db.Decimal(18, 4)
-  description String?
-  imageUrl String?
-  isActive Boolean @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  organization   Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  type           InventoryAssetType
+  code           String
+  name           String
+  quantity       Decimal            @default(0) @db.Decimal(18, 4)
+  price          Decimal            @default(0) @db.Decimal(18, 4)
+  description    String?
+  imageUrl       String?
+  isActive       Boolean            @default(true)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  warehouseStocks  InventoryWarehouseStock[]
+  requestLines     InventoryRequestLine[]
+  stockMovements   InventoryStockMovement[]
+  conditionReports InventoryConditionReport[]
 
   @@unique([organizationId, code])
   @@index([organizationId, type, isActive])
   @@index([organizationId, name])
   @@map("inventory_assets")
+}
+
+enum InventoryWarehouseType {
+  CENTRAL
+  PROJECT_SITE
+}
+
+enum InventoryRequestStatus {
+  SUBMITTED
+  APPROVED
+  REJECTED
+  ISSUED
+  PARTIALLY_RETURNED
+  RETURNED
+  CANCELLED
+}
+
+enum InventoryReturnStatus {
+  SUBMITTED
+  APPROVED
+  REJECTED
+  RECEIVED
+  CANCELLED
+}
+
+enum InventoryConditionReportStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  IN_REPAIR
+  RESOLVED
+  WRITTEN_OFF
+}
+
+enum InventoryStockMovementType {
+  RECEIPT
+  ISSUE
+  RETURN
+  DAMAGE_OUT
+  REPAIR_IN
+  ADJUSTMENT_IN
+  ADJUSTMENT_OUT
+}
+
+model InventoryWarehouse {
+  id             String                 @id @default(uuid())
+  organizationId String
+  organization   Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  code           String
+  name           String
+  type           InventoryWarehouseType @default(CENTRAL)
+  projectId      String?
+  project        Project?               @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  address        String?
+  isDefault      Boolean                @default(false)
+  isActive       Boolean                @default(true)
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+
+  stocks            InventoryWarehouseStock[]
+  inventoryRequests InventoryRequest[]
+  inventoryReturns  InventoryReturnRequest[]
+  conditionReports  InventoryConditionReport[]
+  stockMovements    InventoryStockMovement[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId, isActive])
+  @@map("inventory_warehouses")
+}
+
+model InventoryWarehouseStock {
+  id             String             @id @default(uuid())
+  organizationId String
+  assetId        String
+  asset          InventoryAsset     @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  warehouseId    String
+  warehouse      InventoryWarehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  onHandQty      Decimal            @default(0) @db.Decimal(18, 4)
+  reservedQty    Decimal            @default(0) @db.Decimal(18, 4)
+  maintenanceQty Decimal            @default(0) @db.Decimal(18, 4)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@unique([organizationId, assetId, warehouseId])
+  @@index([organizationId, warehouseId])
+  @@index([organizationId, assetId])
+  @@map("inventory_warehouse_stocks")
+}
+
+model InventoryRequest {
+  id                             String                 @id @default(uuid())
+  organizationId                 String
+  organization                   Organization           @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  referenceNumber                String
+  warehouseId                    String
+  warehouse                      InventoryWarehouse     @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+  projectId                      String
+  project                        Project                @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  requestedForLabourAssignmentId String?
+  requestedForLabourAssignment   LabourAssignment?      @relation(fields: [requestedForLabourAssignmentId], references: [id], onDelete: Restrict)
+  requestedById                  String
+  requestedBy                    User                   @relation("InventoryRequestCreator", fields: [requestedById], references: [id], onDelete: Restrict)
+  reviewedById                   String?
+  reviewedBy                     User?                  @relation("InventoryRequestReviewer", fields: [reviewedById], references: [id], onDelete: Restrict)
+  status                         InventoryRequestStatus @default(SUBMITTED)
+  purpose                        String?
+  reviewNote                     String?
+  submittedAt                    DateTime               @default(now())
+  reviewedAt                     DateTime?
+  issuedAt                       DateTime?
+  createdAt                      DateTime               @default(now())
+  updatedAt                      DateTime               @updatedAt
+
+  lines            InventoryRequestLine[]
+  returns          InventoryReturnRequest[]
+  conditionReports InventoryConditionReport[]
+  stockMovements   InventoryStockMovement[]
+
+  @@unique([organizationId, referenceNumber])
+  @@index([organizationId, status, submittedAt])
+  @@index([organizationId, projectId])
+  @@index([organizationId, requestedForLabourAssignmentId])
+  @@map("inventory_requests")
+}
+
+model InventoryRequestLine {
+  id             String           @id @default(uuid())
+  organizationId String
+  requestId      String
+  request        InventoryRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  assetId        String
+  asset          InventoryAsset   @relation(fields: [assetId], references: [id], onDelete: Restrict)
+  requestedQty   Decimal          @db.Decimal(18, 4)
+  approvedQty    Decimal?         @db.Decimal(18, 4)
+  issuedQty      Decimal          @default(0) @db.Decimal(18, 4)
+  returnedQty    Decimal          @default(0) @db.Decimal(18, 4)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  returnLines      InventoryReturnLine[]
+  conditionReports InventoryConditionReport[]
+  stockMovements   InventoryStockMovement[]
+
+  @@index([organizationId, requestId])
+  @@map("inventory_request_lines")
+}
+
+model InventoryReturnRequest {
+  id              String                @id @default(uuid())
+  organizationId  String
+  organization    Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  referenceNumber String
+  requestId       String
+  request         InventoryRequest      @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  warehouseId     String
+  warehouse       InventoryWarehouse    @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+  requestedById   String
+  requestedBy     User                  @relation("InventoryReturnCreator", fields: [requestedById], references: [id], onDelete: Restrict)
+  reviewedById    String?
+  reviewedBy      User?                 @relation("InventoryReturnReviewer", fields: [reviewedById], references: [id], onDelete: Restrict)
+  status          InventoryReturnStatus @default(SUBMITTED)
+  reviewNote      String?
+  submittedAt     DateTime              @default(now())
+  reviewedAt      DateTime?
+  receivedAt      DateTime?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  lines          InventoryReturnLine[]
+  stockMovements InventoryStockMovement[]
+
+  @@unique([organizationId, referenceNumber])
+  @@index([organizationId, status, submittedAt])
+  @@map("inventory_return_requests")
+}
+
+model InventoryReturnLine {
+  id              String                 @id @default(uuid())
+  organizationId  String
+  returnRequestId String
+  returnRequest   InventoryReturnRequest @relation(fields: [returnRequestId], references: [id], onDelete: Cascade)
+  requestLineId   String
+  requestLine     InventoryRequestLine   @relation(fields: [requestLineId], references: [id], onDelete: Restrict)
+  quantity        Decimal                @db.Decimal(18, 4)
+  condition       String?
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+
+  @@index([organizationId, returnRequestId])
+  @@map("inventory_return_lines")
+}
+
+model InventoryConditionReport {
+  id             String                         @id @default(uuid())
+  organizationId String
+  organization   Organization                   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  assetId        String
+  asset          InventoryAsset                 @relation(fields: [assetId], references: [id], onDelete: Restrict)
+  warehouseId    String
+  warehouse      InventoryWarehouse             @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+  requestId      String?
+  request        InventoryRequest?              @relation(fields: [requestId], references: [id], onDelete: SetNull)
+  requestLineId  String?
+  requestLine    InventoryRequestLine?          @relation(fields: [requestLineId], references: [id], onDelete: SetNull)
+  reportedById   String
+  reportedBy     User                           @relation("InventoryConditionReporter", fields: [reportedById], references: [id], onDelete: Restrict)
+  reviewedById   String?
+  reviewedBy     User?                          @relation("InventoryConditionReviewer", fields: [reviewedById], references: [id], onDelete: Restrict)
+  quantity       Decimal                        @db.Decimal(18, 4)
+  description    String
+  status         InventoryConditionReportStatus @default(SUBMITTED)
+  resolutionNote String?
+  reviewedAt     DateTime?
+  resolvedAt     DateTime?
+  createdAt      DateTime                       @default(now())
+  updatedAt      DateTime                       @updatedAt
+
+  stockMovements InventoryStockMovement[]
+
+  @@index([organizationId, status, createdAt])
+  @@map("inventory_condition_reports")
+}
+
+model InventoryStockMovement {
+  id                String                     @id @default(uuid())
+  organizationId    String
+  organization      Organization               @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  assetId           String
+  asset             InventoryAsset             @relation(fields: [assetId], references: [id], onDelete: Restrict)
+  warehouseId       String
+  warehouse         InventoryWarehouse         @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
+  requestId         String?
+  request           InventoryRequest?          @relation(fields: [requestId], references: [id], onDelete: SetNull)
+  requestLineId     String?
+  requestLine       InventoryRequestLine?      @relation(fields: [requestLineId], references: [id], onDelete: SetNull)
+  returnRequestId   String?
+  returnRequest     InventoryReturnRequest?    @relation(fields: [returnRequestId], references: [id], onDelete: SetNull)
+  conditionReportId String?
+  conditionReport   InventoryConditionReport?  @relation(fields: [conditionReportId], references: [id], onDelete: SetNull)
+  type              InventoryStockMovementType
+  quantityDelta     Decimal                    @db.Decimal(18, 4)
+  reason            String?
+  actorId           String
+  actor             User                       @relation(fields: [actorId], references: [id], onDelete: Restrict)
+  occurredAt        DateTime                   @default(now())
+
+  @@index([organizationId, assetId, occurredAt])
+  @@index([organizationId, warehouseId, occurredAt])
+  @@map("inventory_stock_movements")
 }
 
 /////////////////////////////////////////////////
@@ -687,6 +953,8 @@ model LabourAssignment {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  inventoryRequests InventoryRequest[]
 
   @@index([labourId])
   @@index([contractorProjectAssignmentId])

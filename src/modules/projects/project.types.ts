@@ -10,6 +10,11 @@ export type UpdateProjectInput = z.infer<
 >;
 
 export type ProjectImageMutation = {
+    kind?: 'DESIGN' | 'SITE';
+    visitedAt?: Date | null;
+    siteStage?: 'BEFORE_WORK' | 'IN_PROGRESS' | 'COMPLETED' | null;
+    areaSqFt?: number | null;
+    notes?: string | null;
     id?: string;
     imageUrl?: string;
     alt?: string;

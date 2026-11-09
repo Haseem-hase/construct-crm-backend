@@ -27,10 +27,12 @@ const projectSubmission = (req: Request) => {
 
     const organizationId = req.user?.organizationId;
     const images: ProjectImageMutation[] = gallery.map((image) => {
-        if (image.source === "existing") return { id: image.id, isCover: image.isCover };
-        if (image.source === "url") return { imageUrl: image.url, alt: image.alt, isCover: image.isCover };
+        const details = { kind: image.kind, visitedAt: image.visitedAt === undefined ? undefined : image.visitedAt ? new Date(image.visitedAt) : null, siteStage: image.siteStage, areaSqFt: image.areaSqFt, notes: image.notes };
+        if (image.source === "existing") return { ...details, id: image.id, isCover: image.isCover };
+        if (image.source === "url") return { ...details, imageUrl: image.url, alt: image.alt, isCover: image.isCover };
         if (!organizationId) throw new BadRequestError("Project organization context is missing.");
         return {
+            ...details,
             imageUrl: `/uploads/projects/${organizationId}/${uploadedFiles[image.uploadIndex].filename}`,
             alt: image.alt,
             isCover: image.isCover,
@@ -108,7 +110,9 @@ export const updateProject = async (
         const user = req.user as AuthenticatedUser;
         const validatedParams = projectIdSchema.parse(req.params);
         const submission = projectSubmission(req);
-        const validatedData = updateProjectSchema.parse(submission.body);
+        const validatedData = submission.images !== undefined && Object.keys(submission.body).length === 0
+            ? {}
+            : updateProjectSchema.parse(submission.body);
         const result = await projectService.updateProject(
             validatedParams.projectId,
             validatedData,

@@ -4,6 +4,11 @@ import prisma from "../../lib/prisma";
 import { CreateProjectInput, ProjectImageMutation, UpdateProjectInput } from "./project.types";
 import { BadRequestError } from "../../errors/BadRequestError";
 
+const imageDetails = (image: ProjectImageMutation) => ({
+    kind: image.kind, visitedAt: image.visitedAt, siteStage: image.siteStage,
+    areaSqFt: image.areaSqFt, notes: image.notes,
+});
+
 const projectRelations = {
     projectCustomers: { include: { customer: true } },
     images: { orderBy: { position: "asc" as const } },
@@ -21,6 +26,7 @@ export const createProject = async (
         data: {
             name: data.name,
             description: data.description,
+            areaSqFt: data.areaSqFt,
             imageUrl: data.imageUrl,
             status: data.status,
             country: data.country,
@@ -36,6 +42,7 @@ export const createProject = async (
             budget: data.budget,
             images: {
                 create: images.map((image, position) => ({
+                    ...imageDetails(image),
                     imageUrl: image.imageUrl!,
                     alt: image.alt,
                     isCover: image.isCover,
@@ -126,6 +133,7 @@ export const updateProject = async (
             data: {
                 name: data.name,
                 description: data.description,
+            areaSqFt: data.areaSqFt,
                 imageUrl: coverImageUrl,
                 status: data.status,
                 country: data.country,
@@ -155,11 +163,11 @@ export const updateProject = async (
                 if (image.id) {
                     await tx.projectImage.update({
                         where: { id: image.id },
-                        data: { isCover: image.isCover, position },
+                        data: { ...imageDetails(image), isCover: image.isCover, position },
                     });
                 } else if (image.imageUrl) {
                     await tx.projectImage.create({
-                        data: { projectId, imageUrl: image.imageUrl, alt: image.alt, isCover: image.isCover, position },
+                        data: { ...imageDetails(image), projectId, imageUrl: image.imageUrl, alt: image.alt, isCover: image.isCover, position },
                     });
                 }
             }

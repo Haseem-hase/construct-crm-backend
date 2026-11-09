@@ -6,11 +6,19 @@ const projectImageUrl = z.string().trim().max(2048).refine(
     "Use a valid project image URL."
 );
 
+const imageDetails = {
+    kind: z.enum(["DESIGN", "SITE"]).optional(),
+    visitedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(value => { const date = new Date(value); return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value; }, "Use a valid visit date.").nullable().optional(),
+    siteStage: z.enum(["BEFORE_WORK", "IN_PROGRESS", "COMPLETED"]).nullable().optional(),
+    areaSqFt: z.number().positive().max(9999999999.99).nullable().optional(),
+    notes: z.string().trim().max(2000).nullable().optional(),
+};
+
 export const projectGallerySchema = z.array(z.discriminatedUnion("source", [
-    z.object({ source: z.literal("existing"), id: z.string().uuid(), isCover: z.boolean() }).strict(),
-    z.object({ source: z.literal("upload"), uploadIndex: z.number().int().min(0).max(9), isCover: z.boolean(), alt: z.string().trim().max(255).optional() }).strict(),
-    z.object({ source: z.literal("url"), url: projectImageUrl, isCover: z.boolean(), alt: z.string().trim().max(255).optional() }).strict(),
-])).max(10).refine(images => images.length === 0 || images.filter(image => image.isCover).length === 1, "Choose exactly one cover image.")
+    z.object({ ...imageDetails, source: z.literal("existing"), id: z.string().uuid(), isCover: z.boolean() }).strict(),
+    z.object({ ...imageDetails, source: z.literal("upload"), uploadIndex: z.number().int().min(0).max(9), isCover: z.boolean(), alt: z.string().trim().max(255).optional() }).strict(),
+    z.object({ ...imageDetails, source: z.literal("url"), url: projectImageUrl, isCover: z.boolean(), alt: z.string().trim().max(255).optional() }).strict(),
+])).max(200).refine(images => images.length === 0 || images.filter(image => image.isCover).length === 1, "Choose exactly one cover image.")
     .refine(images => {
         const indexes = images.filter(image => image.source === "upload").map(image => image.uploadIndex);
         return indexes.length === new Set(indexes).size;
@@ -35,6 +43,7 @@ export const createProjectSchema = z.object({
         .max(1000)
         .optional(),
 
+    areaSqFt: z.coerce.number().positive().max(9999999999.99).optional(),
     imageUrl: projectImageUrl.optional(),
 
     status: z
@@ -151,6 +160,7 @@ export const updateProjectSchema = z.object({
         .nullable()
         .optional()),
 
+    areaSqFt: z.preprocess(formNullToNull, z.coerce.number().positive().max(9999999999.99).nullable().optional()),
     imageUrl: z.preprocess(formNullToNull, projectImageUrl.nullable().optional()),
 
     status: z

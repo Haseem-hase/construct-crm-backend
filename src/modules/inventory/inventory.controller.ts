@@ -58,3 +58,5 @@ export const createInventoryConditionReport = handle("Inventory condition report
     workflowService.createInventoryConditionReport(organization(req, res), req.user!.id, inventoryConditionReportSchema.parse(req.body)));
 export const reviewInventoryConditionReport = handle("Inventory condition report updated.", 200, "report", (req, res) =>
     workflowService.reviewInventoryConditionReport(organization(req, res), id(req), req.user!.id, inventoryConditionReviewSchema.parse(req.body)));
+
+export const getInventoryRequestOptions = handle("Inventory request options retrieved.", 200, "options", (req, res) => service.getInventoryRequestOptions(organization(req, res)));

@@ -20,6 +20,7 @@ const uploadInventoryImage = createImageUploadMiddleware({
 const router = Router();
 router.use(authenticate, requireInventoryOrganization);
 
+router.get("/request-options", authorize(Module.INVENTORY, Action.VIEW), controller.getInventoryRequestOptions);
 router.get("/assets", authorize(Module.INVENTORY, Action.VIEW), controller.listInventoryAssets);
 router.get("/warehouses", authorize(Module.INVENTORY, Action.VIEW), controller.listInventoryWarehouses);
 router.post("/warehouses", authorize(Module.INVENTORY, Action.CREATE), controller.createInventoryWarehouse);

@@ -222,3 +222,26 @@ export const adjustWarehouseStock = async (organizationId: string, actorId: stri
         return { ...stock, onHandQty: nextOnHand, availableQty: nextOnHand.minus(stock.reservedQty).minus(stock.maintenanceQty).toString(), reason: input.reason };
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
 };
+
+/** Use the trusted inventory tenant for request and warehouse project selectors. */
+export const getInventoryRequestOptions = async (organizationId: string) => {
+    const [projects, labourAssignments] = await Promise.all([
+        prisma.project.findMany({
+            where: { organizationId },
+            select: { id: true, name: true, projectCode: true },
+            orderBy: { name: "asc" },
+        }),
+        prisma.labourAssignment.findMany({
+            where: { status: "ACTIVE", assignment: { project: { organizationId } } },
+            select: {
+                id: true, status: true,
+                labour: { select: { fullName: true } },
+                assignment: { select: {
+                    project: { select: { id: true } },
+                    contractor: { select: { fullName: true } },
+                } },
+            },
+        }),
+    ]);
+    return { projects, labourAssignments };
+};

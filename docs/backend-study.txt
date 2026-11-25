@@ -1,0 +1,196 @@
+Construct CRM backend study notes
+=================================
+
+Start with src/server.ts, then src/app.ts and src/routes/index.ts. The server
+opens the HTTP port. The app sets up shared Express middleware and mounts the
+feature router under /api. The router adds a feature prefix, so /auth plus
+/login in the auth router becomes POST /api/auth/login.
+
+Trace a request through the files
+---------------------------------
+
+1. Open src/modules/auth/auth.routes.ts and find POST /login. The route lists
+   validate(loginSchema) before authController.login. Express follows that
+   order, so the controller receives the request after input validation.
+2. Follow loginSchema in auth.validation.ts, then the login handler in
+   auth.controller.ts and the business logic in auth.service.ts. Follow the
+   account lookup into auth.repository.ts, then find the User and RefreshToken
+   models in prisma/schema.prisma.
+3. Compare GET /api/auth/me. The authenticate middleware reads the Bearer
+   token, verifies it, looks up the user, and assigns req.user. The declaration
+   in src/shared/types/express.d.ts explains how TypeScript knows that property
+   exists. Other protected routes can add an authorize check for a module and
+   action after authentication.
+4. Try the same trace for a project update. Find the PATCH route in
+   project.routes.ts and follow authorization, image upload, the controller,
+   the service, and the repository. Check project.validation.test.ts for
+   examples of valid and invalid gallery and site-area input.
+5. For a database workflow, start with issueInventoryRequest in
+   inventory-workflow.service.ts. Follow the reads and writes inside the
+   transaction. Compare the request, warehouse stock, and stock movement
+   models to see which records represent workflow state, current quantity, and
+   history.
+
+Project files and local infrastructure
+--------------------------------------
+
+package.json defines the npm scripts and dependency ranges. dev runs the
+TypeScript server in watch mode, build compiles it, and start runs the compiled
+server. package-lock.json records resolved dependency versions for repeatable
+installation. JSON does not support slash comments.
+
+tsconfig.json configures TypeScript. It targets ES2022 and uses NodeNext module
+rules. Strict checks are enabled. The normal build reads src and writes dist.
+The generated JS in dist and installed packages in node_modules can be rebuilt
+from the source and dependency files.
+
+docker-compose.yml describes a PostgreSQL 17 service, maps host port 5432 to
+the container port, reads the database settings from environment variables,
+and mounts a named volume so database files can survive container replacement.
+YAML uses # for comments.
+
+.env supplies local environment values. Read src/config/env.ts and
+prisma.config.ts for the code that consumes environment settings. Keep actual
+local values private. .gitignore controls which local paths Git normally
+excludes. uploads holds uploaded media. .DS_Store stores Finder metadata.
+
+migrate.exp is an Expect helper. Its spawn command launches another process,
+expect waits for matching output or completion, and send supplies input to the
+process. Expect scripts use Tcl syntax.
+
+prisma.config.ts connects the Prisma CLI to the schema and migration directory.
+prisma/schema.prisma defines the current models. prisma/seed.ts creates initial
+application data. prisma/migrations/migration_lock.toml records the PostgreSQL
+provider for the migration history.
+
+Reading the migration history
+-----------------------------
+
+Each entry below names a folder under prisma/migrations. Open its migration.sql
+to see the actual SQL. Reading the migrations in timestamp order shows how the
+current schema evolved. Prisma tracks checksums for applied SQL files, so the
+study notes for migrations live here.
+
+CREATE TYPE defines allowed enum values. CREATE TABLE declares columns and
+constraints. ALTER TABLE changes an existing table. A foreign key enforces a
+link between records, and ON DELETE controls what happens to dependent rows.
+A UNIQUE index also rejects duplicate keys. A partial index applies only to
+rows meeting its WHERE condition. INSERT INTO can seed or backfill data.
+
+20260710111949_init_auth
+  Establishes users, roles, permissions, and refresh tokens. Module and Action
+  provide the two parts of a permission such as PROJECT and VIEW.
+
+20260828212035_add_organization
+  Creates the organizations table and its uniqueness rules.
+
+20260829080953_connect_users_to_organizations
+  Adds the nullable organizationId to users. ON DELETE SET NULL allows the
+  user row to remain when its referenced organization is removed.
+
+20260829211216_add_customers
+  Creates organization-owned customer records and indexes their lookup fields.
+
+20260830081412_add_projects
+  Creates projects and the ProjectStatus enum. Compare its original customer
+  link with the later project-customer migration.
+
+20260830082407_add_project_members
+  Adds a project/user membership table and the enum for membership roles.
+
+20260830082901_add_project_labour
+  Adds an early project-to-labour link using user records. The dedicated labour
+  model later replaces this arrangement.
+
+20260831082104_add_organization_roles
+  Adds ROLE and USER permissions and introduces organization scoping for roles.
+
+20260901194952_role_architecture
+  Introduces organization_roles as a link between organizations and role
+  templates. Users and permission assignments reference this link.
+
+20260901200804_add_role_organization
+  Adds organization ownership back to role templates. Also introduces the
+  nullable SystemRole on users for SUPER_ADMIN.
+
+20260907200909_init_customer
+  Expands customers with types and a parent-customer link, plus a sequence used
+  in customer setup.
+
+20260907201204_add_parent_customer_index
+  Indexes the parent-customer field for lookups of child records.
+
+20260908181100_customer_hierarchy_cascade
+  Uses both parentCustomerId and organizationId for the foreign key. This
+  keeps a child and its parent in the same organization and cascades deletion.
+
+20260909195205_add_customer_contact
+  Adds contact records under customers. A partial unique index limits customers
+  to one primary contact apiece.
+
+20260913205107_init_project_customer
+  Introduces the project-customer join table and relationship types such as
+  OWNER and CLIENT. Also expands project fields, including actual dates.
+
+20260914185642_remove_legacy_project_fields
+  Drops older project fields and the original direct customer link after the
+  join table was introduced.
+
+20260917201446_add_labour_and_profession
+  Creates dedicated labour and profession records. Compare the new tables
+  with the project_labour structure removed by this migration.
+
+20260917212809_add_unique_labour_phone_per_organization
+  Enforces unique labour phone numbers inside each organization.
+
+20260918174020_init_contractor_phase_1
+  Creates contractors, their status enum, and the sequence and indexes for
+  contractor records.
+
+20260918180321_add_contractor_module
+  Adds CONTRACTOR to Module so it can form part of a permission.
+
+20260918182258_init_contractor_project_assignments
+  Adds contractor placements, the responsibility catalog, and a join table
+  assigning responsibilities to a placement.
+
+20260920211054_init_labour_assignment
+  Adds labour placements associated with contractor project assignments and
+  tracks their status.
+
+20261031120000_inventory_foundation
+  Introduces the original inventory schema, including stock documents,
+  movements, storage, suppliers, and project allocations.
+
+20261031130000_inventory_location_warehouse_scope
+  Updates the original inventory foreign keys and constraints so related
+  storage locations are scoped to the relevant warehouse.
+
+20261031140000_inventory_document_cancellation_audit
+  Extends stock documents with cancellation audit data.
+
+20261031150000_project_allocation_storage_location
+  Adds the storage-location link for project material allocations.
+
+20261101090000_simplified_inventory_assets
+  Adds the inventory_assets catalog and distinguishes materials, tools, and
+  machinery with an enum.
+
+20261101100000_archive_legacy_inventory
+  Moves the old inventory tables and enums into a legacy_inventory schema.
+
+20261102120000_project_image_gallery
+  Introduces separate project image records linked to projects.
+
+20261106120000_inventory_warehouse_workflow
+  Adds warehouses, warehouse stocks, request and return lines, condition
+  reports, and stock movements. Its inserts initialize warehouse and stock
+  rows from existing data.
+
+20261109120000_project_image_kinds
+  Distinguishes design images from site photos, adds site stages, and checks
+  that an image's optional area measurement is positive.
+
+20261109130000_project_site_area
+  Adds the optional areaSqFt measurement on projects and requires it to be
+  positive when provided.

@@ -1,19 +1,34 @@
+# Study: Lists the parts Docker Compose should run together. This file runs the CRM database.
 services:
+  # Study: Names the database service postgres. Other services on the same Compose network can use this name to reach it.
   postgres:
+    # Study: Uses the PostgreSQL 17 image, a ready-made package containing the database software.
     image: postgres:17
+    # Study: Gives the running database container a recognizable name in Docker.
     container_name: construct-crm-postgres
+    # Study: Restarts the database after it exits or Docker restarts, unless you stopped it yourself.
     restart: unless-stopped
 
+    # Study: Lists which ports are published so programs outside the container can connect.
     ports:
+      # Study: Connects port 5432 on the computer to port 5432 inside the container. The left number is the computer side.
       - "5432:5432"
 
+    # Study: Lists settings passed into the database container. Docker Compose fills in the values from your shell or .env file.
     environment:
+      # Study: Names the initial database user created when PostgreSQL sets up a fresh data folder.
       POSTGRES_USER: ${POSTGRES_USER}
+      # Study: Supplies the password for that initial database user. The actual value comes from your local settings.
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      # Study: Names the database PostgreSQL creates when it sets up a fresh data folder.
       POSTGRES_DB: ${POSTGRES_DB}
 
+    # Study: Lists storage that Docker attaches to the database container.
     volumes:
+      # Study: Attaches postgres_data at PostgreSQL’s data folder so saved records can survive container replacement.
       - postgres_data:/var/lib/postgresql/data
 
+# Study: Declares the storage volumes that services in this file can use.
 volumes:
+  # Study: Names the Docker-managed storage volume used by the database service above.
   postgres_data:

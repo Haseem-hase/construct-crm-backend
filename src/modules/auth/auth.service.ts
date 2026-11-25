@@ -1,74 +1,74 @@
-// Study: Apply business rules and coordinate database operations for account registration, sign-in, sign-out, and session token refresh.
-// Study: Import `* as authRepository` from `"./auth.repository"`.
+// Study: This file is about signing in, signing out, creating an account, and staying signed in. Applies the rules for this part of the CRM, such as what must be checked before saving a change.
+// Study: Bring in `* as authRepository` from `"./auth.repository"` so this file can use it.
 import * as authRepository from "./auth.repository";
-// Study: Import `bcrypt` from `"bcrypt"`.
+// Study: Bring in `bcrypt` from `"bcrypt"` so this file can use it.
 import bcrypt from "bcrypt";
-// Study: Import `crypto` from `"crypto"`.
+// Study: Bring in `crypto` from `"crypto"` so this file can use it.
 import crypto from "crypto";
-// Study: Import `{ LoginInput, LoginResponse, MeResponse, RegisterCustomerInput }` from `"./auth.types"`.
+// Study: Bring in `{ LoginInput, LoginResponse, MeResponse, RegisterCustomerInput }` from `"./auth.types"` so this file can use it.
 import { LoginInput, LoginResponse, MeResponse, RegisterCustomerInput } from "./auth.types";
-// Study: Import `{ ConflictError }` from `"../../errors/ConflictError"`.
+// Study: Bring in `{ ConflictError }` from `"../../errors/ConflictError"` so this file can use it.
 import { ConflictError } from "../../errors/ConflictError";
-// Study: Import `{ generateAccessToken, generateRefreshToken, verifyRefreshToken }` from `"../../utils/jwt.utils"`.
+// Study: Bring in `{ generateAccessToken, generateRefreshToken, verifyRefreshToken }` from `"../../utils/jwt.utils"` so this file can use it.
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../utils/jwt.utils";
-// Study: Import `{ UnauthorizedError }` from `"../../errors/UnauthorizedError"`.
+// Study: Bring in `{ UnauthorizedError }` from `"../../errors/UnauthorizedError"` so this file can use it.
 import { UnauthorizedError } from "../../errors/UnauthorizedError";
-// Study: Import `{ AuthenticatedUser }` from `"../../shared/types/authenticated-user"`.
+// Study: Bring in `{ AuthenticatedUser }` from `"../../shared/types/authenticated-user"` so this file can use it.
 import { AuthenticatedUser } from "../../shared/types/authenticated-user";
-// Study: Import `{ addDuration }` from `"../../utils/date.utils"`.
+// Study: Bring in `{ addDuration }` from `"../../utils/date.utils"` so this file can use it.
 import { addDuration } from "../../utils/date.utils";
-// Study: Import `{ getDurationEnv }` from `"../../utils/env.utils"`.
+// Study: Bring in `{ getDurationEnv }` from `"../../utils/env.utils"` so this file can use it.
 import { getDurationEnv } from "../../utils/env.utils";
-// Study: Import `{ createRefreshToken, revokeRefreshToken }` from `"./refresh-token.repository"`.
+// Study: Bring in `{ createRefreshToken, revokeRefreshToken }` from `"./refresh-token.repository"` so this file can use it.
 import { createRefreshToken, revokeRefreshToken } from "./refresh-token.repository";
-// Study: Import `{ findMatchingRefreshToken }` from `"./refresh-token.service"`.
+// Study: Bring in `{ findMatchingRefreshToken }` from `"./refresh-token.service"` so this file can use it.
 import { findMatchingRefreshToken } from "./refresh-token.service";
 
-// Study: Export `registerCustomer` as an async function that returns a promise.
+// Study: Make `registerCustomer` available to other files. Its result arrives after its work finishes.
 export const registerCustomer = async (
-    // Study: Accept `data` with type `RegisterCustomerInput`.
+    // Study: This step receives `data`. `RegisterCustomerInput` describes what that information should look like.
     data: RegisterCustomerInput
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
 
-    // Study: Call `authRepository.findUserByEmail` and wait for it to finish and store its result in `existingUser`.
+    // Study: Check whether this email address already belongs to an account before creating another one.
     const existingUser = await authRepository.findUserByEmail(
-        // Study: Supply `data` to the surrounding statement.
+        // Study: Use the email that was submitted for this step.
         data.email
-    // Study: Close the call arguments.
+    // Study: End the list of information being sent to this step.
     );
 
-    // Study: Run the following branch when `existingUser` is truthy.
+    // Study: Use the next step if an account with that email was found.
     if (existingUser) {
-        // Study: Stop this execution path by throwing `new ConflictError("Email already registered.")`.
+        // Study: Stop here and report this problem: "Email already registered."
         throw new ConflictError("Email already registered.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Call `authRepository.findUserByPhone` and wait for it to finish and store its result in `existingPhone`.
+    // Study: Check whether this phone number is already registered.
     const existingPhone = await authRepository.findUserByPhone(
-        // Study: Supply `data` to the surrounding statement.
+        // Study: Use the phone that was submitted for this step.
         data.phone
-    // Study: Close the call arguments.
+    // Study: End the list of information being sent to this step.
     );
 
-    // Study: Run the following branch when `existingPhone` is truthy.
+    // Study: Use the next step if an account with that phone number was found.
     if (existingPhone) {
-        // Study: Stop this execution path by throwing `new ConflictError("Phone number already registered")`.
+        // Study: Stop here and report this problem: "Phone number already registered".
         throw new ConflictError("Phone number already registered")
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // Customer role is now handled per-organization, leaving empty for global registration
 
 
-    // Study: Call `bcrypt.hash` and wait for it to finish and store its result in `hashedPassword`.
+    // Study: Scramble the password into a one-way fingerprint so the original password does not have to be stored.
     const hashedPassword = await bcrypt.hash(
-        // Study: Supply `data` to the surrounding statement.
+        // Study: Use the password that was submitted for this step.
         data.password,
-        // Study: Set the bcrypt cost factor to 10 for this password hash.
+        // Study: Use 10 as bcrypt’s work setting. Higher settings take longer to calculate and make password guessing slower.
         10
-    // Study: Close the call arguments.
+    // Study: End the list of information being sent to this step.
     );
 
     // Study: Call `authRepository.createUser` and wait for it to finish and store its result in `user`.
@@ -81,49 +81,49 @@ export const registerCustomer = async (
         phone: data.phone,
         // Study: Set `password` to `hashedPassword`.
         password: hashedPassword,
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
 
-    // Study: Set `{ password, ...userWithoutPassword }` to `user`.
+    // Study: Take the password field out of the account information before sending the account details back.
     const { password, ...userWithoutPassword } = user;
 
-    // Study: Return `userWithoutPassword` to the caller.
+    // Study: Give `userWithoutPassword` back to the code that asked for it.
     return userWithoutPassword;
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
 //login
-// Study: Export `login` as an async function that returns a promise.
+// Study: Make `login` available to other files. Its result arrives after its work finishes.
 export const login = async (
-    // Study: Accept `data` with type `LoginInput`.
+    // Study: This step receives `data`. `LoginInput` describes what that information should look like.
     data: LoginInput
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ): Promise<LoginResponse> => {
 
     // Study: Call `authRepository.findUserByEmail` and wait for it to finish and store its result in `user`.
     const user = await authRepository.findUserByEmail(data.email);
 
-    // Study: Run the following branch when `!user` is truthy.
+    // Study: Do the next step if there is no value for `user`.
     if (!user) {
-        // Study: Stop this execution path by throwing `new UnauthorizedError("Invalid email or password.")`.
+        // Study: Stop here and report this problem: "Invalid email or password."
         throw new UnauthorizedError("Invalid email or password.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // Study: Call `bcrypt.compare` and wait for it to finish and store its result in `isPasswordValid`.
     const isPasswordValid = await bcrypt.compare(
-        // Study: Supply `data` to the surrounding statement.
+        // Study: Use the password that was submitted for this step.
         data.password,
         // Study: Supply `user` to the surrounding statement.
         user.password
-    // Study: Close the call arguments.
+    // Study: End the list of information being sent to this step.
     );
 
-    // Study: Run the following branch when `!isPasswordValid` is truthy.
+    // Study: Do the next step if there is no value for `isPasswordValid`.
     if (!isPasswordValid) {
-        // Study: Stop this execution path by throwing `new UnauthorizedError("Invalid email or password.")`.
+        // Study: Stop here and report this problem: "Invalid email or password."
         throw new UnauthorizedError("Invalid email or password.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // Study: Set `roleName` to `user.systemRole || user.organizationRole?.role.name || "USER"`.
@@ -135,7 +135,7 @@ export const login = async (
         userId: user.id,
         // Study: Set `role` to `roleName`.
         role: roleName,
-    // Study: Close the object literal.
+    // Study: End this group of values.
     };
 
     // Study: Call `generateAccessToken` and store the result as `accessToken`.
@@ -148,14 +148,14 @@ export const login = async (
     const hashedRefreshToken = await bcrypt.hash(
         // Study: Call `crypto.createHash("sha256").update(refreshToken).digest`.
         crypto.createHash("sha256").update(refreshToken).digest("hex"), 10
-    // Study: Close the call arguments.
+    // Study: End the list of information being sent to this step.
     )
 
     // Study: Call `addDuration` and store the result as `expiresAt`.
     const expiresAt = addDuration(
         // Study: Call `getDurationEnv`.
         getDurationEnv("JWT_REFRESH_EXPIRES_IN")
-    // Study: Close the call arguments.
+    // Study: End the list of information being sent to this step.
     )
 
     // Study: Call `createRefreshToken` and wait for it to finish.
@@ -164,16 +164,16 @@ export const login = async (
         hashedToken: hashedRefreshToken,
         // Study: Set `userId` to `user.id`.
         userId: user.id,
-        // Study: Pass the current `expiresAt` value under the same property name.
+        // Study: Carry the value of `expiresAt` into the new group under the same name.
         expiresAt,
-    // Study: Close the object literal.
+    // Study: End this group of values.
     })
 
-    // Study: Return `{ accessToken, refreshToken, user: { id: user.id, fullName: user.fullName, email: u…` to the caller.
+    // Study: Give `{ accessToken, refreshToken, user: { id: user.id, fullName: user.fullName, email: u…` back to the code that asked for it.
     return {
-        // Study: Pass the current `accessToken` value under the same property name.
+        // Study: Carry the value of `accessToken` into the new group under the same name.
         accessToken,
-        // Study: Pass the current `refreshToken` value under the same property name.
+        // Study: Carry the value of `refreshToken` into the new group under the same name.
         refreshToken,
         // Study: Start the nested value for `user`.
         user: {
@@ -185,19 +185,19 @@ export const login = async (
             email: user.email,
             // Study: Set `role` to `roleName`.
             role: roleName,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     };
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
 //genrate new access token and refresh token using old refresh token
-// Study: Export `refreshAccessToken` as an async function that returns a promise.
+// Study: Make `refreshAccessToken` available to other files. Its result arrives after its work finishes.
 export const refreshAccessToken = async (
-    // Study: Accept `refreshToken` with type `string`.
+    // Study: This step receives `refreshToken`. `string` describes what that information should look like.
     refreshToken: string
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
     // Study: Call `verifyRefreshToken` and store the result as `payload`.
     const payload = verifyRefreshToken(refreshToken);
@@ -208,38 +208,38 @@ export const refreshAccessToken = async (
         refreshToken,
         // Study: Supply `payload` to the surrounding statement.
         payload.userId
-    // Study: Close the call arguments.
+    // Study: End the list of information being sent to this step.
     );
 
-    // Study: Run the following branch when `!matchedToken` is truthy.
+    // Study: Do the next step if there is no value for `matchedToken`.
     if (!matchedToken) {
-        // Study: Stop this execution path by throwing `new UnauthorizedError("Invalid refresh token.")`.
+        // Study: Stop here and report this problem: "Invalid refresh token."
         throw new UnauthorizedError("Invalid refresh token.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Run the following branch when `matchedToken.revokedAt` is truthy.
+    // Study: Do the next step if this check passes: `matchedToken.revokedAt`.
     if (matchedToken.revokedAt) {
-        // Study: Stop this execution path by throwing `new UnauthorizedError("Refresh token has been revoked.")`.
+        // Study: Stop here and report this problem: "Refresh token has been revoked."
         throw new UnauthorizedError("Refresh token has been revoked.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Run the following branch when `matchedToken.expiresAt <= new Date()` is truthy.
+    // Study: Do the next step if this check passes: `matchedToken.expiresAt <= new Date()`.
     if (matchedToken.expiresAt <= new Date()) {
-        // Study: Stop this execution path by throwing `new UnauthorizedError("Refresh token has expired.")`.
+        // Study: Stop here and report this problem: "Refresh token has expired."
         throw new UnauthorizedError("Refresh token has expired.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // Study: Call `authRepository.findUserById` and wait for it to finish and store its result in `user`.
     const user = await authRepository.findUserById(payload.userId);
 
-    // Study: Run the following branch when `!user` is truthy.
+    // Study: Do the next step if there is no value for `user`.
     if (!user) {
-        // Study: Stop this execution path by throwing `new UnauthorizedError("User not found.")`.
+        // Study: Stop here and report this problem: "User not found."
         throw new UnauthorizedError("User not found.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // Study: Call `revokeRefreshToken` and wait for it to finish.
@@ -254,7 +254,7 @@ export const refreshAccessToken = async (
         userId: user.id,
         // Study: Set `role` to `roleName`.
         role: roleName,
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
 
     // Study: Call `bcrypt.hash` and wait for it to finish and store its result in `hashedRefreshToken`.
@@ -264,7 +264,7 @@ export const refreshAccessToken = async (
     const expiresAt = addDuration(
         // Study: Call `getDurationEnv`.
         getDurationEnv("JWT_REFRESH_EXPIRES_IN")
-    // Study: Close the call arguments.
+    // Study: End the list of information being sent to this step.
     )
 
     // Study: Call `createRefreshToken` and wait for it to finish.
@@ -273,9 +273,9 @@ export const refreshAccessToken = async (
         hashedToken: hashedRefreshToken,
         // Study: Set `userId` to `user.id`.
         userId: user.id,
-        // Study: Pass the current `expiresAt` value under the same property name.
+        // Study: Carry the value of `expiresAt` into the new group under the same name.
         expiresAt,
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
 
     // Study: Call `generateAccessToken` and store the result as `accessToken`.
@@ -284,28 +284,28 @@ export const refreshAccessToken = async (
         userId: user.id,
         // Study: Set `role` to `roleName`.
         role: roleName,
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
 
-    // Study: Return `{ accessToken, refreshToken: newRefreshToken, }` to the caller.
+    // Study: Give `{ accessToken, refreshToken: newRefreshToken, }` back to the code that asked for it.
     return {
-        // Study: Pass the current `accessToken` value under the same property name.
+        // Study: Carry the value of `accessToken` into the new group under the same name.
         accessToken,
         // Study: Set `refreshToken` to `newRefreshToken`.
         refreshToken: newRefreshToken,
-    // Study: Close the object literal.
+    // Study: End this group of values.
     }
 
 
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
 //logout
-// Study: Export `logout` as an async function that returns a promise.
+// Study: Make `logout` available to other files. Its result arrives after its work finishes.
 export const logout = async (
-    // Study: Accept `refreshToken` with type `string`.
+    // Study: This step receives `refreshToken`. `string` describes what that information should look like.
     refreshToken: string
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
     // Study: Call `verifyRefreshToken` and store the result as `payload`.
     const payload = verifyRefreshToken(refreshToken);
@@ -316,42 +316,42 @@ export const logout = async (
         refreshToken,
         // Study: Supply `payload` to the surrounding statement.
         payload.userId
-    // Study: Close the call arguments.
+    // Study: End the list of information being sent to this step.
     );
 
-    // Study: Run the following branch when `!matchedToken` is truthy.
+    // Study: Do the next step if there is no value for `matchedToken`.
     if (!matchedToken) {
-        // Study: Stop this execution path by throwing `new UnauthorizedError("Invalid refresh token.")`.
+        // Study: Stop here and report this problem: "Invalid refresh token."
         throw new UnauthorizedError("Invalid refresh token.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Run the following branch when `matchedToken.revokedAt` is truthy.
+    // Study: Do the next step if this check passes: `matchedToken.revokedAt`.
     if (matchedToken.revokedAt) {
-        // Study: Stop this execution path by throwing `new UnauthorizedError("Refresh token has already been revoked")`.
+        // Study: Stop here and report this problem: "Refresh token has already been revoked".
         throw new UnauthorizedError("Refresh token has already been revoked");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // Study: Call `revokeRefreshToken` and wait for it to finish.
     await revokeRefreshToken(matchedToken.id);
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
 
 //get me 
-// Study: Export `getMe` as an async function that returns a promise.
+// Study: Make `getMe` available to other files. Its result arrives after its work finishes.
 export const getMe = async (
-    // Study: Accept `user` with type `AuthenticatedUser`.
+    // Study: This step receives `user`. `AuthenticatedUser` describes what that information should look like.
     user: AuthenticatedUser
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ): Promise<MeResponse> => {
 
-    // Study: Return `{ user, }` to the caller.
+    // Study: Give `{ user, }` back to the code that asked for it.
     return {
-        // Study: Pass the current `user` value under the same property name.
+        // Study: Carry the value of `user` into the new group under the same name.
         user,
-    // Study: Close the object literal.
+    // Study: End this group of values.
     }
-// Study: Close the code block.
+// Study: End this group of steps.
 };

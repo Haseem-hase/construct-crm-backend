@@ -1,28 +1,28 @@
-// Study: Read and write database records through Prisma for customer accounts and parent-child customer relationships.
-// Study: Import `prisma` from `"../../lib/prisma"`.
+// Study: This file is about customer accounts and which customers belong under a parent customer. Finds or saves information in the database, where the CRM keeps its records.
+// Study: Bring in `prisma` from `"../../lib/prisma"` so this file can use it.
 import prisma from "../../lib/prisma";
 
-// Study: Import `{ CreateCustomerInput, UpdateCustomerInput, }` from `"./customer.types"`.
+// Study: Bring in `{ CreateCustomerInput, UpdateCustomerInput, }` from `"./customer.types"` so this file can use it.
 import {
-    // Study: Bring `CreateCustomerInput` into scope from the imported module.
+    // Study: Make `CreateCustomerInput` from the other file available here.
     CreateCustomerInput,
-    // Study: Bring `UpdateCustomerInput` into scope from the imported module.
+    // Study: Make `UpdateCustomerInput` from the other file available here.
     UpdateCustomerInput,
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 } from "./customer.types";
 
 
-// Study: Export `createCustomer` as an async function that returns a promise.
+// Study: Make `createCustomer` available to other files. Its result arrives after its work finishes.
 export const createCustomer = async (
-    // Study: Accept `data` with type `CreateCustomerInput & { organizationId: string; }`.
+    // Study: This step receives `data`. `CreateCustomerInput & { organizationId: string; }` describes what that information should look like.
     data: CreateCustomerInput & {
         // Study: Define `organizationId` with type `string`.
         organizationId: string;
     // Study: Close the object type.
     }
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Return `await prisma.customer.create({ data: { name: data.name, type: data.type, profileIma…` to the caller.
+    // Study: Give `await prisma.customer.create({ data: { name: data.name, type: data.type, profileIma…` back to the code that asked for it.
     return await prisma.customer.create({
         // Study: Supply the values to write to the database.
         data: {
@@ -45,88 +45,88 @@ export const createCustomer = async (
             
             // Study: Set the organization identifier used for this record or operation using `data.organizationId`.
             organizationId: data.organizationId,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
 
-// Study: Export `findCustomersByOrganizationId` as an async function that returns a promise.
+// Study: Make `findCustomersByOrganizationId` available to other files. Its result arrives after its work finishes.
 export const findCustomersByOrganizationId = async (
-    // Study: Accept `organizationId` with type `string`.
+    // Study: This step receives `organizationId`. `string` describes what that information should look like.
     organizationId: string
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Return `await prisma.customer.findMany({ where: { organizationId, }, orderBy: { createdAt: …` to the caller.
+    // Study: Give `await prisma.customer.findMany({ where: { organizationId, }, orderBy: { createdAt: …` back to the code that asked for it.
     return await prisma.customer.findMany({
-        // Study: Set the conditions that database records must match using organizationId.
+        // Study: Set the conditions that records must meet using organizationId.
         where: {
-            // Study: Pass the current `organizationId` value under the same property name.
+            // Study: Carry the value of `organizationId` into the new group under the same name.
             organizationId,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Set the sort order for the returned records.
         orderBy: {
             // Study: Set `createdAt` to `"desc"`.
             createdAt: "desc",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `findAllPlatformCustomers` as an async function that returns a promise.
+// Study: Make `findAllPlatformCustomers` available to other files. Its result arrives after its work finishes.
 export const findAllPlatformCustomers = async () => prisma.customer.findMany({
-    // Study: Load related database records with the main result.
+    // Study: Ask for linked information along with the main record.
     include: { organization: { select: { id: true, name: true } } },
     // Study: Set the sort order for the returned records.
     orderBy: { createdAt: "desc" },
-// Study: Close the object literal.
+// Study: End this group of values.
 });
 
-// Study: Export `findPlatformCustomerById` as an async function that returns a promise.
+// Study: Make `findPlatformCustomerById` available to other files. Its result arrives after its work finishes.
 export const findPlatformCustomerById = async (customerId: string) => prisma.customer.findUnique({
-    // Study: Set the conditions that database records must match using id.
+    // Study: Set the conditions that records must meet using id.
     where: { id: customerId },
-    // Study: Load related database records with the main result.
+    // Study: Ask for linked information along with the main record.
     include: { organization: { select: { id: true, name: true } } },
-// Study: Close the object literal.
+// Study: End this group of values.
 });
 
 
-// Study: Export `findCustomerByIdAndOrganization` as an async function that returns a promise.
+// Study: Make `findCustomerByIdAndOrganization` available to other files. Its result arrives after its work finishes.
 export const findCustomerByIdAndOrganization = async (
-    // Study: Accept `customerId` with type `string`.
+    // Study: This step receives `customerId`. `string` describes what that information should look like.
     customerId: string,
-    // Study: Accept `organizationId` with type `string`.
+    // Study: This step receives `organizationId`. `string` describes what that information should look like.
     organizationId: string
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Return `await prisma.customer.findFirst({ where: { id: customerId, organizationId, }, })` to the caller.
+    // Study: Give `await prisma.customer.findFirst({ where: { id: customerId, organizationId, }, })` back to the code that asked for it.
     return await prisma.customer.findFirst({
-        // Study: Set the conditions that database records must match using id, organizationId.
+        // Study: Set the conditions that records must meet using id, organizationId.
         where: {
             // Study: Set `id` to `customerId`.
             id: customerId,
-            // Study: Pass the current `organizationId` value under the same property name.
+            // Study: Carry the value of `organizationId` into the new group under the same name.
             organizationId,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `findCustomerDescendants` as an async function that returns a promise.
+// Study: Make `findCustomerDescendants` available to other files. Its result arrives after its work finishes.
 export const findCustomerDescendants = async (
-    // Study: Accept `customerId` with type `string`.
+    // Study: This step receives `customerId`. `string` describes what that information should look like.
     customerId: string,
-    // Study: Accept `organizationId` with type `string`.
+    // Study: This step receives `organizationId`. `string` describes what that information should look like.
     organizationId: string
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
     // We use a PostgreSQL Recursive CTE to fetch all descendants.
     // The UNION (without ALL) automatically deduplicates, protecting against infinite loops if a data cycle exists.
@@ -152,87 +152,87 @@ export const findCustomerDescendants = async (
         SELECT * FROM CustomerHierarchy;
     `;
 
-    // Study: Return `descendants` to the caller.
+    // Study: Give `descendants` back to the code that asked for it.
     return descendants;
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
 
 
-// Study: Export `updateCustomer` as an async function that returns a promise.
+// Study: Make `updateCustomer` available to other files. Its result arrives after its work finishes.
 export const updateCustomer = async (
-    // Study: Accept `customerId` with type `string`.
+    // Study: This step receives `customerId`. `string` describes what that information should look like.
     customerId: string,
-    // Study: Accept `organizationId` with type `string`.
+    // Study: This step receives `organizationId`. `string` describes what that information should look like.
     organizationId: string,
-    // Study: Accept `data` with type `UpdateCustomerInput`.
+    // Study: This step receives `data`. `UpdateCustomerInput` describes what that information should look like.
     data: UpdateCustomerInput
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
     // Study: Update all records matching the filters through `prisma.customer` and wait for it to finish and store its result in `result`.
     const result = await prisma.customer.updateMany({
-        // Study: Set the conditions that database records must match using id, organizationId.
+        // Study: Set the conditions that records must meet using id, organizationId.
         where: {
             // Study: Set `id` to `customerId`.
             id: customerId,
-            // Study: Pass the current `organizationId` value under the same property name.
+            // Study: Carry the value of `organizationId` into the new group under the same name.
             organizationId,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Supply the values to write to the database.
         data: {
             // Study: Expand the values from `data` into the surrounding collection.
             ...data,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
 
-    // Study: Run the following branch when `result.count === 0` is truthy.
+    // Study: Do the next step if this check passes: `result.count === 0`.
     if (result.count === 0) {
-        // Study: Return `null` to the caller.
+        // Study: Give `null` back to the code that asked for it.
         return null;
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Return `await prisma.customer.findFirst({ where: { id: customerId, organizationId } })` to the caller.
+    // Study: Give `await prisma.customer.findFirst({ where: { id: customerId, organizationId } })` back to the code that asked for it.
     return await prisma.customer.findFirst({
-        // Study: Set the conditions that database records must match using id, organizationId.
+        // Study: Set the conditions that records must meet using id, organizationId.
         where: { 
             // Study: Set `id` to `customerId`.
             id: customerId,
-            // Study: Pass the current `organizationId` value under the same property name.
+            // Study: Carry the value of `organizationId` into the new group under the same name.
             organizationId
-        // Study: Close the object literal.
+        // Study: End this group of values.
         }
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
 
-// Study: Export `deleteCustomer` as an async function that returns a promise.
+// Study: Make `deleteCustomer` available to other files. Its result arrives after its work finishes.
 export const deleteCustomer = async (
-    // Study: Accept `customerId` with type `string`.
+    // Study: This step receives `customerId`. `string` describes what that information should look like.
     customerId: string,
-    // Study: Accept `organizationId` with type `string`.
+    // Study: This step receives `organizationId`. `string` describes what that information should look like.
     organizationId: string
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
     // Study: Delete records matching the filters through `prisma.customer` and wait for it to finish and store its result in `result`.
     const result = await prisma.customer.deleteMany({
-        // Study: Set the conditions that database records must match using id, organizationId.
+        // Study: Set the conditions that records must meet using id, organizationId.
         where: {
             // Study: Set `id` to `customerId`.
             id: customerId,
-            // Study: Pass the current `organizationId` value under the same property name.
+            // Study: Carry the value of `organizationId` into the new group under the same name.
             organizationId,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
     
-    // Study: Return `result.count > 0` to the caller.
+    // Study: Give `result.count > 0` back to the code that asked for it.
     return result.count > 0;
-// Study: Close the code block.
+// Study: End this group of steps.
 };

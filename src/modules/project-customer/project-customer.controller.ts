@@ -1,42 +1,42 @@
-// Study: Translate HTTP requests into service calls and send HTTP responses for relationships between projects and customers.
-// Study: Import `{ Request, Response, NextFunction }` from `"express"`.
+// Study: This file is about which customers are connected to each job and in what role. Takes information sent by the screen, asks the backend to do the work, and sends back the result.
+// Study: Bring in `{ Request, Response, NextFunction }` from `"express"` so this file can use it.
 import { Request, Response, NextFunction } from "express";
-// Study: Import `* as projectCustomerService` from `"./project-customer.service"`.
+// Study: Bring in `* as projectCustomerService` from `"./project-customer.service"` so this file can use it.
 import * as projectCustomerService from "./project-customer.service";
-// Study: Import `{ AuthenticatedUser }` from `"../../shared/types/authenticated-user"`.
+// Study: Bring in `{ AuthenticatedUser }` from `"../../shared/types/authenticated-user"` so this file can use it.
 import { AuthenticatedUser } from "../../shared/types/authenticated-user";
-// Study: Import `{ ProjectIdAndProjectCustomerIdParams }` from `"./project-customer.types"`.
+// Study: Bring in `{ ProjectIdAndProjectCustomerIdParams }` from `"./project-customer.types"` so this file can use it.
 import { ProjectIdAndProjectCustomerIdParams } from "./project-customer.types";
-// Study: Import `{ createProjectCustomerSchema, updateProjectCustomerSchema, projectIdAndProjectCust…` from `"./project-customer.validation"`.
+// Study: Bring in `{ createProjectCustomerSchema, updateProjectCustomerSchema, projectIdAndProjectCust…` from `"./project-customer.validation"` so this file can use it.
 import {
-    // Study: Bring `createProjectCustomerSchema` into scope from the imported module.
+    // Study: Make `createProjectCustomerSchema` from the other file available here.
     createProjectCustomerSchema,
-    // Study: Bring `updateProjectCustomerSchema` into scope from the imported module.
+    // Study: Make `updateProjectCustomerSchema` from the other file available here.
     updateProjectCustomerSchema,
-    // Study: Bring `projectIdAndProjectCustomerIdParamsSchema` into scope from the imported module.
+    // Study: Make `projectIdAndProjectCustomerIdParamsSchema` from the other file available here.
     projectIdAndProjectCustomerIdParamsSchema,
-    // Study: Bring `projectIdSchema` into scope from the imported module.
+    // Study: Make `projectIdSchema` from the other file available here.
     projectIdSchema
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 } from "./project-customer.validation";
 
-// Study: Export `createProjectCustomer` as an async function that returns a promise.
+// Study: Make `createProjectCustomer` available to other files. Its result arrives after its work finishes.
 export const createProjectCustomer = async (
-    // Study: Accept `req` with type `Request<{ projectId: string }>`.
+    // Study: Read the information that came in with the request from the screen.
     req: Request<{ projectId: string }>,
-    // Study: Accept `res` with type `Response`.
+    // Study: Use this to send information or an error back to the screen.
     res: Response,
-    // Study: Accept `next` with type `NextFunction`.
+    // Study: Use this to move the request to the next check or action.
     next: NextFunction
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Run this block and handle failures in the associated catch block.
+    // Study: Try these steps. If one fails, go to the error-handling steps below.
     try {
-        // Study: Validate `req.params` with `projectIdSchema` and obtain the parsed value and store the result as `validatedParams`.
+        // Study: Check `req.params` using the rule `projectIdSchema` and obtain the parsed value and store the result as `validatedParams`.
         const validatedParams = projectIdSchema.parse(req.params);
-        // Study: Validate `req.body` with `createProjectCustomerSchema` and obtain the parsed value and store the result as `validatedBody`.
+        // Study: Check `req.body` using the rule `createProjectCustomerSchema` and obtain the parsed value and store the result as `validatedBody`.
         const validatedBody = createProjectCustomerSchema.parse(req.body);
-        // Study: Set `user` to `req.user as AuthenticatedUser`.
+        // Study: Use the signed-in account attached to this request.
         const user = req.user as AuthenticatedUser;
 
         // Study: Call `projectCustomerService.createProjectCustomer` and wait for it to finish and store its result in `result`.
@@ -49,43 +49,43 @@ export const createProjectCustomer = async (
             validatedBody,
             // Study: Supply `user` to the surrounding statement.
             user
-        // Study: Close the call arguments.
+        // Study: End the list of information being sent to this step.
         );
 
-        // Study: Send a JSON response to the client.
+        // Study: Send named information back to the screen as JSON.
         res.status(201).json({
-            // Study: Set `success` to `true`.
+            // Study: Tell the screen that the request succeeded.
             success: true,
             // Study: Set `message` to `"Project customer created successfully."`.
             message: "Project customer created successfully.",
             // Study: Set `data` to `result`.
             data: result,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
-    // Study: Handle an exception from the try block as `error`.
+    // Study: Handle a problem raised during the steps above.
     } catch (error) {
-        // Study: Pass the error to the next Express error handler.
+        // Study: Send the problem to the part of the backend that prepares an error reply.
         next(error);
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `getProjectCustomers` as an async function that returns a promise.
+// Study: Make `getProjectCustomers` available to other files. Its result arrives after its work finishes.
 export const getProjectCustomers = async (
-    // Study: Accept `req` with type `Request<{ projectId: string }>`.
+    // Study: Read the information that came in with the request from the screen.
     req: Request<{ projectId: string }>,
-    // Study: Accept `res` with type `Response`.
+    // Study: Use this to send information or an error back to the screen.
     res: Response,
-    // Study: Accept `next` with type `NextFunction`.
+    // Study: Use this to move the request to the next check or action.
     next: NextFunction
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Run this block and handle failures in the associated catch block.
+    // Study: Try these steps. If one fails, go to the error-handling steps below.
     try {
-        // Study: Validate `req.params` with `projectIdSchema` and obtain the parsed value and store the result as `validatedParams`.
+        // Study: Check `req.params` using the rule `projectIdSchema` and obtain the parsed value and store the result as `validatedParams`.
         const validatedParams = projectIdSchema.parse(req.params);
-        // Study: Set `user` to `req.user as AuthenticatedUser`.
+        // Study: Use the signed-in account attached to this request.
         const user = req.user as AuthenticatedUser;
 
         // Study: Call `projectCustomerService.getProjectCustomers` and wait for it to finish and store its result in `result`.
@@ -94,43 +94,43 @@ export const getProjectCustomers = async (
             validatedParams.projectId,
             // Study: Supply `user` to the surrounding statement.
             user
-        // Study: Close the call arguments.
+        // Study: End the list of information being sent to this step.
         );
 
-        // Study: Send a JSON response to the client.
+        // Study: Send named information back to the screen as JSON.
         res.status(200).json({
-            // Study: Set `success` to `true`.
+            // Study: Tell the screen that the request succeeded.
             success: true,
             // Study: Set `message` to `"Project customers retrieved successfully."`.
             message: "Project customers retrieved successfully.",
             // Study: Set `data` to `result`.
             data: result,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
-    // Study: Handle an exception from the try block as `error`.
+    // Study: Handle a problem raised during the steps above.
     } catch (error) {
-        // Study: Pass the error to the next Express error handler.
+        // Study: Send the problem to the part of the backend that prepares an error reply.
         next(error);
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `getProjectCustomer` as an async function that returns a promise.
+// Study: Make `getProjectCustomer` available to other files. Its result arrives after its work finishes.
 export const getProjectCustomer = async (
-    // Study: Accept `req` with type `Request<ProjectIdAndProjectCustomerIdParams>`.
+    // Study: Read the information that came in with the request from the screen.
     req: Request<ProjectIdAndProjectCustomerIdParams>,
-    // Study: Accept `res` with type `Response`.
+    // Study: Use this to send information or an error back to the screen.
     res: Response,
-    // Study: Accept `next` with type `NextFunction`.
+    // Study: Use this to move the request to the next check or action.
     next: NextFunction
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Run this block and handle failures in the associated catch block.
+    // Study: Try these steps. If one fails, go to the error-handling steps below.
     try {
-        // Study: Validate `req.params` with `projectIdAndProjectCustomerIdParamsSchema` and obtain the parsed value and store the result as `validatedParams`.
+        // Study: Check `req.params` using the rule `projectIdAndProjectCustomerIdParamsSchema` and obtain the parsed value and store the result as `validatedParams`.
         const validatedParams = projectIdAndProjectCustomerIdParamsSchema.parse(req.params);
-        // Study: Set `user` to `req.user as AuthenticatedUser`.
+        // Study: Use the signed-in account attached to this request.
         const user = req.user as AuthenticatedUser;
 
         // Study: Call `projectCustomerService.getProjectCustomer` and wait for it to finish and store its result in `result`.
@@ -141,45 +141,45 @@ export const getProjectCustomer = async (
             validatedParams.projectCustomerId,
             // Study: Supply `user` to the surrounding statement.
             user
-        // Study: Close the call arguments.
+        // Study: End the list of information being sent to this step.
         );
 
-        // Study: Send a JSON response to the client.
+        // Study: Send named information back to the screen as JSON.
         res.status(200).json({
-            // Study: Set `success` to `true`.
+            // Study: Tell the screen that the request succeeded.
             success: true,
             // Study: Set `message` to `"Project customer retrieved successfully."`.
             message: "Project customer retrieved successfully.",
             // Study: Set `data` to `result`.
             data: result,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
-    // Study: Handle an exception from the try block as `error`.
+    // Study: Handle a problem raised during the steps above.
     } catch (error) {
-        // Study: Pass the error to the next Express error handler.
+        // Study: Send the problem to the part of the backend that prepares an error reply.
         next(error);
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `updateProjectCustomer` as an async function that returns a promise.
+// Study: Make `updateProjectCustomer` available to other files. Its result arrives after its work finishes.
 export const updateProjectCustomer = async (
-    // Study: Accept `req` with type `Request<ProjectIdAndProjectCustomerIdParams>`.
+    // Study: Read the information that came in with the request from the screen.
     req: Request<ProjectIdAndProjectCustomerIdParams>,
-    // Study: Accept `res` with type `Response`.
+    // Study: Use this to send information or an error back to the screen.
     res: Response,
-    // Study: Accept `next` with type `NextFunction`.
+    // Study: Use this to move the request to the next check or action.
     next: NextFunction
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Run this block and handle failures in the associated catch block.
+    // Study: Try these steps. If one fails, go to the error-handling steps below.
     try {
-        // Study: Validate `req.params` with `projectIdAndProjectCustomerIdParamsSchema` and obtain the parsed value and store the result as `validatedParams`.
+        // Study: Check `req.params` using the rule `projectIdAndProjectCustomerIdParamsSchema` and obtain the parsed value and store the result as `validatedParams`.
         const validatedParams = projectIdAndProjectCustomerIdParamsSchema.parse(req.params);
-        // Study: Validate `req.body` with `updateProjectCustomerSchema` and obtain the parsed value and store the result as `validatedBody`.
+        // Study: Check `req.body` using the rule `updateProjectCustomerSchema` and obtain the parsed value and store the result as `validatedBody`.
         const validatedBody = updateProjectCustomerSchema.parse(req.body);
-        // Study: Set `user` to `req.user as AuthenticatedUser`.
+        // Study: Use the signed-in account attached to this request.
         const user = req.user as AuthenticatedUser;
 
         // Study: Call `projectCustomerService.updateProjectCustomer` and wait for it to finish and store its result in `result`.
@@ -192,43 +192,43 @@ export const updateProjectCustomer = async (
             validatedBody,
             // Study: Supply `user` to the surrounding statement.
             user
-        // Study: Close the call arguments.
+        // Study: End the list of information being sent to this step.
         );
 
-        // Study: Send a JSON response to the client.
+        // Study: Send named information back to the screen as JSON.
         res.status(200).json({
-            // Study: Set `success` to `true`.
+            // Study: Tell the screen that the request succeeded.
             success: true,
             // Study: Set `message` to `"Project customer updated successfully."`.
             message: "Project customer updated successfully.",
             // Study: Set `data` to `result`.
             data: result,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
-    // Study: Handle an exception from the try block as `error`.
+    // Study: Handle a problem raised during the steps above.
     } catch (error) {
-        // Study: Pass the error to the next Express error handler.
+        // Study: Send the problem to the part of the backend that prepares an error reply.
         next(error);
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `deleteProjectCustomer` as an async function that returns a promise.
+// Study: Make `deleteProjectCustomer` available to other files. Its result arrives after its work finishes.
 export const deleteProjectCustomer = async (
-    // Study: Accept `req` with type `Request<ProjectIdAndProjectCustomerIdParams>`.
+    // Study: Read the information that came in with the request from the screen.
     req: Request<ProjectIdAndProjectCustomerIdParams>,
-    // Study: Accept `res` with type `Response`.
+    // Study: Use this to send information or an error back to the screen.
     res: Response,
-    // Study: Accept `next` with type `NextFunction`.
+    // Study: Use this to move the request to the next check or action.
     next: NextFunction
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Run this block and handle failures in the associated catch block.
+    // Study: Try these steps. If one fails, go to the error-handling steps below.
     try {
-        // Study: Validate `req.params` with `projectIdAndProjectCustomerIdParamsSchema` and obtain the parsed value and store the result as `validatedParams`.
+        // Study: Check `req.params` using the rule `projectIdAndProjectCustomerIdParamsSchema` and obtain the parsed value and store the result as `validatedParams`.
         const validatedParams = projectIdAndProjectCustomerIdParamsSchema.parse(req.params);
-        // Study: Set `user` to `req.user as AuthenticatedUser`.
+        // Study: Use the signed-in account attached to this request.
         const user = req.user as AuthenticatedUser;
 
         // Study: Call `projectCustomerService.deleteProjectCustomer` and wait for it to finish and store its result in `result`.
@@ -239,24 +239,24 @@ export const deleteProjectCustomer = async (
             validatedParams.projectCustomerId,
             // Study: Supply `user` to the surrounding statement.
             user
-        // Study: Close the call arguments.
+        // Study: End the list of information being sent to this step.
         );
 
-        // Study: Send a JSON response to the client.
+        // Study: Send named information back to the screen as JSON.
         res.status(200).json({
-            // Study: Set `success` to `true`.
+            // Study: Tell the screen that the request succeeded.
             success: true,
             // Study: Set `message` to `"Project customer deleted successfully."`.
             message: "Project customer deleted successfully.",
             // Study: Set `data` to `result`.
             data: result,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
-    // Study: Handle an exception from the try block as `error`.
+    // Study: Handle a problem raised during the steps above.
     } catch (error) {
-        // Study: Pass the error to the next Express error handler.
+        // Study: Send the problem to the part of the backend that prepares an error reply.
         next(error);
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-// Study: Close the code block.
+// Study: End this group of steps.
 };

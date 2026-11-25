@@ -1,188 +1,188 @@
-// Study: Apply business rules and coordinate database operations for worker records and their professions.
-// Study: Import `* as labourRepository` from `"./labour.repository"`.
+// Study: This file is about workers and the kinds of work they do. Applies the rules for this part of the CRM, such as what must be checked before saving a change.
+// Study: Bring in `* as labourRepository` from `"./labour.repository"` so this file can use it.
 import * as labourRepository from "./labour.repository";
-// Study: Import `{ CreateLabourInput, UpdateLabourInput }` from `"./labour.types"`.
+// Study: Bring in `{ CreateLabourInput, UpdateLabourInput }` from `"./labour.types"` so this file can use it.
 import { CreateLabourInput, UpdateLabourInput } from "./labour.types";
-// Study: Import `{ NotFoundError }` from `"../../errors/NotFoundError"`.
+// Study: Bring in `{ NotFoundError }` from `"../../errors/NotFoundError"` so this file can use it.
 import { NotFoundError } from "../../errors/NotFoundError";
-// Study: Import `{ BadRequestError }` from `"../../errors/BadRequestError"`.
+// Study: Bring in `{ BadRequestError }` from `"../../errors/BadRequestError"` so this file can use it.
 import { BadRequestError } from "../../errors/BadRequestError";
-// Study: Import `{ ConflictError }` from `"../../errors/ConflictError"`.
+// Study: Bring in `{ ConflictError }` from `"../../errors/ConflictError"` so this file can use it.
 import { ConflictError } from "../../errors/ConflictError";
-// Study: Import `{ Prisma }` from `"@prisma/client"`.
+// Study: Bring in `{ Prisma }` from `"@prisma/client"` so this file can use it.
 import { Prisma } from "@prisma/client";
 
-// Study: Export `createLabour` as an async function that returns a promise.
+// Study: Make `createLabour` available to other files. Its result arrives after its work finishes.
 export const createLabour = async (
-    // Study: Accept `organizationId` with type `string`.
+    // Study: This step receives `organizationId`. `string` describes what that information should look like.
     organizationId: string,
-    // Study: Accept `data` with type `CreateLabourInput`.
+    // Study: This step receives `data`. `CreateLabourInput` describes what that information should look like.
     data: CreateLabourInput
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
     // Verify the profession exists
     // Study: Call `labourRepository.findProfessionById` and wait for it to finish and store its result in `profession`.
     const profession = await labourRepository.findProfessionById(data.professionId);
     
-    // Study: Run the following branch when `!profession` is truthy.
+    // Study: Do the next step if there is no value for `profession`.
     if (!profession) {
-        // Study: Stop this execution path by throwing `new NotFoundError("Profession not found.")`.
+        // Study: Stop here and report this problem: "Profession not found."
         throw new NotFoundError("Profession not found.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
     
-    // Study: Run the following branch when `!profession.isActive` is truthy.
+    // Study: Do the next step if this check passes: `!profession.isActive`.
     if (!profession.isActive) {
-        // Study: Stop this execution path by throwing `new BadRequestError("Cannot assign an inactive profession to a labour.")`.
+        // Study: Stop here and report this problem: "Cannot assign an inactive profession to a labour."
         throw new BadRequestError("Cannot assign an inactive profession to a labour.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // Study: Call `labourRepository.findLabourByPhone` and wait for it to finish and store its result in `existingLabour`.
     const existingLabour = await labourRepository.findLabourByPhone(organizationId, data.phone);
-    // Study: Run the following branch when `existingLabour` is truthy.
+    // Study: Do the next step if this check passes: `existingLabour`.
     if (existingLabour) {
-        // Study: Stop this execution path by throwing `new ConflictError("A labour with this phone number already exists in this organizat…`.
+        // Study: Stop here and pass the problem onward: `new ConflictError("A labour with this phone number already exists in this organizat…`.
         throw new ConflictError("A labour with this phone number already exists in this organization.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Run this block and handle failures in the associated catch block.
+    // Study: Try these steps. If one fails, go to the error-handling steps below.
     try {
         // Study: Call `labourRepository.createLabour` and wait for it to finish and store its result in `labour`.
         const labour = await labourRepository.createLabour({
             // Study: Expand the values from `data` into the surrounding collection.
             ...data,
-            // Study: Pass the current `organizationId` value under the same property name.
+            // Study: Carry the value of `organizationId` into the new group under the same name.
             organizationId,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
 
-        // Study: Return `labour` to the caller.
+        // Study: Give `labour` back to the code that asked for it.
         return labour;
-    // Study: Handle an exception from the try block as `error`.
+    // Study: Handle a problem raised during the steps above.
     } catch (error) {
-        // Study: Run the following branch when `error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002"` is truthy.
+        // Study: Do the next step if this check passes: `error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002"`.
         if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
             // Study: Set `target` to `error.meta?.target as string[] | undefined`.
             const target = error.meta?.target as string[] | undefined;
-            // Study: Run the following branch when `target && target.includes("organizationId") && target.includes("phone")` is truthy.
+            // Study: Do the next step if this check passes: `target && target.includes("organizationId") && target.includes("phone")`.
             if (target && target.includes("organizationId") && target.includes("phone")) {
-                // Study: Stop this execution path by throwing `new ConflictError("A labour with this phone number already exists in this organizat…`.
+                // Study: Stop here and pass the problem onward: `new ConflictError("A labour with this phone number already exists in this organizat…`.
                 throw new ConflictError("A labour with this phone number already exists in this organization.");
-            // Study: Close the code block.
+            // Study: End this group of steps.
             }
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
-        // Study: Stop this execution path by throwing `error`.
+        // Study: Stop here and pass the problem onward: `error`.
         throw error;
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `getOrganizationLabours` as an async function that returns a promise.
+// Study: Make `getOrganizationLabours` available to other files. Its result arrives after its work finishes.
 export const getOrganizationLabours = async (
-    // Study: Accept `organizationId` with type `string`.
+    // Study: This step receives `organizationId`. `string` describes what that information should look like.
     organizationId: string
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Return `await labourRepository.findLabours(organizationId)` to the caller.
+    // Study: Give `await labourRepository.findLabours(organizationId)` back to the code that asked for it.
     return await labourRepository.findLabours(organizationId);
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `getPlatformLabours` as an async function that returns a promise.
+// Study: Make `getPlatformLabours` available to other files. Its result arrives after its work finishes.
 export const getPlatformLabours = async () => labourRepository.findAllPlatformLabours();
-// Study: Export `getPlatformLabourById` as an async function that returns a promise.
+// Study: Make `getPlatformLabourById` available to other files. Its result arrives after its work finishes.
 export const getPlatformLabourById = async (labourId: string) => {
     // Study: Call `labourRepository.findPlatformLabourById` and wait for it to finish and store its result in `labour`.
     const labour = await labourRepository.findPlatformLabourById(labourId);
-    // Study: Run the following branch when `!labour` is truthy and throw `new NotFoundError("Labour not found.")`.
+    // Study: Do the next step if there is no value for `labour` . If so, stop and report "Labour not found."
     if (!labour) throw new NotFoundError("Labour not found.");
-    // Study: Return `labour` to the caller.
+    // Study: Give `labour` back to the code that asked for it.
     return labour;
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `getLabourById` as an async function that returns a promise.
+// Study: Make `getLabourById` available to other files. Its result arrives after its work finishes.
 export const getLabourById = async (
-    // Study: Accept `labourId` with type `string`.
+    // Study: This step receives `labourId`. `string` describes what that information should look like.
     labourId: string,
-    // Study: Accept `organizationId` with type `string`.
+    // Study: This step receives `organizationId`. `string` describes what that information should look like.
     organizationId: string
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
     // Study: Call `labourRepository.findLabourById` and wait for it to finish and store its result in `labour`.
     const labour = await labourRepository.findLabourById(labourId, organizationId);
     
-    // Study: Run the following branch when `!labour` is truthy.
+    // Study: Do the next step if there is no value for `labour`.
     if (!labour) {
-        // Study: Stop this execution path by throwing `new NotFoundError("Labour not found.")`.
+        // Study: Stop here and report this problem: "Labour not found."
         throw new NotFoundError("Labour not found.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Return `labour` to the caller.
+    // Study: Give `labour` back to the code that asked for it.
     return labour;
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `updateLabour` as an async function that returns a promise.
+// Study: Make `updateLabour` available to other files. Its result arrives after its work finishes.
 export const updateLabour = async (
-    // Study: Accept `labourId` with type `string`.
+    // Study: This step receives `labourId`. `string` describes what that information should look like.
     labourId: string,
-    // Study: Accept `organizationId` with type `string`.
+    // Study: This step receives `organizationId`. `string` describes what that information should look like.
     organizationId: string,
-    // Study: Accept `data` with type `UpdateLabourInput`.
+    // Study: This step receives `data`. `UpdateLabourInput` describes what that information should look like.
     data: UpdateLabourInput
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
     // Study: Call `labourRepository.findLabourById` and wait for it to finish and store its result in `existingLabour`.
     const existingLabour = await labourRepository.findLabourById(labourId, organizationId);
     
-    // Study: Run the following branch when `!existingLabour` is truthy.
+    // Study: Do the next step if there is no value for `existingLabour`.
     if (!existingLabour) {
-        // Study: Stop this execution path by throwing `new NotFoundError("Labour not found.")`.
+        // Study: Stop here and report this problem: "Labour not found."
         throw new NotFoundError("Labour not found.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Run the following branch when `data.professionId` is truthy.
+    // Study: Do the next step if this check passes: `data.professionId`.
     if (data.professionId) {
         // Study: Call `labourRepository.findProfessionById` and wait for it to finish and store its result in `profession`.
         const profession = await labourRepository.findProfessionById(data.professionId);
         
-        // Study: Run the following branch when `!profession` is truthy.
+        // Study: Do the next step if there is no value for `profession`.
         if (!profession) {
-            // Study: Stop this execution path by throwing `new NotFoundError("Profession not found.")`.
+            // Study: Stop here and report this problem: "Profession not found."
             throw new NotFoundError("Profession not found.");
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
         
-        // Study: Run the following branch when `!profession.isActive` is truthy.
+        // Study: Do the next step if this check passes: `!profession.isActive`.
         if (!profession.isActive) {
-            // Study: Stop this execution path by throwing `new BadRequestError("Cannot assign an inactive profession to a labour.")`.
+            // Study: Stop here and report this problem: "Cannot assign an inactive profession to a labour."
             throw new BadRequestError("Cannot assign an inactive profession to a labour.");
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Run the following branch when `data.phone && data.phone !== existingLabour.phone` is truthy.
+    // Study: Do the next step if this check passes: `data.phone && data.phone !== existingLabour.phone`.
     if (data.phone && data.phone !== existingLabour.phone) {
         // Study: Call `labourRepository.findLabourByPhone` and wait for it to finish and store its result in `phoneOwner`.
         const phoneOwner = await labourRepository.findLabourByPhone(organizationId, data.phone);
-        // Study: Run the following branch when `phoneOwner` is truthy.
+        // Study: Do the next step if this check passes: `phoneOwner`.
         if (phoneOwner) {
-            // Study: Stop this execution path by throwing `new ConflictError("A labour with this phone number already exists in this organizat…`.
+            // Study: Stop here and pass the problem onward: `new ConflictError("A labour with this phone number already exists in this organizat…`.
             throw new ConflictError("A labour with this phone number already exists in this organization.");
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Run this block and handle failures in the associated catch block.
+    // Study: Try these steps. If one fails, go to the error-handling steps below.
     try {
         // Study: Call `labourRepository.updateLabour` and wait for it to finish and store its result in `updatedLabour`.
         const updatedLabour = await labourRepository.updateLabour(
@@ -192,28 +192,28 @@ export const updateLabour = async (
             organizationId,
             // Study: Supply `data` to the surrounding statement.
             data
-        // Study: Close the call arguments.
+        // Study: End the list of information being sent to this step.
         );
 
-        // Study: Return `updatedLabour` to the caller.
+        // Study: Give `updatedLabour` back to the code that asked for it.
         return updatedLabour;
-    // Study: Handle an exception from the try block as `error`.
+    // Study: Handle a problem raised during the steps above.
     } catch (error) {
-        // Study: Run the following branch when `error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002"` is truthy.
+        // Study: Do the next step if this check passes: `error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002"`.
         if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
             // Study: Set `target` to `error.meta?.target as string[] | undefined`.
             const target = error.meta?.target as string[] | undefined;
-            // Study: Run the following branch when `target && target.includes("organizationId") && target.includes("phone")` is truthy.
+            // Study: Do the next step if this check passes: `target && target.includes("organizationId") && target.includes("phone")`.
             if (target && target.includes("organizationId") && target.includes("phone")) {
-                // Study: Stop this execution path by throwing `new ConflictError("A labour with this phone number already exists in this organizat…`.
+                // Study: Stop here and pass the problem onward: `new ConflictError("A labour with this phone number already exists in this organizat…`.
                 throw new ConflictError("A labour with this phone number already exists in this organization.");
-            // Study: Close the code block.
+            // Study: End this group of steps.
             }
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
-        // Study: Stop this execution path by throwing `error`.
+        // Study: Stop here and pass the problem onward: `error`.
         throw error;
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-// Study: Close the code block.
+// Study: End this group of steps.
 };

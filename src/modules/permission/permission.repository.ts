@@ -1,14 +1,14 @@
-// Study: Read and write database records through Prisma for the module/action permission catalog.
-// Study: Import `prisma` from `"../../lib/prisma"`.
+// Study: This file is about the list of actions people can be allowed to take. Finds or saves information in the database, where the CRM keeps its records.
+// Study: Bring in `prisma` from `"../../lib/prisma"` so this file can use it.
 import prisma from "../../lib/prisma";
-// Study: Import `{ PermissionResponse }` from `"./permission.types"`.
+// Study: Bring in `{ PermissionResponse }` from `"./permission.types"` so this file can use it.
 import { PermissionResponse } from "./permission.types";
 
-// Study: Export `getAllPermissions` as an async function that returns a promise.
+// Study: Make `getAllPermissions` available to other files. Its result arrives after its work finishes.
 export const getAllPermissions = async (): Promise<PermissionResponse[]> => {
-    // Study: Return `prisma.permission.findMany({ select: { id: true, module: true, action: true, descri…` to the caller.
+    // Study: Give `prisma.permission.findMany({ select: { id: true, module: true, action: true, descri…` back to the code that asked for it.
     return prisma.permission.findMany({
-        // Study: Choose which fields Prisma returns.
+        // Study: Choose which details the database gives back.
         select: {
             // Study: Set `id` to `true`.
             id: true,
@@ -18,7 +18,7 @@ export const getAllPermissions = async (): Promise<PermissionResponse[]> => {
             action: true,
             // Study: Set `description` to `true`.
             description: true,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Set the sort order for the returned records.
         orderBy: [
@@ -26,9 +26,9 @@ export const getAllPermissions = async (): Promise<PermissionResponse[]> => {
             { module: "asc" },
             // Study: Start the object passed to the surrounding expression.
             { action: "asc" },
-        // Study: Close the array literal.
+        // Study: End this group of values.
         ],
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };

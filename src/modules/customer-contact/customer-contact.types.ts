@@ -1,27 +1,27 @@
-// Study: Define TypeScript data contracts for contacts attached to customer accounts.
-// Study: Import `{ z }` from `"zod"`.
+// Study: This file is about the people you can contact at a customer account. Lists the names and kinds of information this part of the code expects.
+// Study: Bring in `{ z }` from `"zod"` so this file can use it.
 import { z } from "zod";
-// Study: Import `{ createCustomerContactSchema, updateCustomerContactSchema, contactIdSchema, custom…` from `"./customer-contact.validation"`.
+// Study: Bring in `{ createCustomerContactSchema, updateCustomerContactSchema, contactIdSchema, custom…` from `"./customer-contact.validation"` so this file can use it.
 import {
-    // Study: Bring `createCustomerContactSchema` into scope from the imported module.
+    // Study: Make `createCustomerContactSchema` from the other file available here.
     createCustomerContactSchema,
-    // Study: Bring `updateCustomerContactSchema` into scope from the imported module.
+    // Study: Make `updateCustomerContactSchema` from the other file available here.
     updateCustomerContactSchema,
-    // Study: Bring `contactIdSchema` into scope from the imported module.
+    // Study: Make `contactIdSchema` from the other file available here.
     contactIdSchema,
-    // Study: Bring `customerAndContactIdParamsSchema` into scope from the imported module.
+    // Study: Make `customerAndContactIdParamsSchema` from the other file available here.
     customerAndContactIdParamsSchema,
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 } from "./customer-contact.validation";
 
-// Study: Define the compile-time contract named `CreateCustomerContactInput` from the Zod schema so the types follow validation.
+// Study: Derive the expected information for `CreateCustomerContactInput` from the same rules that check submitted values.
 export type CreateCustomerContactInput = z.infer<typeof createCustomerContactSchema>;
 
-// Study: Define the compile-time contract named `UpdateCustomerContactInput` from the Zod schema so the types follow validation.
+// Study: Derive the expected information for `UpdateCustomerContactInput` from the same rules that check submitted values.
 export type UpdateCustomerContactInput = z.infer<typeof updateCustomerContactSchema>;
 
-// Study: Define the compile-time contract named `ContactIdParams` from the Zod schema so the types follow validation.
+// Study: Derive the expected information for `ContactIdParams` from the same rules that check submitted values.
 export type ContactIdParams = z.infer<typeof contactIdSchema>;
 
-// Study: Define the compile-time contract named `CustomerAndContactIdParams` from the Zod schema so the types follow validation.
+// Study: Derive the expected information for `CustomerAndContactIdParams` from the same rules that check submitted values.
 export type CustomerAndContactIdParams = z.infer<typeof customerAndContactIdParamsSchema>;

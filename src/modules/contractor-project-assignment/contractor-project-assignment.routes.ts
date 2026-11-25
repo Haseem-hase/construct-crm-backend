@@ -1,15 +1,15 @@
-// Study: Connect HTTP methods and paths to middleware and handlers for contractor placements on projects and their responsibilities.
-// Study: Import `{ Router }` from `"express"`.
+// Study: This file is about which contractors work on which jobs and what they are responsible for. Matches each request from the screen to the checks and work it needs.
+// Study: Bring in `{ Router }` from `"express"` so this file can use it.
 import { Router } from "express";
 
-// Study: Import `* as assignmentController` from `"./contractor-project-assignment.controller"`.
+// Study: Bring in `* as assignmentController` from `"./contractor-project-assignment.controller"` so this file can use it.
 import * as assignmentController from "./contractor-project-assignment.controller";
 
-// Study: Import `{ authenticate }` from `"../../middlewares/authenticate"`.
+// Study: Bring in `{ authenticate }` from `"../../middlewares/authenticate"` so this file can use it.
 import { authenticate } from "../../middlewares/authenticate";
-// Study: Import `{ authorize }` from `"../../middlewares/authorize"`.
+// Study: Bring in `{ authorize }` from `"../../middlewares/authorize"` so this file can use it.
 import { authorize } from "../../middlewares/authorize";
-// Study: Import `{ Module, Action }` from `"@prisma/client"`.
+// Study: Bring in `{ Module, Action }` from `"@prisma/client"` so this file can use it.
 import { Module, Action } from "@prisma/client";
 
 // Study: Call `Router` and store the result as `router`.
@@ -22,11 +22,11 @@ router.post(
     "/",
     // Study: Supply `authenticate` to the surrounding statement.
     authenticate,
-    // Study: Call `authorize`.
+    // Study: Check that the signed-in person has permission for the action listed here.
     authorize(Module.CONTRACTOR, Action.ASSIGN),
     // Study: Supply `assignmentController` to the surrounding statement.
     assignmentController.createAssignment
-// Study: Close the call arguments.
+// Study: End the list of information being sent to this step.
 );
 
 // Get Assignments
@@ -36,11 +36,11 @@ router.get(
     "/",
     // Study: Supply `authenticate` to the surrounding statement.
     authenticate,
-    // Study: Call `authorize`.
+    // Study: Check that the signed-in person has permission for the action listed here.
     authorize(Module.CONTRACTOR, Action.VIEW),
     // Study: Supply `assignmentController` to the surrounding statement.
     assignmentController.getAssignments
-// Study: Close the call arguments.
+// Study: End the list of information being sent to this step.
 );
 
 // Get Assignment By ID
@@ -50,11 +50,11 @@ router.get(
     "/:id",
     // Study: Supply `authenticate` to the surrounding statement.
     authenticate,
-    // Study: Call `authorize`.
+    // Study: Check that the signed-in person has permission for the action listed here.
     authorize(Module.CONTRACTOR, Action.VIEW),
     // Study: Supply `assignmentController` to the surrounding statement.
     assignmentController.getAssignmentById
-// Study: Close the call arguments.
+// Study: End the list of information being sent to this step.
 );
 
 // Update Assignment
@@ -64,12 +64,12 @@ router.patch(
     "/:id",
     // Study: Supply `authenticate` to the surrounding statement.
     authenticate,
-    // Study: Call `authorize`.
+    // Study: Check that the signed-in person has permission for the action listed here.
     authorize(Module.CONTRACTOR, Action.UPDATE),
     // Study: Supply `assignmentController` to the surrounding statement.
     assignmentController.updateAssignment
-// Study: Close the call arguments.
+// Study: End the list of information being sent to this step.
 );
 
-// Study: Expose `router` as the default export.
+// Study: Make `router` the main thing other files can get from this file.
 export default router;

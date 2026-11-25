@@ -1,20 +1,20 @@
-// Study: Define TypeScript data contracts for relationships between projects and customers.
-// Study: Import `{ z }` from `"zod"`.
+// Study: This file is about which customers are connected to each job and in what role. Lists the names and kinds of information this part of the code expects.
+// Study: Bring in `{ z }` from `"zod"` so this file can use it.
 import { z } from "zod";
-// Study: Import `{ createProjectCustomerSchema, updateProjectCustomerSchema, projectIdAndProjectCust…` from `"./project-customer.validation"`.
+// Study: Bring in `{ createProjectCustomerSchema, updateProjectCustomerSchema, projectIdAndProjectCust…` from `"./project-customer.validation"` so this file can use it.
 import {
-    // Study: Bring `createProjectCustomerSchema` into scope from the imported module.
+    // Study: Make `createProjectCustomerSchema` from the other file available here.
     createProjectCustomerSchema,
-    // Study: Bring `updateProjectCustomerSchema` into scope from the imported module.
+    // Study: Make `updateProjectCustomerSchema` from the other file available here.
     updateProjectCustomerSchema,
-    // Study: Bring `projectIdAndProjectCustomerIdParamsSchema` into scope from the imported module.
+    // Study: Make `projectIdAndProjectCustomerIdParamsSchema` from the other file available here.
     projectIdAndProjectCustomerIdParamsSchema
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 } from "./project-customer.validation";
 
-// Study: Define the compile-time contract named `CreateProjectCustomerInput` from the Zod schema so the types follow validation.
+// Study: Derive the expected information for `CreateProjectCustomerInput` from the same rules that check submitted values.
 export type CreateProjectCustomerInput = z.infer<typeof createProjectCustomerSchema>;
-// Study: Define the compile-time contract named `UpdateProjectCustomerInput` from the Zod schema so the types follow validation.
+// Study: Derive the expected information for `UpdateProjectCustomerInput` from the same rules that check submitted values.
 export type UpdateProjectCustomerInput = z.infer<typeof updateProjectCustomerSchema>;
-// Study: Define the compile-time contract named `ProjectIdAndProjectCustomerIdParams` from the Zod schema so the types follow validation.
+// Study: Derive the expected information for `ProjectIdAndProjectCustomerIdParams` from the same rules that check submitted values.
 export type ProjectIdAndProjectCustomerIdParams = z.infer<typeof projectIdAndProjectCustomerIdParamsSchema>;

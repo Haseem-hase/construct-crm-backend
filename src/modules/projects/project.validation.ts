@@ -1,40 +1,40 @@
-// Study: Use Zod to parse and validate inputs for construction projects, their site details, and image galleries.
-// Study: Import `{ z }` from `"zod"`.
+// Study: This file is about construction jobs, their site details, and their photos. Checks whether incoming information is complete and in the expected form.
+// Study: Bring in `{ z }` from `"zod"` so this file can use it.
 import { z } from "zod";
 
-// Study: Define `formNullToNull` as a reusable function.
+// Study: Set up a reusable step named `formNullToNull`.
 const formNullToNull = (value: unknown) => value === null || value === "null" ? null : value;
-// Study: Build a Zod validation rule with `z.string().trim().max(2048).refine` and store the result as `projectImageUrl`.
+// Study: Set up a check for incoming information using `z.string().trim().max(2048).refine` and store the result as `projectImageUrl`.
 const projectImageUrl = z.string().trim().max(2048).refine(
     // Study: Accept `value`.
     value => /^\/uploads\/projects\/[0-9a-f-]{36}\/[a-zA-Z0-9-]+\.(jpg|png|webp)$/i.test(value) || z.string().url().safeParse(value).success,
     // Study: Supply the literal string `"Use a valid project image URL."` here.
     "Use a valid project image URL."
-// Study: Close the call arguments.
+// Study: End the list of information being sent to this step.
 );
 
 // Study: Build the object `imageDetails` with the entries below.
 const imageDetails = {
-    // Study: Validate `kind` with `z.enum(["DESIGN", "SITE"]).optional()`.
+    // Study: Check `kind` using the rule `z.enum(["DESIGN", "SITE"]).optional()`.
     kind: z.enum(["DESIGN", "SITE"]).optional(),
-    // Study: Validate `visitedAt` with `z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(value => { const date = new Date(val…`.
+    // Study: Check `visitedAt` using the rule `z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(value => { const date = new Date(val…`.
     visitedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(value => { const date = new Date(value); return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value; }, "Use a valid visit date.").nullable().optional(),
-    // Study: Validate `siteStage` with `z.enum(["BEFORE_WORK", "IN_PROGRESS", "COMPLETED"]).nullable().optional()`.
+    // Study: Check `siteStage` using the rule `z.enum(["BEFORE_WORK", "IN_PROGRESS", "COMPLETED"]).nullable().optional()`.
     siteStage: z.enum(["BEFORE_WORK", "IN_PROGRESS", "COMPLETED"]).nullable().optional(),
-    // Study: Validate `areaSqFt` with `z.number().positive().max(9999999999.99).nullable().optional()`.
+    // Study: Check `areaSqFt` using the rule `z.number().positive().max(9999999999.99).nullable().optional()`.
     areaSqFt: z.number().positive().max(9999999999.99).nullable().optional(),
-    // Study: Validate `notes` with `z.string().trim().max(2000).nullable().optional()`.
+    // Study: Check `notes` using the rule `z.string().trim().max(2000).nullable().optional()`.
     notes: z.string().trim().max(2000).nullable().optional(),
-// Study: Close the object literal.
+// Study: End this group of values.
 };
 
-// Study: Build a Zod validation rule with `z.array(z.discriminatedUnion("source", [ z.object({ ...imageDetails, source: z.lite…` and store the result as `projectGallerySchema`.
+// Study: Set up a check for incoming information using `z.array(z.discriminatedUnion("source", [ z.object({ ...imageDetails, source: z.lite…` and store the result as `projectGallerySchema`.
 export const projectGallerySchema = z.array(z.discriminatedUnion("source", [
-    // Study: Build a Zod validation rule with `z.object({ ...imageDetails, source: z.literal("existing"), id: z.string().uuid(), i…`.
+    // Study: Set up a check for incoming information using `z.object({ ...imageDetails, source: z.literal("existing"), id: z.string().uuid(), i…`.
     z.object({ ...imageDetails, source: z.literal("existing"), id: z.string().uuid(), isCover: z.boolean() }).strict(),
-    // Study: Build a Zod validation rule with `z.object({ ...imageDetails, source: z.literal("upload"), uploadIndex: z.number().in…`.
+    // Study: Set up a check for incoming information using `z.object({ ...imageDetails, source: z.literal("upload"), uploadIndex: z.number().in…`.
     z.object({ ...imageDetails, source: z.literal("upload"), uploadIndex: z.number().int().min(0).max(9), isCover: z.boolean(), alt: z.string().trim().max(255).optional() }).strict(),
-    // Study: Build a Zod validation rule with `z.object({ ...imageDetails, source: z.literal("url"), url: projectImageUrl, isCover…`.
+    // Study: Set up a check for incoming information using `z.object({ ...imageDetails, source: z.literal("url"), url: projectImageUrl, isCover…`.
     z.object({ ...imageDetails, source: z.literal("url"), url: projectImageUrl, isCover: z.boolean(), alt: z.string().trim().max(255).optional() }).strict(),
 // Study: Keep the items in `images` that satisfy the predicate.
 ])).max(200).refine(images => images.length === 0 || images.filter(image => image.isCover).length === 1, "Choose exactly one cover image.")
@@ -42,47 +42,47 @@ export const projectGallerySchema = z.array(z.discriminatedUnion("source", [
     .refine(images => {
         // Study: Transform each item in `images.filter(image => image.source === "upload")` and store the result as `indexes`.
         const indexes = images.filter(image => image.source === "upload").map(image => image.uploadIndex);
-        // Study: Return `indexes.length === new Set(indexes).size` to the caller.
+        // Study: Give `indexes.length === new Set(indexes).size` back to the code that asked for it.
         return indexes.length === new Set(indexes).size;
-    // Study: Close this group and continue the enclosing expression.
+    // Study: Finish this group and continue the surrounding step.
     }, "An uploaded image can only appear once.")
     // Study: Apply a custom validation rule.
     .refine(images => {
         // Study: Transform each item in `images.filter(image => image.source === "existing")` and store the result as `ids`.
         const ids = images.filter(image => image.source === "existing").map(image => image.id);
-        // Study: Return `ids.length === new Set(ids).size` to the caller.
+        // Study: Give `ids.length === new Set(ids).size` back to the code that asked for it.
         return ids.length === new Set(ids).size;
-    // Study: Close this group and continue the enclosing expression.
+    // Study: Finish this group and continue the surrounding step.
     }, "An existing image can only appear once.");
 
-// Study: Define the compile-time contract named `ProjectGalleryPlan` from the Zod schema so the types follow validation.
+// Study: Derive the expected information for `ProjectGalleryPlan` from the same rules that check submitted values.
 export type ProjectGalleryPlan = z.infer<typeof projectGallerySchema>;
 
-// Study: Build a Zod validation rule with `z.object({ name: z .string() .trim() .min(3, "Project name must be at least 3 chara…` and store the result as `createProjectSchema`.
+// Study: Set up a check for incoming information using `z.object({ name: z .string() .trim() .min(3, "Project name must be at least 3 chara…` and store the result as `createProjectSchema`.
 export const createProjectSchema = z.object({
     // Study: Set `name` to `z .string() .trim() .min(3, "Project name must be at least 3 characters.") .max(150)`.
     name: z
-        // Study: Continue the chain with `string`.
+        // Study: Require this value to be text.
         .string()
-        // Study: Remove surrounding whitespace.
+        // Study: Remove extra spaces at the beginning and end of the text.
         .trim()
-        // Study: Enforce a minimum value or length.
+        // Study: Require at least 3 here. For text, the limit counts characters.
         .min(3, "Project name must be at least 3 characters.")
-        // Study: Enforce a maximum value or length.
+        // Study: Require at most 150 here. For text, the limit counts characters.
         .max(150),
 
     // Study: Set `description` to `z .string() .trim() .max(1000) .optional()`.
     description: z
-        // Study: Continue the chain with `string`.
+        // Study: Require this value to be text.
         .string()
-        // Study: Remove surrounding whitespace.
+        // Study: Remove extra spaces at the beginning and end of the text.
         .trim()
-        // Study: Enforce a maximum value or length.
+        // Study: Require at most 1000 here. For text, the limit counts characters.
         .max(1000)
         // Study: Allow this value to be omitted.
         .optional(),
 
-    // Study: Validate `areaSqFt` with `z.coerce.number().positive().max(9999999999.99).optional()`.
+    // Study: Check `areaSqFt` using the rule `z.coerce.number().positive().max(9999999999.99).optional()`.
     areaSqFt: z.coerce.number().positive().max(9999999999.99).optional(),
     // Study: Set `imageUrl` to `projectImageUrl.optional()`.
     imageUrl: projectImageUrl.optional(),
@@ -98,31 +98,31 @@ export const createProjectSchema = z.object({
 
     // Study: Set `country` to `z .string() .trim() .max(100)`.
     country: z
-        // Study: Continue the chain with `string`.
+        // Study: Require this value to be text.
         .string()
-        // Study: Remove surrounding whitespace.
+        // Study: Remove extra spaces at the beginning and end of the text.
         .trim()
-        // Study: Enforce a maximum value or length.
+        // Study: Require at most 100 here. For text, the limit counts characters.
         .max(100),
 
     // Study: Set `city` to `z .string() .trim() .max(100) .optional()`.
     city: z
-        // Study: Continue the chain with `string`.
+        // Study: Require this value to be text.
         .string()
-        // Study: Remove surrounding whitespace.
+        // Study: Remove extra spaces at the beginning and end of the text.
         .trim()
-        // Study: Enforce a maximum value or length.
+        // Study: Require at most 100 here. For text, the limit counts characters.
         .max(100)
         // Study: Allow this value to be omitted.
         .optional(),
 
     // Study: Set `address` to `z .string() .trim() .max(255) .optional()`.
     address: z
-        // Study: Continue the chain with `string`.
+        // Study: Require this value to be text.
         .string()
-        // Study: Remove surrounding whitespace.
+        // Study: Remove extra spaces at the beginning and end of the text.
         .trim()
-        // Study: Enforce a maximum value or length.
+        // Study: Require at most 255 here. For text, the limit counts characters.
         .max(255)
         // Study: Allow this value to be omitted.
         .optional(),
@@ -133,9 +133,9 @@ export const createProjectSchema = z.object({
         .coerce
         // Study: Continue the chain with `number`.
         .number()
-        // Study: Enforce a minimum value or length.
+        // Study: Check that the value or its length stays within the at least limit.
         .min(-90)
-        // Study: Enforce a maximum value or length.
+        // Study: Require at most 90 here. For text, the limit counts characters.
         .max(90)
         // Study: Allow this value to be omitted.
         .optional(),
@@ -146,9 +146,9 @@ export const createProjectSchema = z.object({
         .coerce
         // Study: Continue the chain with `number`.
         .number()
-        // Study: Enforce a minimum value or length.
+        // Study: Check that the value or its length stays within the at least limit.
         .min(-180)
-        // Study: Enforce a maximum value or length.
+        // Study: Require at most 180 here. For text, the limit counts characters.
         .max(180)
         // Study: Allow this value to be omitted.
         .optional(),
@@ -197,9 +197,9 @@ export const createProjectSchema = z.object({
         .number()
         // Study: Continue the chain with `int`.
         .int()
-        // Study: Enforce a minimum value or length.
+        // Study: Require at least 0 here. For text, the limit counts characters.
         .min(0)
-        // Study: Enforce a maximum value or length.
+        // Study: Require at most 100 here. For text, the limit counts characters.
         .max(100)
         // Study: Use this default when no value is provided.
         .default(0)
@@ -219,25 +219,25 @@ export const createProjectSchema = z.object({
 
     // Study: Set `customerId` to `z .string() .uuid("Invalid customer ID.") .optional()`.
     customerId: z
-        // Study: Continue the chain with `string`.
+        // Study: Require this value to be text.
         .string()
         // Study: Continue the chain with `uuid`.
         .uuid("Invalid customer ID.")
         // Study: Allow this value to be omitted.
         .optional(),
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 }).strict().refine(
     // Study: Supply `data` to the surrounding statement.
     (data) => {
-        // Study: Run the following branch when `data.plannedStartDate && data.plannedEndDate` is truthy.
+        // Study: Do the next step if this check passes: `data.plannedStartDate && data.plannedEndDate`.
         if (data.plannedStartDate && data.plannedEndDate) {
-            // Study: Return `data.plannedEndDate >= data.plannedStartDate` to the caller.
+            // Study: Give `data.plannedEndDate >= data.plannedStartDate` back to the code that asked for it.
             return data.plannedEndDate >= data.plannedStartDate;
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
-        // Study: Return `true` to the caller.
+        // Study: Give `true` back to the code that asked for it.
         return true;
-    // Study: Close the code block.
+    // Study: End this group of steps.
     },
     // Study: Start the object passed to the surrounding expression.
     {
@@ -245,21 +245,21 @@ export const createProjectSchema = z.object({
         message: "Planned end date must be after planned start date.",
         // Study: Start the nested value for `path`.
         path: ["plannedEndDate"],
-    // Study: Close the object literal.
+    // Study: End this group of values.
     }
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ).refine(
     // Study: Supply `data` to the surrounding statement.
     (data) => {
-        // Study: Run the following branch when `data.actualStartDate && data.actualEndDate` is truthy.
+        // Study: Do the next step if this check passes: `data.actualStartDate && data.actualEndDate`.
         if (data.actualStartDate && data.actualEndDate) {
-            // Study: Return `data.actualEndDate >= data.actualStartDate` to the caller.
+            // Study: Give `data.actualEndDate >= data.actualStartDate` back to the code that asked for it.
             return data.actualEndDate >= data.actualStartDate;
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
-        // Study: Return `true` to the caller.
+        // Study: Give `true` back to the code that asked for it.
         return true;
-    // Study: Close the code block.
+    // Study: End this group of steps.
     },
     // Study: Start the object passed to the surrounding expression.
     {
@@ -267,42 +267,42 @@ export const createProjectSchema = z.object({
         message: "Actual end date must be after actual start date.",
         // Study: Start the nested value for `path`.
         path: ["actualEndDate"],
-    // Study: Close the object literal.
+    // Study: End this group of values.
     }
-// Study: Close the call arguments.
+// Study: End the list of information being sent to this step.
 );
 
-// Study: Build a Zod validation rule with `z.object({ name: z .string() .trim() .min(3) .max(150) .optional(), description: z.…` and store the result as `updateProjectSchema`.
+// Study: Set up a check for incoming information using `z.object({ name: z .string() .trim() .min(3) .max(150) .optional(), description: z.…` and store the result as `updateProjectSchema`.
 export const updateProjectSchema = z.object({
     // Study: Set `name` to `z .string() .trim() .min(3) .max(150) .optional()`.
     name: z
-        // Study: Continue the chain with `string`.
+        // Study: Require this value to be text.
         .string()
-        // Study: Remove surrounding whitespace.
+        // Study: Remove extra spaces at the beginning and end of the text.
         .trim()
-        // Study: Enforce a minimum value or length.
+        // Study: Require at least 3 here. For text, the limit counts characters.
         .min(3)
-        // Study: Enforce a maximum value or length.
+        // Study: Require at most 150 here. For text, the limit counts characters.
         .max(150)
         // Study: Allow this value to be omitted.
         .optional(),
 
-    // Study: Validate `description` with `z.preprocess(formNullToNull, z .string() .trim() .max(1000) .nullable() .optional())`.
+    // Study: Check `description` using the rule `z.preprocess(formNullToNull, z .string() .trim() .max(1000) .nullable() .optional())`.
     description: z.preprocess(formNullToNull, z
-        // Study: Continue the chain with `string`.
+        // Study: Require this value to be text.
         .string()
-        // Study: Remove surrounding whitespace.
+        // Study: Remove extra spaces at the beginning and end of the text.
         .trim()
-        // Study: Enforce a maximum value or length.
+        // Study: Require at most 1000 here. For text, the limit counts characters.
         .max(1000)
         // Study: Allow an explicit null value.
         .nullable()
         // Study: Allow this value to be omitted.
         .optional()),
 
-    // Study: Validate `areaSqFt` with `z.preprocess(formNullToNull, z.coerce.number().positive().max(9999999999.99).nullab…`.
+    // Study: Check `areaSqFt` using the rule `z.preprocess(formNullToNull, z.coerce.number().positive().max(9999999999.99).nullab…`.
     areaSqFt: z.preprocess(formNullToNull, z.coerce.number().positive().max(9999999999.99).nullable().optional()),
-    // Study: Validate `imageUrl` with `z.preprocess(formNullToNull, projectImageUrl.nullable().optional())`.
+    // Study: Check `imageUrl` using the rule `z.preprocess(formNullToNull, projectImageUrl.nullable().optional())`.
     imageUrl: z.preprocess(formNullToNull, projectImageUrl.nullable().optional()),
 
     // Study: Set `status` to `z .enum(["PLANNING", "ACTIVE", "ON_HOLD", "COMPLETED", "CANCELLED"]) .optional()`.
@@ -314,68 +314,68 @@ export const updateProjectSchema = z.object({
 
     // Study: Set `country` to `z .string() .trim() .max(100) .optional()`.
     country: z
-        // Study: Continue the chain with `string`.
+        // Study: Require this value to be text.
         .string()
-        // Study: Remove surrounding whitespace.
+        // Study: Remove extra spaces at the beginning and end of the text.
         .trim()
-        // Study: Enforce a maximum value or length.
+        // Study: Require at most 100 here. For text, the limit counts characters.
         .max(100)
         // Study: Allow this value to be omitted.
         .optional(),
 
-    // Study: Validate `city` with `z.preprocess(formNullToNull, z .string() .trim() .max(100) .nullable() .optional())`.
+    // Study: Check `city` using the rule `z.preprocess(formNullToNull, z .string() .trim() .max(100) .nullable() .optional())`.
     city: z.preprocess(formNullToNull, z
-        // Study: Continue the chain with `string`.
+        // Study: Require this value to be text.
         .string()
-        // Study: Remove surrounding whitespace.
+        // Study: Remove extra spaces at the beginning and end of the text.
         .trim()
-        // Study: Enforce a maximum value or length.
+        // Study: Require at most 100 here. For text, the limit counts characters.
         .max(100)
         // Study: Allow an explicit null value.
         .nullable()
         // Study: Allow this value to be omitted.
         .optional()),
 
-    // Study: Validate `address` with `z.preprocess(formNullToNull, z .string() .trim() .max(255) .nullable() .optional())`.
+    // Study: Check `address` using the rule `z.preprocess(formNullToNull, z .string() .trim() .max(255) .nullable() .optional())`.
     address: z.preprocess(formNullToNull, z
-        // Study: Continue the chain with `string`.
+        // Study: Require this value to be text.
         .string()
-        // Study: Remove surrounding whitespace.
+        // Study: Remove extra spaces at the beginning and end of the text.
         .trim()
-        // Study: Enforce a maximum value or length.
+        // Study: Require at most 255 here. For text, the limit counts characters.
         .max(255)
         // Study: Allow an explicit null value.
         .nullable()
         // Study: Allow this value to be omitted.
         .optional()),
 
-    // Study: Validate `latitude` with `z.preprocess(formNullToNull, z .coerce.number() .min(-90) .max(90) .nullable() .opt…`.
+    // Study: Check `latitude` using the rule `z.preprocess(formNullToNull, z .coerce.number() .min(-90) .max(90) .nullable() .opt…`.
     latitude: z.preprocess(formNullToNull, z
         // Study: Supply `coerce` to the surrounding statement.
         .coerce.number()
-        // Study: Enforce a minimum value or length.
+        // Study: Check that the value or its length stays within the at least limit.
         .min(-90)
-        // Study: Enforce a maximum value or length.
+        // Study: Require at most 90 here. For text, the limit counts characters.
         .max(90)
         // Study: Allow an explicit null value.
         .nullable()
         // Study: Allow this value to be omitted.
         .optional()),
 
-    // Study: Validate `longitude` with `z.preprocess(formNullToNull, z .coerce.number() .min(-180) .max(180) .nullable() .o…`.
+    // Study: Check `longitude` using the rule `z.preprocess(formNullToNull, z .coerce.number() .min(-180) .max(180) .nullable() .o…`.
     longitude: z.preprocess(formNullToNull, z
         // Study: Supply `coerce` to the surrounding statement.
         .coerce.number()
-        // Study: Enforce a minimum value or length.
+        // Study: Check that the value or its length stays within the at least limit.
         .min(-180)
-        // Study: Enforce a maximum value or length.
+        // Study: Require at most 180 here. For text, the limit counts characters.
         .max(180)
         // Study: Allow an explicit null value.
         .nullable()
         // Study: Allow this value to be omitted.
         .optional()),
 
-    // Study: Validate `plannedStartDate` with `z.preprocess(formNullToNull, z .coerce.date() .nullable() .optional())`.
+    // Study: Check `plannedStartDate` using the rule `z.preprocess(formNullToNull, z .coerce.date() .nullable() .optional())`.
     plannedStartDate: z.preprocess(formNullToNull, z
         // Study: Supply `coerce` to the surrounding statement.
         .coerce.date()
@@ -384,7 +384,7 @@ export const updateProjectSchema = z.object({
         // Study: Allow this value to be omitted.
         .optional()),
 
-    // Study: Validate `plannedEndDate` with `z.preprocess(formNullToNull, z .coerce.date() .nullable() .optional())`.
+    // Study: Check `plannedEndDate` using the rule `z.preprocess(formNullToNull, z .coerce.date() .nullable() .optional())`.
     plannedEndDate: z.preprocess(formNullToNull, z
         // Study: Supply `coerce` to the surrounding statement.
         .coerce.date()
@@ -393,7 +393,7 @@ export const updateProjectSchema = z.object({
         // Study: Allow this value to be omitted.
         .optional()),
 
-    // Study: Validate `actualStartDate` with `z.preprocess(formNullToNull, z .coerce.date() .nullable() .optional())`.
+    // Study: Check `actualStartDate` using the rule `z.preprocess(formNullToNull, z .coerce.date() .nullable() .optional())`.
     actualStartDate: z.preprocess(formNullToNull, z
         // Study: Supply `coerce` to the surrounding statement.
         .coerce.date()
@@ -402,7 +402,7 @@ export const updateProjectSchema = z.object({
         // Study: Allow this value to be omitted.
         .optional()),
 
-    // Study: Validate `actualEndDate` with `z.preprocess(formNullToNull, z .coerce.date() .nullable() .optional())`.
+    // Study: Check `actualEndDate` using the rule `z.preprocess(formNullToNull, z .coerce.date() .nullable() .optional())`.
     actualEndDate: z.preprocess(formNullToNull, z
         // Study: Supply `coerce` to the surrounding statement.
         .coerce.date()
@@ -419,14 +419,14 @@ export const updateProjectSchema = z.object({
         .number()
         // Study: Continue the chain with `int`.
         .int()
-        // Study: Enforce a minimum value or length.
+        // Study: Require at least 0 here. For text, the limit counts characters.
         .min(0)
-        // Study: Enforce a maximum value or length.
+        // Study: Require at most 100 here. For text, the limit counts characters.
         .max(100)
         // Study: Allow this value to be omitted.
         .optional(),
 
-    // Study: Validate `budget` with `z.preprocess(formNullToNull, z .coerce.number() .nonnegative() .nullable() .optiona…`.
+    // Study: Check `budget` using the rule `z.preprocess(formNullToNull, z .coerce.number() .nonnegative() .nullable() .optiona…`.
     budget: z.preprocess(formNullToNull, z
         // Study: Supply `coerce` to the surrounding statement.
         .coerce.number()
@@ -436,7 +436,7 @@ export const updateProjectSchema = z.object({
         .nullable()
         // Study: Allow this value to be omitted.
         .optional()),
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 }).strict().refine(
     // Study: Supply `data` to the surrounding statement.
     (data) => Object.keys(data).length > 0,
@@ -444,21 +444,21 @@ export const updateProjectSchema = z.object({
     {
         // Study: Set `message` to `"At least one field must be provided for update."`.
         message: "At least one field must be provided for update.",
-    // Study: Close the object literal.
+    // Study: End this group of values.
     }
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ).refine(
     // Study: Supply `data` to the surrounding statement.
     (data) => {
-        // Study: Run the following branch when `data.plannedStartDate && data.plannedEndDate` is truthy.
+        // Study: Do the next step if this check passes: `data.plannedStartDate && data.plannedEndDate`.
         if (data.plannedStartDate && data.plannedEndDate) {
-            // Study: Return `data.plannedEndDate >= data.plannedStartDate` to the caller.
+            // Study: Give `data.plannedEndDate >= data.plannedStartDate` back to the code that asked for it.
             return data.plannedEndDate >= data.plannedStartDate;
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
-        // Study: Return `true` to the caller.
+        // Study: Give `true` back to the code that asked for it.
         return true;
-    // Study: Close the code block.
+    // Study: End this group of steps.
     },
     // Study: Start the object passed to the surrounding expression.
     {
@@ -466,21 +466,21 @@ export const updateProjectSchema = z.object({
         message: "Planned end date must be after planned start date.",
         // Study: Start the nested value for `path`.
         path: ["plannedEndDate"],
-    // Study: Close the object literal.
+    // Study: End this group of values.
     }
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ).refine(
     // Study: Supply `data` to the surrounding statement.
     (data) => {
-        // Study: Run the following branch when `data.actualStartDate && data.actualEndDate` is truthy.
+        // Study: Do the next step if this check passes: `data.actualStartDate && data.actualEndDate`.
         if (data.actualStartDate && data.actualEndDate) {
-            // Study: Return `data.actualEndDate >= data.actualStartDate` to the caller.
+            // Study: Give `data.actualEndDate >= data.actualStartDate` back to the code that asked for it.
             return data.actualEndDate >= data.actualStartDate;
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
-        // Study: Return `true` to the caller.
+        // Study: Give `true` back to the code that asked for it.
         return true;
-    // Study: Close the code block.
+    // Study: End this group of steps.
     },
     // Study: Start the object passed to the surrounding expression.
     {
@@ -488,14 +488,14 @@ export const updateProjectSchema = z.object({
         message: "Actual end date must be after actual start date.",
         // Study: Start the nested value for `path`.
         path: ["actualEndDate"],
-    // Study: Close the object literal.
+    // Study: End this group of values.
     }
-// Study: Close the call arguments.
+// Study: End the list of information being sent to this step.
 );
 
-// Study: Build a Zod validation rule with `z.object` and store the result as `projectIdSchema`.
+// Study: Set up a check for incoming information using `z.object` and store the result as `projectIdSchema`.
 export const projectIdSchema = z.object({
-    // Study: Validate `projectId` with `z.string().uuid("Invalid project ID.")`.
+    // Study: Check `projectId` using the rule `z.string().uuid("Invalid project ID.")`.
     projectId: z.string().uuid("Invalid project ID."),
-// Study: Close the object literal.
+// Study: End this group of values.
 });

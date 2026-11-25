@@ -1,128 +1,128 @@
-// Study: Apply business rules and coordinate database operations for role templates, organization roles, and permission assignments.
-// Study: Import `{ BadRequestError }` from `"../../errors/BadRequestError"`.
+// Study: This file is about job roles in each company and the actions people in those roles may take. Applies the rules for this part of the CRM, such as what must be checked before saving a change.
+// Study: Bring in `{ BadRequestError }` from `"../../errors/BadRequestError"` so this file can use it.
 import { BadRequestError } from "../../errors/BadRequestError";
-// Study: Import `{ ForbiddenError }` from `"../../errors/ForbiddenError"`.
+// Study: Bring in `{ ForbiddenError }` from `"../../errors/ForbiddenError"` so this file can use it.
 import { ForbiddenError } from "../../errors/ForbiddenError";
-// Study: Import `{ NotFoundError }` from `"../../errors/NotFoundError"`.
+// Study: Bring in `{ NotFoundError }` from `"../../errors/NotFoundError"` so this file can use it.
 import { NotFoundError } from "../../errors/NotFoundError";
-// Study: Import `{ countUsersWithOrganizationRole, createGlobalRole, createOrganizationRole, deleteG…` from `"./role.repository"`.
+// Study: Bring in `{ countUsersWithOrganizationRole, createGlobalRole, createOrganizationRole, deleteG…` from `"./role.repository"` so this file can use it.
 import { 
-    // Study: Bring `countUsersWithOrganizationRole` into scope from the imported module.
+    // Study: Make `countUsersWithOrganizationRole` from the other file available here.
     countUsersWithOrganizationRole, 
-    // Study: Bring `createGlobalRole` into scope from the imported module.
+    // Study: Make `createGlobalRole` from the other file available here.
     createGlobalRole, 
-    // Study: Bring `createOrganizationRole` into scope from the imported module.
+    // Study: Make `createOrganizationRole` from the other file available here.
     createOrganizationRole, 
-    // Study: Bring `deleteGlobalRole` into scope from the imported module.
+    // Study: Make `deleteGlobalRole` from the other file available here.
     deleteGlobalRole, 
-    // Study: Bring `deleteOrganizationRole` into scope from the imported module.
+    // Study: Make `deleteOrganizationRole` from the other file available here.
     deleteOrganizationRole, 
-    // Study: Bring `findGlobalRoleById` into scope from the imported module.
+    // Study: Make `findGlobalRoleById` from the other file available here.
     findGlobalRoleById, 
-    // Study: Bring `findGlobalRoleByName` into scope from the imported module.
+    // Study: Make `findGlobalRoleByName` from the other file available here.
     findGlobalRoleByName, 
-    // Study: Bring `findGlobalRoles` into scope from the imported module.
+    // Study: Make `findGlobalRoles` from the other file available here.
     findGlobalRoles, 
-    // Study: Bring `findOrganizationRoleById` into scope from the imported module.
+    // Study: Make `findOrganizationRoleById` from the other file available here.
     findOrganizationRoleById, 
-    // Study: Bring `findOrganizationRoleByIdWithPermissions` into scope from the imported module.
+    // Study: Make `findOrganizationRoleByIdWithPermissions` from the other file available here.
     findOrganizationRoleByIdWithPermissions, 
-    // Study: Bring `findOrganizationRoleByName` into scope from the imported module.
+    // Study: Make `findOrganizationRoleByName` from the other file available here.
     findOrganizationRoleByName, 
-    // Study: Bring `findOrganizationRoles` into scope from the imported module.
+    // Study: Make `findOrganizationRoles` from the other file available here.
     findOrganizationRoles, 
-    // Study: Bring `updateGlobalRole` into scope from the imported module.
+    // Study: Make `updateGlobalRole` from the other file available here.
     updateGlobalRole, 
-    // Study: Bring `updateOrganizationRole` into scope from the imported module.
+    // Study: Make `updateOrganizationRole` from the other file available here.
     updateOrganizationRole 
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 } from "./role.repository";
-// Study: Import `{ CreateRoleData, UpdateRoleData }` from `"./role.types"`.
+// Study: Bring in `{ CreateRoleData, UpdateRoleData }` from `"./role.types"` so this file can use it.
 import { CreateRoleData, UpdateRoleData } from "./role.types";
 
 // ==========================================
 // GLOBAL ROLE SERVICES (SUPER_ADMIN)
 // ==========================================
 
-// Study: Export `createGlobalRoleService` as an async function that returns a promise.
+// Study: Make `createGlobalRoleService` available to other files. Its result arrives after its work finishes.
 export const createGlobalRoleService = async (data: CreateRoleData) => {
     // Study: Call `findGlobalRoleByName` and wait for it to finish and store its result in `existingRole`.
     const existingRole = await findGlobalRoleByName(data.name);
-    // Study: Run the following branch when `existingRole` is truthy.
+    // Study: Do the next step if this check passes: `existingRole`.
     if (existingRole) {
-        // Study: Stop this execution path by throwing `new BadRequestError("A global role with this name already exists.")`.
+        // Study: Stop here and report this problem: "A global role with this name already exists."
         throw new BadRequestError("A global role with this name already exists.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-    // Study: Return `await createGlobalRole(data)` to the caller.
+    // Study: Give `await createGlobalRole(data)` back to the code that asked for it.
     return await createGlobalRole(data);
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `getGlobalRolesService` as an async function that returns a promise.
+// Study: Make `getGlobalRolesService` available to other files. Its result arrives after its work finishes.
 export const getGlobalRolesService = async () => {
-    // Study: Return `await findGlobalRoles()` to the caller.
+    // Study: Give `await findGlobalRoles()` back to the code that asked for it.
     return await findGlobalRoles();
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `getGlobalRoleService` as an async function that returns a promise.
+// Study: Make `getGlobalRoleService` available to other files. Its result arrives after its work finishes.
 export const getGlobalRoleService = async (roleId: string) => {
     // Study: Call `findGlobalRoleById` and wait for it to finish and store its result in `role`.
     const role = await findGlobalRoleById(roleId);
-    // Study: Run the following branch when `!role` is truthy.
+    // Study: Do the next step if there is no value for `role`.
     if (!role) {
-        // Study: Stop this execution path by throwing `new NotFoundError("Global role not found.")`.
+        // Study: Stop here and report this problem: "Global role not found."
         throw new NotFoundError("Global role not found.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-    // Study: Return `role` to the caller.
+    // Study: Give `role` back to the code that asked for it.
     return role;
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `updateGlobalRoleService` as an async function that returns a promise.
+// Study: Make `updateGlobalRoleService` available to other files. Its result arrives after its work finishes.
 export const updateGlobalRoleService = async (roleId: string, data: UpdateRoleData) => {
     // Study: Call `findGlobalRoleById` and wait for it to finish and store its result in `role`.
     const role = await findGlobalRoleById(roleId);
-    // Study: Run the following branch when `!role` is truthy.
+    // Study: Do the next step if there is no value for `role`.
     if (!role) {
-        // Study: Stop this execution path by throwing `new NotFoundError("Global role not found.")`.
+        // Study: Stop here and report this problem: "Global role not found."
         throw new NotFoundError("Global role not found.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Run the following branch when `data.name && data.name !== role.name` is truthy.
+    // Study: Do the next step if this check passes: `data.name && data.name !== role.name`.
     if (data.name && data.name !== role.name) {
         // Study: Call `findGlobalRoleByName` and wait for it to finish and store its result in `existingRole`.
         const existingRole = await findGlobalRoleByName(data.name);
-        // Study: Run the following branch when `existingRole` is truthy.
+        // Study: Do the next step if this check passes: `existingRole`.
         if (existingRole) {
-            // Study: Stop this execution path by throwing `new BadRequestError("A global role with this name already exists.")`.
+            // Study: Stop here and report this problem: "A global role with this name already exists."
             throw new BadRequestError("A global role with this name already exists.");
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Return `await updateGlobalRole(roleId, data)` to the caller.
+    // Study: Give `await updateGlobalRole(roleId, data)` back to the code that asked for it.
     return await updateGlobalRole(roleId, data);
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `deleteGlobalRoleService` as an async function that returns a promise.
+// Study: Make `deleteGlobalRoleService` available to other files. Its result arrives after its work finishes.
 export const deleteGlobalRoleService = async (roleId: string) => {
     // Study: Call `findGlobalRoleById` and wait for it to finish and store its result in `role`.
     const role = await findGlobalRoleById(roleId);
-    // Study: Run the following branch when `!role` is truthy.
+    // Study: Do the next step if there is no value for `role`.
     if (!role) {
-        // Study: Stop this execution path by throwing `new NotFoundError("Global role not found.")`.
+        // Study: Stop here and report this problem: "Global role not found."
         throw new NotFoundError("Global role not found.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-    // Study: Return `await deleteGlobalRole(roleId)` to the caller.
+    // Study: Give `await deleteGlobalRole(roleId)` back to the code that asked for it.
     return await deleteGlobalRole(roleId);
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
 
@@ -130,116 +130,116 @@ export const deleteGlobalRoleService = async (roleId: string) => {
 // ORGANIZATION ROLE SERVICES (ORGANIZATION_OWNER)
 // ==========================================
 
-// Study: Export `createOrganizationRoleService` as an async function that returns a promise.
+// Study: Make `createOrganizationRoleService` available to other files. Its result arrives after its work finishes.
 export const createOrganizationRoleService = async (organizationId: string, data: CreateRoleData) => {
     // Study: Call `findOrganizationRoleByName` and wait for it to finish and store its result in `existingRole`.
     const existingRole = await findOrganizationRoleByName(organizationId, data.name);
-    // Study: Run the following branch when `existingRole` is truthy.
+    // Study: Do the next step if this check passes: `existingRole`.
     if (existingRole) {
-        // Study: Stop this execution path by throwing `new BadRequestError("A role with this name already exists in your organization.")`.
+        // Study: Stop here and report this problem: "A role with this name already exists in your organization."
         throw new BadRequestError("A role with this name already exists in your organization.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-    // Study: Return `await createOrganizationRole(organizationId, data)` to the caller.
+    // Study: Give `await createOrganizationRole(organizationId, data)` back to the code that asked for it.
     return await createOrganizationRole(organizationId, data);
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `getOrganizationRolesService` as an async function that returns a promise.
+// Study: Make `getOrganizationRolesService` available to other files. Its result arrives after its work finishes.
 export const getOrganizationRolesService = async (organizationId: string) => {
-    // Study: Return `await findOrganizationRoles(organizationId)` to the caller.
+    // Study: Give `await findOrganizationRoles(organizationId)` back to the code that asked for it.
     return await findOrganizationRoles(organizationId);
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `getOrganizationRoleService` as an async function that returns a promise.
+// Study: Make `getOrganizationRoleService` available to other files. Its result arrives after its work finishes.
 export const getOrganizationRoleService = async (id: string, organizationId: string) => {
     // Study: Call `findOrganizationRoleByIdWithPermissions` and wait for it to finish and store its result in `role`.
     const role = await findOrganizationRoleByIdWithPermissions(id, organizationId);
-    // Study: Run the following branch when `!role` is truthy.
+    // Study: Do the next step if there is no value for `role`.
     if (!role) {
-        // Study: Stop this execution path by throwing `new NotFoundError("Role not found.")`.
+        // Study: Stop here and report this problem: "Role not found."
         throw new NotFoundError("Role not found.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-    // Study: Return `role` to the caller.
+    // Study: Give `role` back to the code that asked for it.
     return role;
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `updateOrganizationRoleService` as an async function that returns a promise.
+// Study: Make `updateOrganizationRoleService` available to other files. Its result arrives after its work finishes.
 export const updateOrganizationRoleService = async (id: string, organizationId: string, data: UpdateRoleData) => {
     // Study: Call `findOrganizationRoleById` and wait for it to finish and store its result in `organizationRole`.
     const organizationRole = await findOrganizationRoleById(id, organizationId);
     
-    // Study: Run the following branch when `!organizationRole` is truthy.
+    // Study: Do the next step if there is no value for `organizationRole`.
     if (!organizationRole) {
-        // Study: Stop this execution path by throwing `new NotFoundError("Role not found.")`.
+        // Study: Stop here and report this problem: "Role not found."
         throw new NotFoundError("Role not found.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // Do not allow changing name or description of a GLOBAL role.
-    // Study: Run the following branch when `organizationRole.role.isGlobal` is truthy.
+    // Study: Do the next step if this check passes: `organizationRole.role.isGlobal`.
     if (organizationRole.role.isGlobal) {
-        // Study: Run the following branch when `data.name !== undefined || data.description !== undefined` is truthy.
+        // Study: Do the next step if this check passes: `data.name !== undefined || data.description !== undefined`.
         if (data.name !== undefined || data.description !== undefined) {
-            // Study: Stop this execution path by throwing `new ForbiddenError("You cannot modify the name or description of a global role.")`.
+            // Study: Stop here and report this problem: "You cannot modify the name or description of a global role."
             throw new ForbiddenError("You cannot modify the name or description of a global role.");
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
     // Study: Run this branch if the preceding conditions failed.
     } else {
         // For custom roles, make sure name doesn't conflict
-        // Study: Run the following branch when `data.name && data.name !== organizationRole.role.name` is truthy.
+        // Study: Do the next step if this check passes: `data.name && data.name !== organizationRole.role.name`.
         if (data.name && data.name !== organizationRole.role.name) {
             // Study: Call `findOrganizationRoleByName` and wait for it to finish and store its result in `existingRole`.
             const existingRole = await findOrganizationRoleByName(organizationId, data.name);
-            // Study: Run the following branch when `existingRole` is truthy.
+            // Study: Do the next step if this check passes: `existingRole`.
             if (existingRole) {
-                // Study: Stop this execution path by throwing `new BadRequestError("A role with this name already exists in your organization.")`.
+                // Study: Stop here and report this problem: "A role with this name already exists in your organization."
                 throw new BadRequestError("A role with this name already exists in your organization.");
-            // Study: Close the code block.
+            // Study: End this group of steps.
             }
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Return `await updateOrganizationRole(id, organizationId, data)` to the caller.
+    // Study: Give `await updateOrganizationRole(id, organizationId, data)` back to the code that asked for it.
     return await updateOrganizationRole(id, organizationId, data);
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `deleteOrganizationRoleService` as an async function that returns a promise.
+// Study: Make `deleteOrganizationRoleService` available to other files. Its result arrives after its work finishes.
 export const deleteOrganizationRoleService = async (id: string, organizationId: string) => {
     // Study: Call `findOrganizationRoleById` and wait for it to finish and store its result in `organizationRole`.
     const organizationRole = await findOrganizationRoleById(id, organizationId);
     
-    // Study: Run the following branch when `!organizationRole` is truthy.
+    // Study: Do the next step if there is no value for `organizationRole`.
     if (!organizationRole) {
-        // Study: Stop this execution path by throwing `new NotFoundError("Role not found.")`.
+        // Study: Stop here and report this problem: "Role not found."
         throw new NotFoundError("Role not found.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Run the following branch when `organizationRole.role.isGlobal` is truthy.
+    // Study: Do the next step if this check passes: `organizationRole.role.isGlobal`.
     if (organizationRole.role.isGlobal) {
-        // Study: Stop this execution path by throwing `new ForbiddenError("You cannot delete a global role from your organization.")`.
+        // Study: Stop here and report this problem: "You cannot delete a global role from your organization."
         throw new ForbiddenError("You cannot delete a global role from your organization.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // Study: Call `countUsersWithOrganizationRole` and wait for it to finish and store its result in `userCount`.
     const userCount = await countUsersWithOrganizationRole(id);
-    // Study: Run the following branch when `userCount > 0` is truthy.
+    // Study: Do the next step if this check passes: `userCount > 0`.
     if (userCount > 0) {
-        // Study: Stop this execution path by throwing `new BadRequestError("This role cannot be deleted because it is assigned to users.")`.
+        // Study: Stop here and report this problem: "This role cannot be deleted because it is assigned to users."
         throw new BadRequestError("This role cannot be deleted because it is assigned to users.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Return `await deleteOrganizationRole(id, organizationId)` to the caller.
+    // Study: Give `await deleteOrganizationRole(id, organizationId)` back to the code that asked for it.
     return await deleteOrganizationRole(id, organizationId);
-// Study: Close the code block.
+// Study: End this group of steps.
 };

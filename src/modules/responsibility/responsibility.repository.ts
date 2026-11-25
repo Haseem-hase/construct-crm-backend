@@ -1,24 +1,24 @@
-// Study: Read and write database records through Prisma for the contractor responsibility catalog.
-// Study: Import `prisma` from `"../../lib/prisma"`.
+// Study: This file is about the list of duties that can be assigned to a contractor. Finds or saves information in the database, where the CRM keeps its records.
+// Study: Bring in `prisma` from `"../../lib/prisma"` so this file can use it.
 import prisma from "../../lib/prisma";
 
-// Study: Export `getActiveResponsibilities` as an async function that returns a promise.
+// Study: Make `getActiveResponsibilities` available to other files. Its result arrives after its work finishes.
 export const getActiveResponsibilities = async () => {
-    // Study: Return `await prisma.responsibility.findMany({ where: { isActive: true, }, orderBy: { name:…` to the caller.
+    // Study: Give `await prisma.responsibility.findMany({ where: { isActive: true, }, orderBy: { name:…` back to the code that asked for it.
     return await prisma.responsibility.findMany({
-        // Study: Set the conditions that database records must match using isActive.
+        // Study: Set the conditions that records must meet using isActive.
         where: {
             // Study: Set `isActive` to `true`.
             isActive: true,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Set the sort order for the returned records.
         orderBy: {
             // Study: Set `name` to `"asc"`.
             name: "asc",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-        // Study: Choose which fields Prisma returns.
+        // Study: Choose which details the database gives back.
         select: {
             // Study: Set `id` to `true`.
             id: true,
@@ -28,9 +28,9 @@ export const getActiveResponsibilities = async () => {
             description: true,
             // Study: Set `isActive` to `true`.
             isActive: true,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };

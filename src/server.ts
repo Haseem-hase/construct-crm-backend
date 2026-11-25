@@ -1,12 +1,12 @@
-// Study: Start the configured Express app on the port from the environment.
-// Study: Import `app` from `"./app"`.
+// Study: Starts the part of the CRM that listens for requests from the screens people use.
+// Study: Bring in `app` from `"./app"` so this file can use it.
 import app from "./app";
-// Study: Import `{ env }` from `"./config/env"`.
+// Study: Bring in `{ env }` from `"./config/env"` so this file can use it.
 import { env } from "./config/env";
 
 // Study: Start accepting HTTP requests on `env.PORT`.
 app.listen(env.PORT, () => {
   // Study: Call `console.log`.
   console.log(`🚀 Server running on port ${env.PORT}`);
-// Study: Close the code block.
+// Study: End this group of steps.
 });

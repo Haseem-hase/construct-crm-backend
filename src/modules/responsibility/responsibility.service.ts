@@ -1,10 +1,10 @@
-// Study: Apply business rules and coordinate database operations for the contractor responsibility catalog.
-// Study: Import `* as responsibilityRepository` from `"./responsibility.repository"`.
+// Study: This file is about the list of duties that can be assigned to a contractor. Applies the rules for this part of the CRM, such as what must be checked before saving a change.
+// Study: Bring in `* as responsibilityRepository` from `"./responsibility.repository"` so this file can use it.
 import * as responsibilityRepository from "./responsibility.repository";
 
-// Study: Export `getResponsibilities` as an async function that returns a promise.
+// Study: Make `getResponsibilities` available to other files. Its result arrives after its work finishes.
 export const getResponsibilities = async () => {
-    // Study: Return `await responsibilityRepository.getActiveResponsibilities()` to the caller.
+    // Study: Give `await responsibilityRepository.getActiveResponsibilities()` back to the code that asked for it.
     return await responsibilityRepository.getActiveResponsibilities();
-// Study: Close the code block.
+// Study: End this group of steps.
 };

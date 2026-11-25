@@ -1,23 +1,23 @@
-// Study: Apply business rules and coordinate database operations for account registration, sign-in, sign-out, and session token refresh.
-// Study: Import `bcrypt` from `"bcrypt"`.
+// Study: This file is about signing in, signing out, creating an account, and staying signed in. Applies the rules for this part of the CRM, such as what must be checked before saving a change.
+// Study: Bring in `bcrypt` from `"bcrypt"` so this file can use it.
 import bcrypt from "bcrypt";
-// Study: Import `crypto` from `"crypto"`.
+// Study: Bring in `crypto` from `"crypto"` so this file can use it.
 import crypto from "crypto";
 
-// Study: Import `{ findRefreshTokensByUserId, }` from `"./refresh-token.repository"`.
+// Study: Bring in `{ findRefreshTokensByUserId, }` from `"./refresh-token.repository"` so this file can use it.
 import {
-    // Study: Bring `findRefreshTokensByUserId` into scope from the imported module.
+    // Study: Make `findRefreshTokensByUserId` from the other file available here.
     findRefreshTokensByUserId,
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 } from "./refresh-token.repository";
 
-// Study: Export `findMatchingRefreshToken` as an async function that returns a promise.
+// Study: Make `findMatchingRefreshToken` available to other files. Its result arrives after its work finishes.
 export const findMatchingRefreshToken = async (
-    // Study: Accept `refreshToken` with type `string`.
+    // Study: This step receives `refreshToken`. `string` describes what that information should look like.
     refreshToken: string,
-    // Study: Accept `userId` with type `string`.
+    // Study: This step receives `userId`. `string` describes what that information should look like.
     userId: string
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
     // Study: Call `crypto .createHash("sha256") .update(refreshToken) .digest` and store the result as `hashedInput`.
     const hashedInput = crypto
@@ -41,19 +41,19 @@ export const findMatchingRefreshToken = async (
             hashedInput,
             // Study: Supply `storedToken` to the surrounding statement.
             storedToken.token
-        // Study: Close the call arguments.
+        // Study: End the list of information being sent to this step.
         );
 
-        // Study: Run the following branch when `matches` is truthy.
+        // Study: Do the next step if this check passes: `matches`.
         if (matches) {
-            // Study: Return `storedToken` to the caller.
+            // Study: Give `storedToken` back to the code that asked for it.
             return storedToken;
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Return `null` to the caller.
+    // Study: Give `null` back to the code that asked for it.
     return null;
-// Study: Close the code block.
+// Study: End this group of steps.
 };

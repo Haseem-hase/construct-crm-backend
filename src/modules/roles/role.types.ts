@@ -1,15 +1,15 @@
-// Study: Define TypeScript data contracts for role templates, organization roles, and permission assignments.
-// Study: Import `{ Prisma }` from `"@prisma/client"`.
+// Study: This file is about job roles in each company and the actions people in those roles may take. Lists the names and kinds of information this part of the code expects.
+// Study: Bring in `{ Prisma }` from `"@prisma/client"` so this file can use it.
 import { Prisma } from "@prisma/client";
-// Study: Import `{ CreateRoleInput, UpdateRoleInput }` from `"./role.validation"`.
+// Study: Bring in `{ CreateRoleInput, UpdateRoleInput }` from `"./role.validation"` so this file can use it.
 import { CreateRoleInput, UpdateRoleInput } from "./role.validation";
 
 // Create role
-// Study: Define the compile-time contract named `CreateRoleData`.
+// Study: Describe which information `CreateRoleData` can contain so TypeScript can catch mistakes while checking the code.
 export type CreateRoleData = CreateRoleInput;
 
 // Update role
-// Study: Define the compile-time contract named `UpdateRoleData`.
+// Study: Describe which information `UpdateRoleData` can contain so TypeScript can catch mistakes while checking the code.
 export type UpdateRoleData = UpdateRoleInput;
 
 // Basic global Role
@@ -27,14 +27,14 @@ export const roleSelect = {
     createdAt: true,
     // Study: Set `updatedAt` to `true`.
     updatedAt: true,
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 } as const;
 
-// Study: Define the compile-time contract named `Role`.
+// Study: Describe which information `Role` can contain so TypeScript can catch mistakes while checking the code.
 export type Role = Prisma.RoleGetPayload<{
     // Study: Define `select` with type `typeof roleSelect`.
     select: typeof roleSelect;
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 }>;
 
 // Organization Role with the underlying global role
@@ -49,7 +49,7 @@ export const organizationRoleSelect = {
 
     // Study: Load `role` and return its selected fields: id, name, description, isGlobal.
     role: {
-        // Study: Choose which fields Prisma returns.
+        // Study: Choose which details the database gives back.
         select: {
             // Study: Set `id` to `true`.
             id: true,
@@ -59,23 +59,23 @@ export const organizationRoleSelect = {
             description: true,
             // Study: Set `isGlobal` to `true`.
             isGlobal: true,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     },
 
     // Study: Set `createdAt` to `true`.
     createdAt: true,
     // Study: Set `updatedAt` to `true`.
     updatedAt: true,
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 } as const;
 
-// Study: Define the compile-time contract named `OrganizationRole`.
+// Study: Describe which information `OrganizationRole` can contain so TypeScript can catch mistakes while checking the code.
 export type OrganizationRole = Prisma.OrganizationRoleGetPayload<{
     // Study: Define `select` with type `typeof organizationRoleSelect`.
     select: typeof organizationRoleSelect;
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 }>;
 
 // Organization Role with permissions
@@ -90,7 +90,7 @@ export const organizationRoleWithPermissionsSelect = {
 
     // Study: Load `role` and return its selected fields: id, name, description, isGlobal.
     role: {
-        // Study: Choose which fields Prisma returns.
+        // Study: Choose which details the database gives back.
         select: {
             // Study: Set `id` to `true`.
             id: true,
@@ -100,18 +100,18 @@ export const organizationRoleWithPermissionsSelect = {
             description: true,
             // Study: Set `isGlobal` to `true`.
             isGlobal: true,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     },
 
     // Study: Load `rolePermissions` and return its selected fields: permission.
     rolePermissions: {
-        // Study: Choose which fields Prisma returns.
+        // Study: Choose which details the database gives back.
         select: {
             // Study: Load `permission` and return its selected fields: id, module, action, description.
             permission: {
-                // Study: Choose which fields Prisma returns.
+                // Study: Choose which details the database gives back.
                 select: {
                     // Study: Set `id` to `true`.
                     id: true,
@@ -121,27 +121,27 @@ export const organizationRoleWithPermissionsSelect = {
                     action: true,
                     // Study: Set `description` to `true`.
                     description: true,
-                // Study: Close the object literal.
+                // Study: End this group of values.
                 },
-            // Study: Close the object literal.
+            // Study: End this group of values.
             },
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     },
 
     // Study: Set `createdAt` to `true`.
     createdAt: true,
     // Study: Set `updatedAt` to `true`.
     updatedAt: true,
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 } as const;
 
-// Study: Define the compile-time contract named `OrganizationRoleWithPermissions`.
+// Study: Describe which information `OrganizationRoleWithPermissions` can contain so TypeScript can catch mistakes while checking the code.
 export type OrganizationRoleWithPermissions =
     // Study: Supply `Prisma` to the surrounding statement.
     Prisma.OrganizationRoleGetPayload<{
         // Study: Define `select` with type `typeof organizationRoleWithPermissionsSelect`.
         select: typeof organizationRoleWithPermissionsSelect;
-    // Study: Close this group and continue the enclosing expression.
+    // Study: Finish this group and continue the surrounding step.
     }>;

@@ -1,58 +1,58 @@
-// Study: Check whether the authenticated user can perform a module action.
-// Study: Import `{ Request, Response, NextFunction }` from `"express"`.
+// Study: Checks whether the signed-in person is allowed to take the requested action.
+// Study: Bring in `{ Request, Response, NextFunction }` from `"express"` so this file can use it.
 import { Request, Response, NextFunction } from "express";
-// Study: Import `{ ForbiddenError }` from `"../errors/ForbiddenError"`.
+// Study: Bring in `{ ForbiddenError }` from `"../errors/ForbiddenError"` so this file can use it.
 import { ForbiddenError } from "../errors/ForbiddenError";
-// Study: Import `{ Module, Action }` from `"@prisma/client"`.
+// Study: Bring in `{ Module, Action }` from `"@prisma/client"` so this file can use it.
 import { Module, Action } from "@prisma/client";
-// Study: Import `prisma` from `"../lib/prisma"`.
+// Study: Bring in `prisma` from `"../lib/prisma"` so this file can use it.
 import prisma from "../lib/prisma";
 
-// Study: Export `authorize` as a reusable function.
+// Study: Set up a reusable step named `authorize`.
 export const authorize = (module: Module, action: Action) => {
-    // Study: Return `async ( req: Request, res: Response, next: NextFunction ) => { try { const user = r…` to the caller.
+    // Study: Give `async ( req: Request, res: Response, next: NextFunction ) => { try { const user = r…` back to the code that asked for it.
     return async (
-        // Study: Accept `req` with type `Request`.
+        // Study: Read the information that came in with the request from the screen.
         req: Request,
-        // Study: Accept `res` with type `Response`.
+        // Study: Use this to send information or an error back to the screen.
         res: Response,
-        // Study: Accept `next` with type `NextFunction`.
+        // Study: Use this to move the request to the next check or action.
         next: NextFunction
-    // Study: Close this group and continue the enclosing expression.
+    // Study: Finish this group and continue the surrounding step.
     ) => {
-        // Study: Run this block and handle failures in the associated catch block.
+        // Study: Try these steps. If one fails, go to the error-handling steps below.
         try {
             // Study: Set `user` to `req.user!`.
             const user = req.user!;
 
-            // Study: Run the following branch when `user.systemRole === "SUPER_ADMIN"` is truthy.
+            // Study: Do the next step if this check passes: `user.systemRole === "SUPER_ADMIN"`.
             if (user.systemRole === "SUPER_ADMIN") {
-                // Study: Return `next()` to the caller.
+                // Study: Give `next()` back to the code that asked for it.
                 return next();
-            // Study: Close the code block.
+            // Study: End this group of steps.
             }
 
-            // Study: Run the following branch when `!user.organizationId || !user.organizationRole?.id` is truthy.
+            // Study: Do the next step if this check passes: `!user.organizationId || !user.organizationRole?.id`.
             if (!user.organizationId || !user.organizationRole?.id) {
-                // Study: Stop this execution path by throwing `new ForbiddenError( "You are not assigned a role in an organization." )`.
+                // Study: Stop here and pass the problem onward: `new ForbiddenError( "You are not assigned a role in an organization." )`.
                 throw new ForbiddenError(
                     // Study: Supply the literal string `"You are not assigned a role in an organization."` here.
                     "You are not assigned a role in an organization."
                 // Study: Close the current group.
                 );
-            // Study: Close the code block.
+            // Study: End this group of steps.
             }
 
-            // Study: Run the following branch when `user.organizationRole.role.name === "ORGANIZATION_OWNER"` is truthy.
+            // Study: Do the next step if this check passes: `user.organizationRole.role.name === "ORGANIZATION_OWNER"`.
             if (user.organizationRole.role.name === "ORGANIZATION_OWNER") {
-                // Study: Return `next()` to the caller.
+                // Study: Give `next()` back to the code that asked for it.
                 return next();
-            // Study: Close the code block.
+            // Study: End this group of steps.
             }
 
-            // Study: Fetch the first record that matches the filters through `prisma.rolePermission` and wait for it to finish and store its result in `hasPermission`.
+            // Study: Find the first record that meets these checks using `prisma.rolePermission` and wait for it to finish and store its result in `hasPermission`.
             const hasPermission = await prisma.rolePermission.findFirst({
-                // Study: Set the conditions that database records must match using organizationRoleId, organizationRole, permission.
+                // Study: Set the conditions that records must meet using organizationRoleId, organizationRole, permission.
                 where: {
                     // Study: Set `organizationRoleId` to `user.organizationRole.id`.
                     organizationRoleId: user.organizationRole.id,
@@ -60,43 +60,43 @@ export const authorize = (module: Module, action: Action) => {
                     organizationRole: {
                         // Study: Set the organization identifier used for this record or operation using `user.organizationId`.
                         organizationId: user.organizationId,
-                    // Study: Close the object literal.
+                    // Study: End this group of values.
                     },
                     // Study: Start the nested value for `permission`.
                     permission: {
-                        // Study: Pass the current `module` value under the same property name.
+                        // Study: Carry the value of `module` into the new group under the same name.
                         module,
-                        // Study: Pass the current `action` value under the same property name.
+                        // Study: Carry the value of `action` into the new group under the same name.
                         action,
-                    // Study: Close the object literal.
+                    // Study: End this group of values.
                     },
-                // Study: Close the object literal.
+                // Study: End this group of values.
                 },
-                // Study: Choose which fields Prisma returns.
+                // Study: Choose which details the database gives back.
                 select: { id: true },
-            // Study: Close the object literal.
+            // Study: End this group of values.
             });
 
-            // Study: Run the following branch when `!hasPermission` is truthy.
+            // Study: Do the next step if there is no value for `hasPermission`.
             if (!hasPermission) {
-                // Study: Stop this execution path by throwing `new ForbiddenError( "You do not have permission to perform this action." )`.
+                // Study: Stop here and pass the problem onward: `new ForbiddenError( "You do not have permission to perform this action." )`.
                 throw new ForbiddenError(
                     // Study: Supply the literal string `"You do not have permission to perform this action."` here.
                     "You do not have permission to perform this action."
                 // Study: Close the current group.
                 );
-            // Study: Close the code block.
+            // Study: End this group of steps.
             }
 
-            // Study: Continue to the next Express middleware or handler.
+            // Study: Allow the request to move to its next check or action.
             next();
-        // Study: Handle an exception from the try block as `error`.
+        // Study: Handle a problem raised during the steps above.
         } catch (error) {
-            // Study: Pass the error to the next Express error handler.
+            // Study: Send the problem to the part of the backend that prepares an error reply.
             next(error);
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
-    // Study: Close the code block.
+    // Study: End this group of steps.
     };
-// Study: Close the code block.
+// Study: End this group of steps.
 };

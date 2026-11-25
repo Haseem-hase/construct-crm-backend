@@ -1,24 +1,24 @@
-// Study: Connect HTTP methods and paths to middleware and handlers for organizations and their owners.
-// Study: Import `{ Router }` from `"express"`.
+// Study: This file is about the companies using the CRM and the people who own their accounts. Matches each request from the screen to the checks and work it needs.
+// Study: Bring in `{ Router }` from `"express"` so this file can use it.
 import { Router } from "express";
 
-// Study: Import `* as organizationController` from `"./organization.controller"`.
+// Study: Bring in `* as organizationController` from `"./organization.controller"` so this file can use it.
 import * as organizationController from "./organization.controller";
-// Study: Import `{ validate }` from `"../../middlewares/validate"`.
+// Study: Bring in `{ validate }` from `"../../middlewares/validate"` so this file can use it.
 import { validate } from "../../middlewares/validate";
-// Study: Import `{ createOrganizationSchema, listOrganizationsQuerySchema, registerOrganizationSchem…` from `"./organization.validation"`.
+// Study: Bring in `{ createOrganizationSchema, listOrganizationsQuerySchema, registerOrganizationSchem…` from `"./organization.validation"` so this file can use it.
 import {
-    // Study: Bring `createOrganizationSchema` into scope from the imported module.
+    // Study: Make `createOrganizationSchema` from the other file available here.
     createOrganizationSchema,
-    // Study: Bring `listOrganizationsQuerySchema` into scope from the imported module.
+    // Study: Make `listOrganizationsQuerySchema` from the other file available here.
     listOrganizationsQuerySchema,
-    // Study: Bring `registerOrganizationSchema` into scope from the imported module.
+    // Study: Make `registerOrganizationSchema` from the other file available here.
     registerOrganizationSchema,
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 } from "./organization.validation";
-// Study: Import `{ authenticate }` from `"../../middlewares/authenticate"`.
+// Study: Bring in `{ authenticate }` from `"../../middlewares/authenticate"` so this file can use it.
 import { authenticate } from "../../middlewares/authenticate";
-// Study: Import `{ requireSuperAdmin }` from `"../../middlewares/require-super-admin"`.
+// Study: Bring in `{ requireSuperAdmin }` from `"../../middlewares/require-super-admin"` so this file can use it.
 import { requireSuperAdmin } from "../../middlewares/require-super-admin";
 
 // Study: Call `Router` and store the result as `router`.
@@ -36,7 +36,7 @@ router.get(
     validate(listOrganizationsQuerySchema, "query"),
     // Study: Supply `organizationController` to the surrounding statement.
     organizationController.listOrganizations
-// Study: Close the call arguments.
+// Study: End the list of information being sent to this step.
 );
 
 // Study: Register POST / with `organizationController.createOrganization` after the listed middleware.
@@ -51,7 +51,7 @@ router.post(
     validate(createOrganizationSchema),
     // Study: Supply `organizationController` to the surrounding statement.
     organizationController.createOrganization
-// Study: Close the call arguments.
+// Study: End the list of information being sent to this step.
 );
 
 // Study: Register POST /register with `organizationController.registerOrganization` after the listed middleware.
@@ -62,8 +62,8 @@ router.post(
     validate(registerOrganizationSchema),
     // Study: Supply `organizationController` to the surrounding statement.
     organizationController.registerOrganization
-// Study: Close the call arguments.
+// Study: End the list of information being sent to this step.
 );
 
-// Study: Expose `router` as the default export.
+// Study: Make `router` the main thing other files can get from this file.
 export default router;

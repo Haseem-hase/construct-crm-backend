@@ -1,7 +1,7 @@
-// Study: Read and write database records through Prisma for organizations and their owners.
-// Study: Import `prisma` from `"../../lib/prisma"`.
+// Study: This file is about the companies using the CRM and the people who own their accounts. Finds or saves information in the database, where the CRM keeps its records.
+// Study: Bring in `prisma` from `"../../lib/prisma"` so this file can use it.
 import prisma from "../../lib/prisma";
-// Study: Import `{ CreateOrganizationInput }` from `"./organization.types"`.
+// Study: Bring in `{ CreateOrganizationInput }` from `"./organization.types"` so this file can use it.
 import { CreateOrganizationInput } from "./organization.types";
 
 // Study: Set `organizationSelect` to `{ id: true, name: true, description: true, createdAt: true, updatedAt: true, } as c…`.
@@ -16,16 +16,16 @@ const organizationSelect = {
     createdAt: true,
     // Study: Set `updatedAt` to `true`.
     updatedAt: true,
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 } as const;
 
-// Study: Export `createOrganizationWithOwner` as an async function that returns a promise.
+// Study: Make `createOrganizationWithOwner` available to other files. Its result arrives after its work finishes.
 export const createOrganizationWithOwner = async (
-    // Study: Accept `data` with type `CreateOrganizationInput`.
+    // Study: This step receives `data`. `CreateOrganizationInput` describes what that information should look like.
     data: CreateOrganizationInput
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Return `prisma.$transaction(async (tx) => { const organization = await tx.organization.crea…` to the caller.
+    // Study: Give `prisma.$transaction(async (tx) => { const organization = await tx.organization.crea…` back to the code that asked for it.
     return prisma.$transaction(async (tx) => {
         // Study: Insert a new record through `tx.organization` and wait for it to finish and store its result in `organization`.
         const organization = await tx.organization.create({
@@ -35,23 +35,23 @@ export const createOrganizationWithOwner = async (
                 name: data.organizationName,
                 // Study: Expand the values from `(data.description !== undefined ? { description: data.description } : {})` into the surrounding collection.
                 ...(data.description !== undefined ? { description: data.description } : {}),
-            // Study: Close the object literal.
+            // Study: End this group of values.
             },
-            // Study: Choose which fields Prisma returns using `organizationSelect`.
+            // Study: Choose which details the database gives back using `organizationSelect`.
             select: organizationSelect,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
 
         // Fetch all global roles
-        // Study: Fetch records matching the query through `tx.role` and wait for it to finish and store its result in `globalRoles`.
+        // Study: Find all matching records using `tx.role` and wait for it to finish and store its result in `globalRoles`.
         const globalRoles = await tx.role.findMany({
-            // Study: Set the conditions that database records must match using isGlobal.
+            // Study: Set the conditions that records must meet using isGlobal.
             where: { isGlobal: true },
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
 
         // Create OrganizationRole records for each global role
-        // Study: Run the following branch when `globalRoles.length > 0` is truthy.
+        // Study: Do the next step if this check passes: `globalRoles.length > 0`.
         if (globalRoles.length > 0) {
             // Study: Insert multiple records through `tx.organizationRole` and wait for it to finish.
             await tx.organizationRole.createMany({
@@ -61,32 +61,32 @@ export const createOrganizationWithOwner = async (
                     organizationId: organization.id,
                     // Study: Set `roleId` to `role.id`.
                     roleId: role.id,
-                // Study: Close the object literal.
+                // Study: End this group of values.
                 })),
-            // Study: Close the object literal.
+            // Study: End this group of values.
             });
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
 
         // We need the ID of the OrganizationRole for the owner to assign to the user
-        // Study: Fetch the first record that matches the filters through `tx.organizationRole` and wait for it to finish and store its result in `ownerOrgRole`.
+        // Study: Find the first record that meets these checks using `tx.organizationRole` and wait for it to finish and store its result in `ownerOrgRole`.
         const ownerOrgRole = await tx.organizationRole.findFirst({
-            // Study: Set the conditions that database records must match using organizationId, roleId.
+            // Study: Set the conditions that records must meet using organizationId, roleId.
             where: {
                 // Study: Set the organization identifier used for this record or operation using `organization.id`.
                 organizationId: organization.id,
                 // Study: Set `roleId` to `data.roleId`.
                 roleId: data.roleId, // data.roleId is the global Role.id of ORGANIZATION_OWNER
-            // Study: Close the object literal.
+            // Study: End this group of values.
             },
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
 
-        // Study: Run the following branch when `!ownerOrgRole` is truthy.
+        // Study: Do the next step if there is no value for `ownerOrgRole`.
         if (!ownerOrgRole) {
-            // Study: Stop this execution path by throwing `new Error("Failed to assign owner role to the new organization.")`.
+            // Study: Stop here and report this problem: "Failed to assign owner role to the new organization."
             throw new Error("Failed to assign owner role to the new organization.");
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
 
         // Study: Insert a new record through `tx.user` and wait for it to finish and store its result in `user`.
@@ -105,25 +105,25 @@ export const createOrganizationWithOwner = async (
                 organizationRoleId: ownerOrgRole.id,
                 // Study: Set the organization identifier used for this record or operation using `organization.id`.
                 organizationId: organization.id,
-            // Study: Close the object literal.
+            // Study: End this group of values.
             },
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
 
-        // Study: Return `{ organization, user, }` to the caller.
+        // Study: Give `{ organization, user, }` back to the code that asked for it.
         return {
-            // Study: Pass the current `organization` value under the same property name.
+            // Study: Carry the value of `organization` into the new group under the same name.
             organization,
-            // Study: Pass the current `user` value under the same property name.
+            // Study: Carry the value of `user` into the new group under the same name.
             user,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         };
-    // Study: Close the code block.
+    // Study: End this group of steps.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `findOrganizations` as an async function that returns a promise.
+// Study: Make `findOrganizations` available to other files. Its result arrives after its work finishes.
 export const findOrganizations = async ({ search, page, pageSize }: {
     // Study: Define `search` as optional with type `string`.
     search?: string;
@@ -131,55 +131,55 @@ export const findOrganizations = async ({ search, page, pageSize }: {
     page: number;
     // Study: Define `pageSize` with type `number`.
     pageSize: number;
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 }) => {
     // Study: Set `where` to `search ? { name: { contains: search, mode: "insensitive" as const } } : {}`.
     const where = search
-        // Study: Use this value when the preceding condition is truthy.
+        // Study: Use this value if the check above passes.
         ? { name: { contains: search, mode: "insensitive" as const } }
-        // Study: Use this value when the preceding condition is falsy.
+        // Study: Use this value if the check above fails.
         : {};
     // Study: Set `skip` to `(page - 1) * pageSize`.
     const skip = (page - 1) * pageSize;
 
     // Study: Group the Prisma operations in a transaction so they commit or roll back together and wait for it to finish and store its result in `[organizations, total]`.
     const [organizations, total] = await prisma.$transaction([
-        // Study: Fetch records matching the query through `prisma.organization`.
+        // Study: Find all matching records using `prisma.organization`.
         prisma.organization.findMany({
-            // Study: Pass the current `where` value under the same property name.
+            // Study: Carry the value of `where` into the new group under the same name.
             where,
-            // Study: Choose which fields Prisma returns using `organizationSelect`.
+            // Study: Choose which details the database gives back using `organizationSelect`.
             select: organizationSelect,
             // Study: Set the sort order for the returned records.
             orderBy: [{ createdAt: "desc" }, { id: "asc" }],
-            // Study: Pass the current `skip` value under the same property name.
+            // Study: Carry the value of `skip` into the new group under the same name.
             skip,
             // Study: Limit the number of results returned using `pageSize`.
             take: pageSize,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         }),
         // Study: Count matching records through `prisma.organization`.
         prisma.organization.count({ where }),
-    // Study: Close the array literal.
+    // Study: End this group of values.
     ]);
 
-    // Study: Return `{ organizations, pagination: { page, pageSize, total, totalPages: Math.ceil(total /…` to the caller.
+    // Study: Give `{ organizations, pagination: { page, pageSize, total, totalPages: Math.ceil(total /…` back to the code that asked for it.
     return {
-        // Study: Pass the current `organizations` value under the same property name.
+        // Study: Carry the value of `organizations` into the new group under the same name.
         organizations,
         // Study: Start the nested value for `pagination`.
         pagination: {
-            // Study: Pass the current `page` value under the same property name.
+            // Study: Carry the value of `page` into the new group under the same name.
             page,
-            // Study: Pass the current `pageSize` value under the same property name.
+            // Study: Carry the value of `pageSize` into the new group under the same name.
             pageSize,
-            // Study: Pass the current `total` value under the same property name.
+            // Study: Carry the value of `total` into the new group under the same name.
             total,
             // Study: Set `totalPages` to `Math.ceil(total / pageSize)`.
             totalPages: Math.ceil(total / pageSize),
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     };
-// Study: Close the code block.
+// Study: End this group of steps.
 };

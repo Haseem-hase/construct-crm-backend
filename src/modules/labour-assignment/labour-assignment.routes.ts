@@ -1,13 +1,13 @@
-// Study: Connect HTTP methods and paths to middleware and handlers for worker placements on construction projects.
-// Study: Import `{ Router }` from `"express"`.
+// Study: This file is about which workers are assigned to each job. Matches each request from the screen to the checks and work it needs.
+// Study: Bring in `{ Router }` from `"express"` so this file can use it.
 import { Router } from "express";
-// Study: Import `{ authenticate }` from `"../../middlewares/authenticate"`.
+// Study: Bring in `{ authenticate }` from `"../../middlewares/authenticate"` so this file can use it.
 import { authenticate } from "../../middlewares/authenticate";
-// Study: Import `{ authorize }` from `"../../middlewares/authorize"`.
+// Study: Bring in `{ authorize }` from `"../../middlewares/authorize"` so this file can use it.
 import { authorize } from "../../middlewares/authorize";
-// Study: Import `{ Module, Action }` from `"@prisma/client"`.
+// Study: Bring in `{ Module, Action }` from `"@prisma/client"` so this file can use it.
 import { Module, Action } from "@prisma/client";
-// Study: Import `* as controller` from `"./labour-assignment.controller"`.
+// Study: Bring in `* as controller` from `"./labour-assignment.controller"` so this file can use it.
 import * as controller from "./labour-assignment.controller";
 
 // Study: Call `Router` and store the result as `router`.
@@ -19,11 +19,11 @@ router.post(
     "/",
     // Study: Supply `authenticate` to the surrounding statement.
     authenticate,
-    // Study: Call `authorize`.
+    // Study: Check that the signed-in person has permission for the action listed here.
     authorize(Module.CONTRACTOR, Action.ASSIGN),
     // Study: Supply `controller` to the surrounding statement.
     controller.createLabourAssignment
-// Study: Close the call arguments.
+// Study: End the list of information being sent to this step.
 );
 
 // Study: Register GET / with `controller.getLabourAssignments` after the listed middleware.
@@ -32,11 +32,11 @@ router.get(
     "/",
     // Study: Supply `authenticate` to the surrounding statement.
     authenticate,
-    // Study: Call `authorize`.
+    // Study: Check that the signed-in person has permission for the action listed here.
     authorize(Module.CONTRACTOR, Action.VIEW),
     // Study: Supply `controller` to the surrounding statement.
     controller.getLabourAssignments
-// Study: Close the call arguments.
+// Study: End the list of information being sent to this step.
 );
 
 // Study: Register GET /:id with `controller.getLabourAssignmentById` after the listed middleware.
@@ -45,11 +45,11 @@ router.get(
     "/:id",
     // Study: Supply `authenticate` to the surrounding statement.
     authenticate,
-    // Study: Call `authorize`.
+    // Study: Check that the signed-in person has permission for the action listed here.
     authorize(Module.CONTRACTOR, Action.VIEW),
     // Study: Supply `controller` to the surrounding statement.
     controller.getLabourAssignmentById
-// Study: Close the call arguments.
+// Study: End the list of information being sent to this step.
 );
 
 // Study: Register PATCH /:id with `controller.updateLabourAssignment` after the listed middleware.
@@ -58,12 +58,12 @@ router.patch(
     "/:id",
     // Study: Supply `authenticate` to the surrounding statement.
     authenticate,
-    // Study: Call `authorize`.
+    // Study: Check that the signed-in person has permission for the action listed here.
     authorize(Module.CONTRACTOR, Action.UPDATE),
     // Study: Supply `controller` to the surrounding statement.
     controller.updateLabourAssignment
-// Study: Close the call arguments.
+// Study: End the list of information being sent to this step.
 );
 
-// Study: Expose `router` as the default export.
+// Study: Make `router` the main thing other files can get from this file.
 export default router;

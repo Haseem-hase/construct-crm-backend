@@ -1,8 +1,8 @@
-// Study: Use Zod to parse and validate inputs for relationships between projects and customers.
-// Study: Import `{ z }` from `"zod"`.
+// Study: This file is about which customers are connected to each job and in what role. Checks whether incoming information is complete and in the expected form.
+// Study: Bring in `{ z }` from `"zod"` so this file can use it.
 import { z } from "zod";
 
-// Study: Build a Zod validation rule with `z.enum` and store the result as `RelationshipTypeEnum`.
+// Study: Set up a check for incoming information using `z.enum` and store the result as `RelationshipTypeEnum`.
 const RelationshipTypeEnum = z.enum([
     // Study: Supply the literal string `"OWNER"` here.
     "OWNER",
@@ -16,12 +16,12 @@ const RelationshipTypeEnum = z.enum([
     "PARTNER",
     // Study: Supply the literal string `"OTHER"` here.
     "OTHER"
-// Study: Close the array literal.
+// Study: End this group of values.
 ]);
 
-// Study: Build a Zod validation rule with `z.object({ customerId: z.string().uuid("Invalid customer ID."), relationshipType: R…` and store the result as `createProjectCustomerSchema`.
+// Study: Set up a check for incoming information using `z.object({ customerId: z.string().uuid("Invalid customer ID."), relationshipType: R…` and store the result as `createProjectCustomerSchema`.
 export const createProjectCustomerSchema = z.object({
-    // Study: Validate `customerId` with `z.string().uuid("Invalid customer ID.")`.
+    // Study: Check `customerId` using the rule `z.string().uuid("Invalid customer ID.")`.
     customerId: z.string().uuid("Invalid customer ID."),
     // Study: Set `relationshipType` to `RelationshipTypeEnum`.
     relationshipType: RelationshipTypeEnum,
@@ -34,10 +34,10 @@ export const createProjectCustomerSchema = z.object({
         .optional()
         // Study: Use this default when no value is provided.
         .default(false),
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 }).strict();
 
-// Study: Build a Zod validation rule with `z.object({ relationshipType: RelationshipTypeEnum.optional(), isPrimary: z .boolean…` and store the result as `updateProjectCustomerSchema`.
+// Study: Set up a check for incoming information using `z.object({ relationshipType: RelationshipTypeEnum.optional(), isPrimary: z .boolean…` and store the result as `updateProjectCustomerSchema`.
 export const updateProjectCustomerSchema = z.object({
     // Study: Set `relationshipType` to `RelationshipTypeEnum.optional()`.
     relationshipType: RelationshipTypeEnum.optional(),
@@ -48,7 +48,7 @@ export const updateProjectCustomerSchema = z.object({
         .boolean()
         // Study: Allow this value to be omitted.
         .optional(),
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 }).strict().refine(
     // Study: Supply `data` to the surrounding statement.
     (data) => Object.keys(data).length > 0,
@@ -56,23 +56,23 @@ export const updateProjectCustomerSchema = z.object({
     {
         // Study: Set `message` to `"At least one field must be provided for update."`.
         message: "At least one field must be provided for update.",
-    // Study: Close the object literal.
+    // Study: End this group of values.
     }
-// Study: Close the call arguments.
+// Study: End the list of information being sent to this step.
 );
 
-// Study: Build a Zod validation rule with `z.object({ projectId: z.string().uuid("Invalid project ID."), projectCustomerId: z.…` and store the result as `projectIdAndProjectCustomerIdParamsSchema`.
+// Study: Set up a check for incoming information using `z.object({ projectId: z.string().uuid("Invalid project ID."), projectCustomerId: z.…` and store the result as `projectIdAndProjectCustomerIdParamsSchema`.
 export const projectIdAndProjectCustomerIdParamsSchema = z.object({
-    // Study: Validate `projectId` with `z.string().uuid("Invalid project ID.")`.
+    // Study: Check `projectId` using the rule `z.string().uuid("Invalid project ID.")`.
     projectId: z.string().uuid("Invalid project ID."),
-    // Study: Validate `projectCustomerId` with `z.string().uuid("Invalid project customer ID.")`.
+    // Study: Check `projectCustomerId` using the rule `z.string().uuid("Invalid project customer ID.")`.
     projectCustomerId: z.string().uuid("Invalid project customer ID."),
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 }).strict();
 
-// Study: Build a Zod validation rule with `z.object({ projectId: z.string().uuid("Invalid project ID."), }).strict` and store the result as `projectIdSchema`.
+// Study: Set up a check for incoming information using `z.object({ projectId: z.string().uuid("Invalid project ID."), }).strict` and store the result as `projectIdSchema`.
 export const projectIdSchema = z.object({
-    // Study: Validate `projectId` with `z.string().uuid("Invalid project ID.")`.
+    // Study: Check `projectId` using the rule `z.string().uuid("Invalid project ID.")`.
     projectId: z.string().uuid("Invalid project ID."),
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 }).strict();

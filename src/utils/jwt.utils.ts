@@ -1,10 +1,10 @@
 // Study: Provide helpers for creating and verifying JSON Web Tokens (JWTs).
-// Study: Import `jwt` from `"jsonwebtoken"`.
+// Study: Bring in `jwt` from `"jsonwebtoken"` so this file can use it.
 import jwt from "jsonwebtoken";
-// Study: Import `{ getEnv }` from `"./env.utils"`.
+// Study: Bring in `{ getEnv }` from `"./env.utils"` so this file can use it.
 import { getEnv } from "./env.utils";
 
-// Study: Define the compile-time contract named `TokenPayload`.
+// Study: Describe which information `TokenPayload` can contain so TypeScript can catch mistakes while checking the code.
 export interface TokenPayload {
     // Study: Define `userId` with type `string`.
     userId: string;
@@ -26,51 +26,51 @@ const jwtRefreshExpiresIn = getEnv("JWT_REFRESH_EXPIRES_IN");
 /**
  * Private helper for generating JWTs
  */
-// Study: Define `generateToken` as a reusable function.
+// Study: Set up a reusable step named `generateToken`.
 const generateToken = (
-    // Study: Accept `payload` with type `TokenPayload`.
+    // Study: This step receives `payload`. `TokenPayload` describes what that information should look like.
     payload: TokenPayload,
-    // Study: Accept `secret` with type `string`.
+    // Study: This step receives `secret`. `string` describes what that information should look like.
     secret: string,
-    // Study: Accept `expiresIn` with type `string`.
+    // Study: This step receives `expiresIn`. `string` describes what that information should look like.
     expiresIn: string
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ): string => {
-    // Study: Return `jwt.sign(payload, secret, { expiresIn, } as jwt.SignOptions)` to the caller.
+    // Study: Give `jwt.sign(payload, secret, { expiresIn, } as jwt.SignOptions)` back to the code that asked for it.
     return jwt.sign(payload, secret, {
-        // Study: Pass the current `expiresIn` value under the same property name.
+        // Study: Carry the value of `expiresIn` into the new group under the same name.
         expiresIn,
-    // Study: Close this group and continue the enclosing expression.
+    // Study: Finish this group and continue the surrounding step.
     } as jwt.SignOptions);
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
 /**
  * Private helper for verifying JWTs
  */
-// Study: Define `verifyToken` as a reusable function.
+// Study: Set up a reusable step named `verifyToken`.
 const verifyToken = (
-    // Study: Accept `token` with type `string`.
+    // Study: This step receives `token`. `string` describes what that information should look like.
     token: string,
-    // Study: Accept `secret` with type `string`.
+    // Study: This step receives `secret`. `string` describes what that information should look like.
     secret: string
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ): TokenPayload => {
-    // Study: Return `jwt.verify(token, secret) as TokenPayload` to the caller.
+    // Study: Give `jwt.verify(token, secret) as TokenPayload` back to the code that asked for it.
     return jwt.verify(token, secret) as TokenPayload;
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
 /**
  * Generate Access Token
  */
-// Study: Export `generateAccessToken` as a reusable function.
+// Study: Set up a reusable step named `generateAccessToken`.
 export const generateAccessToken = (
-    // Study: Accept `payload` with type `TokenPayload`.
+    // Study: This step receives `payload`. `TokenPayload` describes what that information should look like.
     payload: TokenPayload
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ): string => {
-    // Study: Return `generateToken( payload, jwtAccessSecret, jwtAccessExpiresIn )` to the caller.
+    // Study: Give `generateToken( payload, jwtAccessSecret, jwtAccessExpiresIn )` back to the code that asked for it.
     return generateToken(
         // Study: Supply `payload` to the surrounding statement.
         payload,
@@ -78,21 +78,21 @@ export const generateAccessToken = (
         jwtAccessSecret,
         // Study: Supply `jwtAccessExpiresIn` to the surrounding statement.
         jwtAccessExpiresIn
-    // Study: Close the call arguments.
+    // Study: End the list of information being sent to this step.
     );
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
 /**
  * Generate Refresh Token
  */
-// Study: Export `generateRefreshToken` as a reusable function.
+// Study: Set up a reusable step named `generateRefreshToken`.
 export const generateRefreshToken = (
-    // Study: Accept `payload` with type `TokenPayload`.
+    // Study: This step receives `payload`. `TokenPayload` describes what that information should look like.
     payload: TokenPayload
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ): string => {
-    // Study: Return `generateToken( payload, jwtRefreshSecret, jwtRefreshExpiresIn )` to the caller.
+    // Study: Give `generateToken( payload, jwtRefreshSecret, jwtRefreshExpiresIn )` back to the code that asked for it.
     return generateToken(
         // Study: Supply `payload` to the surrounding statement.
         payload,
@@ -100,47 +100,47 @@ export const generateRefreshToken = (
         jwtRefreshSecret,
         // Study: Supply `jwtRefreshExpiresIn` to the surrounding statement.
         jwtRefreshExpiresIn
-    // Study: Close the call arguments.
+    // Study: End the list of information being sent to this step.
     );
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
 /**
  * Verify Access Token
  */
-// Study: Export `verifyAccessToken` as a reusable function.
+// Study: Set up a reusable step named `verifyAccessToken`.
 export const verifyAccessToken = (
-    // Study: Accept `token` with type `string`.
+    // Study: This step receives `token`. `string` describes what that information should look like.
     token: string
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ): TokenPayload => {
-    // Study: Return `verifyToken( token, jwtAccessSecret )` to the caller.
+    // Study: Give `verifyToken( token, jwtAccessSecret )` back to the code that asked for it.
     return verifyToken(
         // Study: Supply `token` to the surrounding statement.
         token,
         // Study: Supply `jwtAccessSecret` to the surrounding statement.
         jwtAccessSecret
-    // Study: Close the call arguments.
+    // Study: End the list of information being sent to this step.
     );
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
 /**
  * Verify Refresh Token
  */
-// Study: Export `verifyRefreshToken` as a reusable function.
+// Study: Set up a reusable step named `verifyRefreshToken`.
 export const verifyRefreshToken = (
-    // Study: Accept `token` with type `string`.
+    // Study: This step receives `token`. `string` describes what that information should look like.
     token: string
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ): TokenPayload => {
-    // Study: Return `verifyToken( token, jwtRefreshSecret )` to the caller.
+    // Study: Give `verifyToken( token, jwtRefreshSecret )` back to the code that asked for it.
     return verifyToken(
         // Study: Supply `token` to the surrounding statement.
         token,
         // Study: Supply `jwtRefreshSecret` to the surrounding statement.
         jwtRefreshSecret
-    // Study: Close the call arguments.
+    // Study: End the list of information being sent to this step.
     );
-// Study: Close the code block.
+// Study: End this group of steps.
 };

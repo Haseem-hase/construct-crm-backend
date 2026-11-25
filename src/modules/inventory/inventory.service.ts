@@ -1,35 +1,35 @@
-// Study: Apply business rules and coordinate database operations for inventory assets, warehouse stock, requests, returns, and condition reports.
-// Study: Import `{ Prisma }` from `"@prisma/client"`.
+// Study: This file is about tools, equipment, and materials that warehouses store, issue, and take back. Applies the rules for this part of the CRM, such as what must be checked before saving a change.
+// Study: Bring in `{ Prisma }` from `"@prisma/client"` so this file can use it.
 import { Prisma } from "@prisma/client";
-// Study: Import `{ randomUUID }` from `"crypto"`.
+// Study: Bring in `{ randomUUID }` from `"crypto"` so this file can use it.
 import { randomUUID } from "crypto";
-// Study: Import `prisma` from `"../../lib/prisma"`.
+// Study: Bring in `prisma` from `"../../lib/prisma"` so this file can use it.
 import prisma from "../../lib/prisma";
-// Study: Import `{ BadRequestError }` from `"../../errors/BadRequestError"`.
+// Study: Bring in `{ BadRequestError }` from `"../../errors/BadRequestError"` so this file can use it.
 import { BadRequestError } from "../../errors/BadRequestError";
-// Study: Import `{ ConflictError }` from `"../../errors/ConflictError"`.
+// Study: Bring in `{ ConflictError }` from `"../../errors/ConflictError"` so this file can use it.
 import { ConflictError } from "../../errors/ConflictError";
-// Study: Import `{ NotFoundError }` from `"../../errors/NotFoundError"`.
+// Study: Bring in `{ NotFoundError }` from `"../../errors/NotFoundError"` so this file can use it.
 import { NotFoundError } from "../../errors/NotFoundError";
-// Study: Import `* as repository` from `"./inventory.repository"`.
+// Study: Bring in `* as repository` from `"./inventory.repository"` so this file can use it.
 import * as repository from "./inventory.repository";
-// Study: Import `{ InventoryAssetInput, InventoryAssetListQuery, InventoryAssetUpdate }` from `"./inventory.validation"`.
+// Study: Bring in `{ InventoryAssetInput, InventoryAssetListQuery, InventoryAssetUpdate }` from `"./inventory.validation"` so this file can use it.
 import { InventoryAssetInput, InventoryAssetListQuery, InventoryAssetUpdate } from "./inventory.validation";
 
-// Study: Define `mapUniqueConflict` as a reusable function.
+// Study: Set up a reusable step named `mapUniqueConflict`.
 const mapUniqueConflict = (error: unknown): never => {
-    // Study: Run the following branch when `error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002"` is truthy.
+    // Study: Do the next step if this check passes: `error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002"`.
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-        // Study: Stop this execution path by throwing `new ConflictError("That inventory code is already in use by your organization.")`.
+        // Study: Stop here and report this problem: "That inventory code is already in use by your organization."
         throw new ConflictError("That inventory code is already in use by your organization.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-    // Study: Stop this execution path by throwing `error`.
+    // Study: Stop here and pass the problem onward: `error`.
     throw error;
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `listInventoryAssets` as an async function that returns a promise.
+// Study: Make `listInventoryAssets` available to other files. Its result arrives after its work finishes.
 export const listInventoryAssets = async (organizationId: string, query: InventoryAssetListQuery) => {
     // Study: Build the object `filters` with the entries below.
     const filters = { type: query.type, search: query.search };
@@ -39,12 +39,12 @@ export const listInventoryAssets = async (organizationId: string, query: Invento
         repository.listInventoryAssets(organizationId, (query.page - 1) * query.pageSize, query.pageSize, filters),
         // Study: Call `repository.countInventoryAssets`.
         repository.countInventoryAssets(organizationId, filters),
-    // Study: Close the array literal.
+    // Study: End this group of values.
     ]);
 
-    // Study: Return `{ rows, pagination: { page: query.page, pageSize: query.pageSize, total, totalPages…` to the caller.
+    // Study: Give `{ rows, pagination: { page: query.page, pageSize: query.pageSize, total, totalPages…` back to the code that asked for it.
     return {
-        // Study: Pass the current `rows` value under the same property name.
+        // Study: Carry the value of `rows` into the new group under the same name.
         rows,
         // Study: Start the nested value for `pagination`.
         pagination: {
@@ -52,39 +52,39 @@ export const listInventoryAssets = async (organizationId: string, query: Invento
             page: query.page,
             // Study: Set `pageSize` to `query.pageSize`.
             pageSize: query.pageSize,
-            // Study: Pass the current `total` value under the same property name.
+            // Study: Carry the value of `total` into the new group under the same name.
             total,
             // Study: Set `totalPages` to `Math.ceil(total / query.pageSize)`.
             totalPages: Math.ceil(total / query.pageSize),
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     };
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `getInventoryAsset` as an async function that returns a promise.
+// Study: Make `getInventoryAsset` available to other files. Its result arrives after its work finishes.
 export const getInventoryAsset = async (organizationId: string, id: string) => {
     // Study: Call `repository.findInventoryAsset` and wait for it to finish and store its result in `asset`.
     const asset = await repository.findInventoryAsset(organizationId, id);
-    // Study: Run the following branch when `!asset` is truthy and throw `new NotFoundError("Inventory record not found.")`.
+    // Study: Do the next step if there is no value for `asset` . If so, stop and report "Inventory record not found."
     if (!asset) throw new NotFoundError("Inventory record not found.");
-    // Study: Return `asset` to the caller.
+    // Study: Give `asset` back to the code that asked for it.
     return asset;
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `createInventoryAsset` as an async function that returns a promise.
+// Study: Make `createInventoryAsset` available to other files. Its result arrives after its work finishes.
 export const createInventoryAsset = async (organizationId: string, input: InventoryAssetInput, actorId?: string) => {
-    // Study: Run this block and handle failures in the associated catch block.
+    // Study: Try these steps. If one fails, go to the error-handling steps below.
     try {
         // Study: Call `ensureMainWarehouse` and wait for it to finish and store its result in `warehouse`.
         const warehouse = await ensureMainWarehouse(organizationId);
-        // Study: Return `await prisma.$transaction(async tx => { const asset = await tx.inventoryAsset.creat…` to the caller.
+        // Study: Give `await prisma.$transaction(async tx => { const asset = await tx.inventoryAsset.creat…` back to the code that asked for it.
         return await prisma.$transaction(async tx => {
             // Study: Insert a new record through `tx.inventoryAsset` and wait for it to finish and store its result in `asset`.
             const asset = await tx.inventoryAsset.create({ data: {
-                // Study: Pass the current `organizationId` value under the same property name.
+                // Study: Carry the value of `organizationId` into the new group under the same name.
                 organizationId,
                 // Study: Set `type` to `input.type`.
                 type: input.type,
@@ -100,42 +100,42 @@ export const createInventoryAsset = async (organizationId: string, input: Invent
                 description: input.description ?? null,
                 // Study: Set `imageUrl` to `input.imageUrl ?? null`.
                 imageUrl: input.imageUrl ?? null,
-            // Study: Close this group and continue the enclosing expression.
+            // Study: Finish this group and continue the surrounding step.
             } });
             // Study: Insert a new record through `tx.inventoryWarehouseStock` and wait for it to finish.
             await tx.inventoryWarehouseStock.create({
                 // Study: Supply the values to write to the database.
                 data: { organizationId, assetId: asset.id, warehouseId: warehouse.id, onHandQty: new Prisma.Decimal(input.quantity) },
-            // Study: Close the object literal.
+            // Study: End this group of values.
             });
-            // Study: Run the following branch when `actorId && new Prisma.Decimal(input.quantity).isPositive()` is truthy.
+            // Study: Do the next step if this check passes: `actorId && new Prisma.Decimal(input.quantity).isPositive()`.
             if (actorId && new Prisma.Decimal(input.quantity).isPositive()) {
                 // Study: Insert a new record through `tx.inventoryStockMovement` and wait for it to finish.
                 await tx.inventoryStockMovement.create({
                     // Study: Supply the values to write to the database.
                     data: { organizationId, assetId: asset.id, warehouseId: warehouse.id, type: "RECEIPT", quantityDelta: new Prisma.Decimal(input.quantity), reason: "Opening stock received", actorId },
-                // Study: Close the object literal.
+                // Study: End this group of values.
                 });
-            // Study: Close the code block.
+            // Study: End this group of steps.
             }
-            // Study: Return `asset` to the caller.
+            // Study: Give `asset` back to the code that asked for it.
             return asset;
-        // Study: Close the code block.
+        // Study: End this group of steps.
         });
-    // Study: Handle an exception from the try block as `error`.
+    // Study: Handle a problem raised during the steps above.
     } catch (error) {
-        // Study: Return `mapUniqueConflict(error)` to the caller.
+        // Study: Give `mapUniqueConflict(error)` back to the code that asked for it.
         return mapUniqueConflict(error);
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `updateInventoryAsset` as an async function that returns a promise.
+// Study: Make `updateInventoryAsset` available to other files. Its result arrives after its work finishes.
 export const updateInventoryAsset = async (organizationId: string, id: string, input: InventoryAssetUpdate, actorId?: string) => {
     // Study: Call `repository.findInventoryAsset` and wait for it to finish and store its result in `existing`.
     const existing = await repository.findInventoryAsset(organizationId, id);
-    // Study: Run the following branch when `!existing` is truthy and throw `new NotFoundError("Inventory record not found.")`.
+    // Study: Do the next step if there is no value for `existing` . If so, stop and report "Inventory record not found."
     if (!existing) throw new NotFoundError("Inventory record not found.");
 
     // Study: Build the object `data` with the entries below.
@@ -154,177 +154,177 @@ export const updateInventoryAsset = async (organizationId: string, id: string, i
         ...(input.description !== undefined ? { description: input.description } : {}),
         // Study: Expand the values from `(input.imageUrl !== undefined ? { imageUrl: input.imageUrl } : {})` into the surrounding collection.
         ...(input.imageUrl !== undefined ? { imageUrl: input.imageUrl } : {}),
-    // Study: Close the object literal.
+    // Study: End this group of values.
     };
 
-    // Study: Run this block and handle failures in the associated catch block.
+    // Study: Try these steps. If one fails, go to the error-handling steps below.
     try {
-        // Study: Return `await prisma.$transaction(async tx => { if (input.quantity !== undefined) { const n…` to the caller.
+        // Study: Give `await prisma.$transaction(async tx => { if (input.quantity !== undefined) { const n…` back to the code that asked for it.
         return await prisma.$transaction(async tx => {
-            // Study: Run the following branch when `input.quantity !== undefined` is truthy.
+            // Study: Do the next step if this check passes: `input.quantity !== undefined`.
             if (input.quantity !== undefined) {
                 // Study: Create an instance of `Prisma.Decimal` and store the result as `nextQty`.
                 const nextQty = new Prisma.Decimal(input.quantity);
                 // Study: Call `nextQty.minus` and store the result as `delta`.
                 const delta = nextQty.minus(existing.quantity);
-                // Study: Run the following branch when `!delta.isZero()` is truthy.
+                // Study: Do the next step if this check passes: `!delta.isZero()`.
                 if (!delta.isZero()) {
-                    // Study: Fetch the first record that matches the filters through `tx.inventoryWarehouse` and wait for it to finish and store its result in `warehouse`.
+                    // Study: Find the first record that meets these checks using `tx.inventoryWarehouse` and wait for it to finish and store its result in `warehouse`.
                     const warehouse = await tx.inventoryWarehouse.findFirst({ where: { organizationId, isDefault: true, isActive: true } });
-                    // Study: Run the following branch when `!warehouse` is truthy and throw `new BadRequestError("Create a default warehouse before changing stock.")`.
+                    // Study: Do the next step if there is no value for `warehouse` . If so, stop and report "Create a default warehouse before changing stock."
                     if (!warehouse) throw new BadRequestError("Create a default warehouse before changing stock.");
                     // Study: Update the matching record or create it if it is missing through `tx.inventoryWarehouseStock` and wait for it to finish and store its result in `stock`.
                     const stock = await tx.inventoryWarehouseStock.upsert({
-                        // Study: Set the conditions that database records must match using organizationId_assetId_warehouseId.
+                        // Study: Set the conditions that records must meet using organizationId_assetId_warehouseId.
                         where: { organizationId_assetId_warehouseId: { organizationId, assetId: id, warehouseId: warehouse.id } },
                         // Study: Start the nested value for `create`.
                         create: { organizationId, assetId: id, warehouseId: warehouse.id },
                         // Study: Start the nested value for `update`.
                         update: {},
-                    // Study: Close the object literal.
+                    // Study: End this group of values.
                     });
                     // Study: Call `stock.onHandQty.minus(stock.reservedQty).minus` and store the result as `available`.
                     const available = stock.onHandQty.minus(stock.reservedQty).minus(stock.maintenanceQty);
-                    // Study: Run the following branch when `delta.isNegative() && available.lessThan(delta.abs())` is truthy.
+                    // Study: Do the next step if this check passes: `delta.isNegative() && available.lessThan(delta.abs())`.
                     if (delta.isNegative() && available.lessThan(delta.abs())) {
-                        // Study: Stop this execution path by throwing `new BadRequestError("The default warehouse does not have enough unreserved stock fo…`.
+                        // Study: Stop here and pass the problem onward: `new BadRequestError("The default warehouse does not have enough unreserved stock fo…`.
                         throw new BadRequestError("The default warehouse does not have enough unreserved stock for this quantity change. Use a stock adjustment for a specific warehouse.");
-                    // Study: Close the code block.
+                    // Study: End this group of steps.
                     }
                     // Study: Update the uniquely identified record through `tx.inventoryWarehouseStock` and wait for it to finish.
                     await tx.inventoryWarehouseStock.update({ where: { id: stock.id }, data: { onHandQty: { increment: delta } } });
-                    // Study: Run the following branch when `actorId` is truthy.
+                    // Study: Do the next step if this check passes: `actorId`.
                     if (actorId) await tx.inventoryStockMovement.create({
                         // Study: Supply the values to write to the database.
                         data: {
-                            // Study: Pass the current `organizationId` value under the same property name.
+                            // Study: Carry the value of `organizationId` into the new group under the same name.
                             organizationId, assetId: id, warehouseId: warehouse.id,
                             // Study: Set `type` to `delta.isPositive() ? "ADJUSTMENT_IN" : "ADJUSTMENT_OUT"`.
                             type: delta.isPositive() ? "ADJUSTMENT_IN" : "ADJUSTMENT_OUT",
                             // Study: Set `quantityDelta` to `delta`.
                             quantityDelta: delta, reason: "Inventory quantity updated", actorId,
-                        // Study: Close the object literal.
+                        // Study: End this group of values.
                         },
-                    // Study: Close the object literal.
+                    // Study: End this group of values.
                     });
-                // Study: Close the code block.
+                // Study: End this group of steps.
                 }
-            // Study: Close the code block.
+            // Study: End this group of steps.
             }
             // Study: Update all records matching the filters through `tx.inventoryAsset` and wait for it to finish and store its result in `updated`.
             const updated = await tx.inventoryAsset.updateMany({ where: { id, organizationId, isActive: true }, data });
-            // Study: Run the following branch when `!updated.count` is truthy and throw `new NotFoundError("Inventory record not found.")`.
+            // Study: Do the next step if this check passes: `!updated.count` . If so, stop and report "Inventory record not found."
             if (!updated.count) throw new NotFoundError("Inventory record not found.");
-            // Study: Return `tx.inventoryAsset.findFirst({ where: { id, organizationId, isActive: true } })` to the caller.
+            // Study: Give `tx.inventoryAsset.findFirst({ where: { id, organizationId, isActive: true } })` back to the code that asked for it.
             return tx.inventoryAsset.findFirst({ where: { id, organizationId, isActive: true } });
         // Study: Set `isolationLevel` to `Prisma.TransactionIsolationLevel.Serializable`.
         }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
-    // Study: Handle an exception from the try block as `error`.
+    // Study: Handle a problem raised during the steps above.
     } catch (error) {
-        // Study: Return `mapUniqueConflict(error)` to the caller.
+        // Study: Give `mapUniqueConflict(error)` back to the code that asked for it.
         return mapUniqueConflict(error);
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `deactivateInventoryAsset` as an async function that returns a promise.
+// Study: Make `deactivateInventoryAsset` available to other files. Its result arrives after its work finishes.
 export const deactivateInventoryAsset = async (organizationId: string, id: string) => {
     // Study: Call `repository.deactivateInventoryAsset` and wait for it to finish and store its result in `result`.
     const result = await repository.deactivateInventoryAsset(organizationId, id);
-    // Study: Run the following branch when `!result.count` is truthy and throw `new NotFoundError("Inventory record not found.")`.
+    // Study: Do the next step if this check passes: `!result.count` . If so, stop and report "Inventory record not found."
     if (!result.count) throw new NotFoundError("Inventory record not found.");
-    // Study: Return `{ id, isActive: false }` to the caller.
+    // Study: Give `{ id, isActive: false }` back to the code that asked for it.
     return { id, isActive: false };
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `ensureMainWarehouse` as an async function that returns a promise.
+// Study: Make `ensureMainWarehouse` available to other files. Its result arrives after its work finishes.
 export const ensureMainWarehouse = async (organizationId: string) => {
-    // Study: Fetch the first record that matches the filters through `prisma.inventoryWarehouse` and wait for it to finish and store its result in `existing`.
+    // Study: Find the first record that meets these checks using `prisma.inventoryWarehouse` and wait for it to finish and store its result in `existing`.
     const existing = await prisma.inventoryWarehouse.findFirst({
-        // Study: Set the conditions that database records must match using organizationId, isDefault, isActive.
+        // Study: Set the conditions that records must meet using organizationId, isDefault, isActive.
         where: { organizationId, isDefault: true, isActive: true },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-    // Study: Run the following branch when `existing` is truthy and exit the function.
+    // Study: Do the next step if this check passes: `existing` and exit the function.
     if (existing) return existing;
-    // Study: Run this block and handle failures in the associated catch block.
+    // Study: Try these steps. If one fails, go to the error-handling steps below.
     try {
-        // Study: Return `await prisma.inventoryWarehouse.create({ data: { organizationId, code: "MAIN", name…` to the caller.
+        // Study: Give `await prisma.inventoryWarehouse.create({ data: { organizationId, code: "MAIN", name…` back to the code that asked for it.
         return await prisma.inventoryWarehouse.create({
             // Study: Supply the values to write to the database.
             data: { organizationId, code: "MAIN", name: "Main Warehouse", type: "CENTRAL", isDefault: true },
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
-    // Study: Handle an exception from the try block as `error`.
+    // Study: Handle a problem raised during the steps above.
     } catch (error) {
-        // Study: Fetch the first record that matches the filters through `prisma.inventoryWarehouse` and wait for it to finish and store its result in `raced`.
+        // Study: Find the first record that meets these checks using `prisma.inventoryWarehouse` and wait for it to finish and store its result in `raced`.
         const raced = await prisma.inventoryWarehouse.findFirst({ where: { organizationId, isDefault: true, isActive: true } });
-        // Study: Run the following branch when `raced` is truthy and exit the function.
+        // Study: Do the next step if this check passes: `raced` and exit the function.
         if (raced) return raced;
-        // Study: Stop this execution path by throwing `error`.
+        // Study: Stop here and pass the problem onward: `error`.
         throw error;
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `listInventoryWarehouses` as an async function that returns a promise.
+// Study: Make `listInventoryWarehouses` available to other files. Its result arrives after its work finishes.
 export const listInventoryWarehouses = async (organizationId: string) => {
     // Study: Call `ensureMainWarehouse` and wait for it to finish.
     await ensureMainWarehouse(organizationId);
-    // Study: Return `prisma.inventoryWarehouse.findMany({ where: { organizationId, isActive: true }, inc…` to the caller.
+    // Study: Give `prisma.inventoryWarehouse.findMany({ where: { organizationId, isActive: true }, inc…` back to the code that asked for it.
     return prisma.inventoryWarehouse.findMany({
-        // Study: Set the conditions that database records must match using organizationId, isActive.
+        // Study: Set the conditions that records must meet using organizationId, isActive.
         where: { organizationId, isActive: true },
-        // Study: Load related database records with the main result.
+        // Study: Ask for linked information along with the main record.
         include: { _count: { select: { stocks: true } }, project: { select: { id: true, name: true, projectCode: true } } },
         // Study: Set the sort order for the returned records.
         orderBy: [{ isDefault: "desc" }, { name: "asc" }],
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `createInventoryWarehouse` as an async function that returns a promise.
+// Study: Make `createInventoryWarehouse` available to other files. Its result arrives after its work finishes.
 export const createInventoryWarehouse = async (organizationId: string, input: {
     // Study: Define `code` with type `string`.
     code: string; name: string; type: "CENTRAL" | "PROJECT_SITE"; projectId?: string; address?: string | null;
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 }) => {
-    // Study: Run the following branch when `input.type === "PROJECT_SITE" && !input.projectId` is truthy and throw `new BadRequestError("Select the project served by this site warehouse.")`.
+    // Study: Do the next step if this check passes: `input.type === "PROJECT_SITE" && !input.projectId` . If so, stop and report "Select the project served by this site warehouse."
     if (input.type === "PROJECT_SITE" && !input.projectId) throw new BadRequestError("Select the project served by this site warehouse.");
-    // Study: Run the following branch when `input.type === "CENTRAL" && input.projectId` is truthy and throw `new BadRequestError("Central warehouses cannot be linked to a project.")`.
+    // Study: Do the next step if this check passes: `input.type === "CENTRAL" && input.projectId` . If so, stop and report "Central warehouses cannot be linked to a project."
     if (input.type === "CENTRAL" && input.projectId) throw new BadRequestError("Central warehouses cannot be linked to a project.");
-    // Study: Run the following branch when `input.projectId` is truthy.
+    // Study: Do the next step if this check passes: `input.projectId`.
     if (input.projectId) {
-        // Study: Fetch the first record that matches the filters through `prisma.project` and wait for it to finish and store its result in `project`.
+        // Study: Find the first record that meets these checks using `prisma.project` and wait for it to finish and store its result in `project`.
         const project = await prisma.project.findFirst({ where: { id: input.projectId, organizationId }, select: { id: true } });
-        // Study: Run the following branch when `!project` is truthy and throw `new BadRequestError("The selected project does not belong to this organization.")`.
+        // Study: Do the next step if there is no value for `project` . If so, stop and report "The selected project does not belong to this organization."
         if (!project) throw new BadRequestError("The selected project does not belong to this organization.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-    // Study: Run this block and handle failures in the associated catch block.
+    // Study: Try these steps. If one fails, go to the error-handling steps below.
     try {
-        // Study: Return `await prisma.inventoryWarehouse.create({ data: { organizationId, ...input } })` to the caller.
+        // Study: Give `await prisma.inventoryWarehouse.create({ data: { organizationId, ...input } })` back to the code that asked for it.
         return await prisma.inventoryWarehouse.create({ data: { organizationId, ...input } });
-    // Study: Handle an exception from the try block as `error`.
+    // Study: Handle a problem raised during the steps above.
     } catch (error) {
-        // Study: Return `mapUniqueConflict(error)` to the caller.
+        // Study: Give `mapUniqueConflict(error)` back to the code that asked for it.
         return mapUniqueConflict(error);
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `listWarehouseStock` as an async function that returns a promise.
+// Study: Make `listWarehouseStock` available to other files. Its result arrives after its work finishes.
 export const listWarehouseStock = async (organizationId: string, warehouseId?: string, search?: string) => {
-    // Study: Fetch records matching the query through `prisma.inventoryWarehouseStock` and wait for it to finish and store its result in `rows`.
+    // Study: Find all matching records using `prisma.inventoryWarehouseStock` and wait for it to finish and store its result in `rows`.
     const rows = await prisma.inventoryWarehouseStock.findMany({
-        // Study: Set the conditions that database records must match using organizationId, warehouse, asset.
+        // Study: Set the conditions that records must meet using organizationId, warehouse, asset.
         where: {
-            // Study: Pass the current `organizationId` value under the same property name.
+            // Study: Carry the value of `organizationId` into the new group under the same name.
             organizationId,
             // Study: Start the nested value for `warehouse`.
             warehouse: { organizationId, isActive: true },
@@ -334,80 +334,80 @@ export const listWarehouseStock = async (organizationId: string, warehouseId?: s
                 { name: { contains: search, mode: "insensitive" } },
                 // Study: Start the object passed to the surrounding expression.
                 { code: { contains: search, mode: "insensitive" } },
-            // Study: Close this group and continue the enclosing expression.
+            // Study: Finish this group and continue the surrounding step.
             ] } : {}) },
             // Study: Expand the values from `(warehouseId ? { warehouseId } : {})` into the surrounding collection.
             ...(warehouseId ? { warehouseId } : {}),
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-        // Study: Load related database records with the main result.
+        // Study: Ask for linked information along with the main record.
         include: { asset: true, warehouse: true },
         // Study: Set the sort order for the returned records.
         orderBy: [{ asset: { type: "asc" } }, { asset: { name: "asc" } }],
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-    // Study: Return `rows.map(row => ({ ...row, availableQty: row.onHandQty.minus(row.reservedQty).minus…` to the caller.
+    // Study: Give `rows.map(row => ({ ...row, availableQty: row.onHandQty.minus(row.reservedQty).minus…` back to the code that asked for it.
     return rows.map(row => ({
         // Study: Expand the values from `row` into the surrounding collection.
         ...row,
         // Study: Set `availableQty` to `row.onHandQty.minus(row.reservedQty).minus(row.maintenanceQty).toString()`.
         availableQty: row.onHandQty.minus(row.reservedQty).minus(row.maintenanceQty).toString(),
-    // Study: Close the object literal.
+    // Study: End this group of values.
     }));
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `adjustWarehouseStock` as an async function that returns a promise.
+// Study: Make `adjustWarehouseStock` available to other files. Its result arrives after its work finishes.
 export const adjustWarehouseStock = async (organizationId: string, actorId: string, input: {
     // Study: Define `assetId` with type `string`.
     assetId: string; warehouseId: string; quantityDelta: string; reason: string;
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 }) => {
     // Study: Create an instance of `Prisma.Decimal` and store the result as `delta`.
     const delta = new Prisma.Decimal(input.quantityDelta);
-    // Study: Return `prisma.$transaction(async tx => { const [asset, warehouse] = await Promise.all([ tx…` to the caller.
+    // Study: Give `prisma.$transaction(async tx => { const [asset, warehouse] = await Promise.all([ tx…` back to the code that asked for it.
     return prisma.$transaction(async tx => {
         // Study: Run the listed asynchronous operations together and collect their results in order and wait for it to finish and store its result in `[asset, warehouse]`.
         const [asset, warehouse] = await Promise.all([
-            // Study: Fetch the first record that matches the filters through `tx.inventoryAsset`.
+            // Study: Find the first record that meets these checks using `tx.inventoryAsset`.
             tx.inventoryAsset.findFirst({ where: { id: input.assetId, organizationId, isActive: true } }),
-            // Study: Fetch the first record that matches the filters through `tx.inventoryWarehouse`.
+            // Study: Find the first record that meets these checks using `tx.inventoryWarehouse`.
             tx.inventoryWarehouse.findFirst({ where: { id: input.warehouseId, organizationId, isActive: true } }),
-        // Study: Close the array literal.
+        // Study: End this group of values.
         ]);
-        // Study: Run the following branch when `!asset` is truthy and throw `new NotFoundError("Inventory item not found.")`.
+        // Study: Do the next step if there is no value for `asset` . If so, stop and report "Inventory item not found."
         if (!asset) throw new NotFoundError("Inventory item not found.");
-        // Study: Run the following branch when `!warehouse` is truthy and throw `new NotFoundError("Warehouse not found.")`.
+        // Study: Do the next step if there is no value for `warehouse` . If so, stop and report "Warehouse not found."
         if (!warehouse) throw new NotFoundError("Warehouse not found.");
 
         // Study: Update the matching record or create it if it is missing through `tx.inventoryWarehouseStock` and wait for it to finish and store its result in `stock`.
         const stock = await tx.inventoryWarehouseStock.upsert({
-            // Study: Set the conditions that database records must match using organizationId_assetId_warehouseId.
+            // Study: Set the conditions that records must meet using organizationId_assetId_warehouseId.
             where: { organizationId_assetId_warehouseId: { organizationId, assetId: input.assetId, warehouseId: input.warehouseId } },
             // Study: Start the nested value for `create`.
             create: { organizationId, assetId: input.assetId, warehouseId: input.warehouseId },
             // Study: Start the nested value for `update`.
             update: {},
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
         // Study: Call `stock.onHandQty.plus` and store the result as `nextOnHand`.
         const nextOnHand = stock.onHandQty.plus(delta);
         // Study: Call `stock.onHandQty.minus(stock.reservedQty).minus` and store the result as `available`.
         const available = stock.onHandQty.minus(stock.reservedQty).minus(stock.maintenanceQty);
-        // Study: Run the following branch when `nextOnHand.isNegative() || (delta.isNegative() && available.lessThan(delta.abs()))` is truthy.
+        // Study: Do the next step if this check passes: `nextOnHand.isNegative() || (delta.isNegative() && available.lessThan(delta.abs()))`.
         if (nextOnHand.isNegative() || (delta.isNegative() && available.lessThan(delta.abs()))) {
-            // Study: Stop this execution path by throwing `new BadRequestError("This adjustment would reduce stock below the quantity already …`.
+            // Study: Stop here and pass the problem onward: `new BadRequestError("This adjustment would reduce stock below the quantity already …`.
             throw new BadRequestError("This adjustment would reduce stock below the quantity already reserved or under maintenance.");
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
 
         // Study: Update the uniquely identified record through `tx.inventoryWarehouseStock` and wait for it to finish.
         await tx.inventoryWarehouseStock.update({
-            // Study: Set the conditions that database records must match using id.
+            // Study: Set the conditions that records must meet using id.
             where: { id: stock.id },
             // Study: Supply the values to write to the database.
             data: { onHandQty: { increment: delta } },
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
         // Study: Update the uniquely identified record through `tx.inventoryAsset` and wait for it to finish.
         await tx.inventoryAsset.update({ where: { id: asset.id }, data: { quantity: { increment: delta } } });
@@ -415,43 +415,43 @@ export const adjustWarehouseStock = async (organizationId: string, actorId: stri
         await tx.inventoryStockMovement.create({
             // Study: Supply the values to write to the database.
             data: {
-                // Study: Pass the current `organizationId` value under the same property name.
+                // Study: Carry the value of `organizationId` into the new group under the same name.
                 organizationId, assetId: asset.id, warehouseId: warehouse.id,
                 // Study: Set `type` to `delta.isPositive() ? "ADJUSTMENT_IN" : "ADJUSTMENT_OUT"`.
                 type: delta.isPositive() ? "ADJUSTMENT_IN" : "ADJUSTMENT_OUT",
                 // Study: Set `quantityDelta` to `delta`.
                 quantityDelta: delta, reason: input.reason, actorId,
-            // Study: Close the object literal.
+            // Study: End this group of values.
             },
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
-        // Study: Return `{ ...stock, onHandQty: nextOnHand, availableQty: nextOnHand.minus(stock.reservedQty…` to the caller.
+        // Study: Give `{ ...stock, onHandQty: nextOnHand, availableQty: nextOnHand.minus(stock.reservedQty…` back to the code that asked for it.
         return { ...stock, onHandQty: nextOnHand, availableQty: nextOnHand.minus(stock.reservedQty).minus(stock.maintenanceQty).toString(), reason: input.reason };
     // Study: Set `isolationLevel` to `Prisma.TransactionIsolationLevel.Serializable`.
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
 /** Use the trusted inventory tenant for request and warehouse project selectors. */
-// Study: Export `getInventoryRequestOptions` as an async function that returns a promise.
+// Study: Make `getInventoryRequestOptions` available to other files. Its result arrives after its work finishes.
 export const getInventoryRequestOptions = async (organizationId: string) => {
     // Study: Run the listed asynchronous operations together and collect their results in order and wait for it to finish and store its result in `[projects, labourAssignments]`.
     const [projects, labourAssignments] = await Promise.all([
-        // Study: Fetch records matching the query through `prisma.project`.
+        // Study: Find all matching records using `prisma.project`.
         prisma.project.findMany({
-            // Study: Set the conditions that database records must match using organizationId.
+            // Study: Set the conditions that records must meet using organizationId.
             where: { organizationId },
-            // Study: Choose which fields Prisma returns.
+            // Study: Choose which details the database gives back.
             select: { id: true, name: true, projectCode: true },
             // Study: Set the sort order for the returned records.
             orderBy: { name: "asc" },
-        // Study: Close the object literal.
+        // Study: End this group of values.
         }),
-        // Study: Fetch records matching the query through `prisma.labourAssignment`.
+        // Study: Find all matching records using `prisma.labourAssignment`.
         prisma.labourAssignment.findMany({
-            // Study: Set the conditions that database records must match using status, assignment.
+            // Study: Set the conditions that records must meet using status, assignment.
             where: { status: "ACTIVE", assignment: { project: { organizationId } } },
-            // Study: Choose which fields Prisma returns.
+            // Study: Choose which details the database gives back.
             select: {
                 // Study: Set `id` to `true`.
                 id: true, status: true,
@@ -463,15 +463,15 @@ export const getInventoryRequestOptions = async (organizationId: string) => {
                     project: { select: { id: true } },
                     // Study: Load `contractor` and return its selected fields: fullName.
                     contractor: { select: { fullName: true } },
-                // Study: Close this group and continue the enclosing expression.
+                // Study: Finish this group and continue the surrounding step.
                 } },
-            // Study: Close the object literal.
+            // Study: End this group of values.
             },
-        // Study: Close the object literal.
+        // Study: End this group of values.
         }),
-    // Study: Close the array literal.
+    // Study: End this group of values.
     ]);
-    // Study: Return `{ projects, labourAssignments }` to the caller.
+    // Study: Give `{ projects, labourAssignments }` back to the code that asked for it.
     return { projects, labourAssignments };
-// Study: Close the code block.
+// Study: End this group of steps.
 };

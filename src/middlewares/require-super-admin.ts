@@ -1,28 +1,28 @@
 // Study: Restrict a route to users with the system-level super-admin role.
-// Study: Import `{ NextFunction, Request, Response }` from `"express"`.
+// Study: Bring in `{ NextFunction, Request, Response }` from `"express"` so this file can use it.
 import { NextFunction, Request, Response } from "express";
-// Study: Import `{ ForbiddenError }` from `"../errors/ForbiddenError"`.
+// Study: Bring in `{ ForbiddenError }` from `"../errors/ForbiddenError"` so this file can use it.
 import { ForbiddenError } from "../errors/ForbiddenError";
 
 /** Restricts platform-wide operations to the system Super Admin role. */
-// Study: Export `requireSuperAdmin` as a reusable function.
+// Study: Set up a reusable step named `requireSuperAdmin`.
 export const requireSuperAdmin = (
-    // Study: Accept `req` with type `Request`.
+    // Study: Read the information that came in with the request from the screen.
     req: Request,
-    // Study: Accept `_res` with type `Response`.
+    // Study: This step receives `_res`. `Response` describes what that information should look like.
     _res: Response,
-    // Study: Accept `next` with type `NextFunction`.
+    // Study: Use this to move the request to the next check or action.
     next: NextFunction
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Run the following branch when `req.user?.systemRole !== "SUPER_ADMIN"` is truthy.
+    // Study: Do the next step if this check passes: `req.user?.systemRole !== "SUPER_ADMIN"`.
     if (req.user?.systemRole !== "SUPER_ADMIN") {
-        // Study: Return `next(new ForbiddenError("Only Super Admins can manage organizations."))` to the caller.
+        // Study: Give `next(new ForbiddenError("Only Super Admins can manage organizations."))` back to the code that asked for it.
         return next(new ForbiddenError("Only Super Admins can manage organizations."));
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Continue to the next Express middleware or handler.
+    // Study: Allow the request to move to its next check or action.
     next();
-// Study: Close the code block.
+// Study: End this group of steps.
 };

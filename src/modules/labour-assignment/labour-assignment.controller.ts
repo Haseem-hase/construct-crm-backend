@@ -1,51 +1,51 @@
-// Study: Translate HTTP requests into service calls and send HTTP responses for worker placements on construction projects.
-// Study: Import `{ Request, Response, NextFunction }` from `"express"`.
+// Study: This file is about which workers are assigned to each job. Takes information sent by the screen, asks the backend to do the work, and sends back the result.
+// Study: Bring in `{ Request, Response, NextFunction }` from `"express"` so this file can use it.
 import { Request, Response, NextFunction } from "express";
-// Study: Import `* as labourAssignmentService` from `"./labour-assignment.service"`.
+// Study: Bring in `* as labourAssignmentService` from `"./labour-assignment.service"` so this file can use it.
 import * as labourAssignmentService from "./labour-assignment.service";
-// Study: Import `{ AuthenticatedUser }` from `"../../shared/types/authenticated-user"`.
+// Study: Bring in `{ AuthenticatedUser }` from `"../../shared/types/authenticated-user"` so this file can use it.
 import { AuthenticatedUser } from "../../shared/types/authenticated-user";
-// Study: Import `{ ForbiddenError }` from `"../../errors/ForbiddenError"`.
+// Study: Bring in `{ ForbiddenError }` from `"../../errors/ForbiddenError"` so this file can use it.
 import { ForbiddenError } from "../../errors/ForbiddenError";
-// Study: Import `{ createLabourAssignmentSchema, updateLabourAssignmentSchema, labourAssignmentIdSch…` from `"./labour-assignment.validation"`.
+// Study: Bring in `{ createLabourAssignmentSchema, updateLabourAssignmentSchema, labourAssignmentIdSch…` from `"./labour-assignment.validation"` so this file can use it.
 import {
-    // Study: Bring `createLabourAssignmentSchema` into scope from the imported module.
+    // Study: Make `createLabourAssignmentSchema` from the other file available here.
     createLabourAssignmentSchema,
-    // Study: Bring `updateLabourAssignmentSchema` into scope from the imported module.
+    // Study: Make `updateLabourAssignmentSchema` from the other file available here.
     updateLabourAssignmentSchema,
-    // Study: Bring `labourAssignmentIdSchema` into scope from the imported module.
+    // Study: Make `labourAssignmentIdSchema` from the other file available here.
     labourAssignmentIdSchema,
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 } from "./labour-assignment.validation";
-// Study: Import `{ LabourAssignmentStatus }` from `"@prisma/client"`.
+// Study: Bring in `{ LabourAssignmentStatus }` from `"@prisma/client"` so this file can use it.
 import { LabourAssignmentStatus } from "@prisma/client";
 
-// Study: Export `createLabourAssignment` as an async function that returns a promise.
+// Study: Make `createLabourAssignment` available to other files. Its result arrives after its work finishes.
 export const createLabourAssignment = async (
-    // Study: Accept `req` with type `Request`.
+    // Study: Read the information that came in with the request from the screen.
     req: Request,
-    // Study: Accept `res` with type `Response`.
+    // Study: Use this to send information or an error back to the screen.
     res: Response,
-    // Study: Accept `next` with type `NextFunction`.
+    // Study: Use this to move the request to the next check or action.
     next: NextFunction
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Run this block and handle failures in the associated catch block.
+    // Study: Try these steps. If one fails, go to the error-handling steps below.
     try {
-        // Study: Validate `req.body` with `createLabourAssignmentSchema` and obtain the parsed value and store the result as `validatedData`.
+        // Study: Check `req.body` using the rule `createLabourAssignmentSchema` and obtain the parsed value and store the result as `validatedData`.
         const validatedData = createLabourAssignmentSchema.parse(req.body);
-        // Study: Set `user` to `req.user as AuthenticatedUser`.
+        // Study: Use the signed-in account attached to this request.
         const user = req.user as AuthenticatedUser;
 
-        // Study: Run the following branch when `!user.organizationId` is truthy.
+        // Study: Do the next step if this check passes: `!user.organizationId`.
         if (!user.organizationId) {
-            // Study: Stop this execution path by throwing `new ForbiddenError( "User is not associated with an organization." )`.
+            // Study: Stop here and pass the problem onward: `new ForbiddenError( "User is not associated with an organization." )`.
             throw new ForbiddenError(
                 // Study: Supply the literal string `"User is not associated with an organization."` here.
                 "User is not associated with an organization."
             // Study: Close the current group.
             );
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
 
         // Study: Call `labourAssignmentService.createAssignment` and wait for it to finish and store its result in `assignment`.
@@ -54,45 +54,45 @@ export const createLabourAssignment = async (
             user.organizationId,
             // Study: Supply `validatedData` to the surrounding statement.
             validatedData
-        // Study: Close the call arguments.
+        // Study: End the list of information being sent to this step.
         );
 
-        // Study: Send a JSON response to the client.
+        // Study: Send named information back to the screen as JSON.
         res.status(201).json({
-            // Study: Set `success` to `true`.
+            // Study: Tell the screen that the request succeeded.
             success: true,
             // Study: Set `message` to `"Labour assignment created successfully."`.
             message: "Labour assignment created successfully.",
             // Study: Supply the values to write to the database.
             data: {
-                // Study: Pass the current `assignment` value under the same property name.
+                // Study: Carry the value of `assignment` into the new group under the same name.
                 assignment,
-            // Study: Close the object literal.
+            // Study: End this group of values.
             },
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
-    // Study: Handle an exception from the try block as `error`.
+    // Study: Handle a problem raised during the steps above.
     } catch (error) {
-        // Study: Pass the error to the next Express error handler.
+        // Study: Send the problem to the part of the backend that prepares an error reply.
         next(error);
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `getLabourAssignments` as an async function that returns a promise.
+// Study: Make `getLabourAssignments` available to other files. Its result arrives after its work finishes.
 export const getLabourAssignments = async (
-    // Study: Accept `req` with type `Request`.
+    // Study: Read the information that came in with the request from the screen.
     req: Request,
-    // Study: Accept `res` with type `Response`.
+    // Study: Use this to send information or an error back to the screen.
     res: Response,
-    // Study: Accept `next` with type `NextFunction`.
+    // Study: Use this to move the request to the next check or action.
     next: NextFunction
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Run this block and handle failures in the associated catch block.
+    // Study: Try these steps. If one fails, go to the error-handling steps below.
     try {
-        // Study: Set `user` to `req.user as AuthenticatedUser`.
+        // Study: Use the signed-in account attached to this request.
         const user = req.user as AuthenticatedUser;
 
         // Study: Build the object `filters` with the entries below.
@@ -103,119 +103,119 @@ export const getLabourAssignments = async (
             contractorProjectAssignmentId: req.query.contractorProjectAssignmentId as string | undefined,
             // Study: Set `status` to `req.query.status as LabourAssignmentStatus | undefined`.
             status: req.query.status as LabourAssignmentStatus | undefined,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         };
 
-        // Study: Run the following branch when `!user.organizationId && user.systemRole !== "SUPER_ADMIN"` is truthy and throw `new ForbiddenError("This operation requires an organization context.")`.
+        // Study: Do the next step if this check passes: `!user.organizationId && user.systemRole !== "SUPER_ADMIN"` . If so, stop and report "This operation requires an organization context."
         if (!user.organizationId && user.systemRole !== "SUPER_ADMIN") throw new ForbiddenError("This operation requires an organization context.");
         // Study: Set `assignments` to `user.systemRole === "SUPER_ADMIN" ? await labourAssignmentService.getPlatformAssign…`.
         const assignments = user.systemRole === "SUPER_ADMIN"
-            // Study: Use this value when the preceding condition is truthy.
+            // Study: Use this value if the check above passes.
             ? await labourAssignmentService.getPlatformAssignments(filters)
-            // Study: Use this value when the preceding condition is falsy.
+            // Study: Use this value if the check above fails.
             : await labourAssignmentService.getAssignments(user.organizationId!, filters);
 
-        // Study: Send a JSON response to the client.
+        // Study: Send named information back to the screen as JSON.
         res.status(200).json({
-            // Study: Set `success` to `true`.
+            // Study: Tell the screen that the request succeeded.
             success: true,
             // Study: Set `message` to `"Labour assignments retrieved successfully."`.
             message: "Labour assignments retrieved successfully.",
             // Study: Supply the values to write to the database.
             data: {
-                // Study: Pass the current `assignments` value under the same property name.
+                // Study: Carry the value of `assignments` into the new group under the same name.
                 assignments,
-            // Study: Close the object literal.
+            // Study: End this group of values.
             },
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
-    // Study: Handle an exception from the try block as `error`.
+    // Study: Handle a problem raised during the steps above.
     } catch (error) {
-        // Study: Pass the error to the next Express error handler.
+        // Study: Send the problem to the part of the backend that prepares an error reply.
         next(error);
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `getLabourAssignmentById` as an async function that returns a promise.
+// Study: Make `getLabourAssignmentById` available to other files. Its result arrives after its work finishes.
 export const getLabourAssignmentById = async (
-    // Study: Accept `req` with type `Request`.
+    // Study: Read the information that came in with the request from the screen.
     req: Request,
-    // Study: Accept `res` with type `Response`.
+    // Study: Use this to send information or an error back to the screen.
     res: Response,
-    // Study: Accept `next` with type `NextFunction`.
+    // Study: Use this to move the request to the next check or action.
     next: NextFunction
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Run this block and handle failures in the associated catch block.
+    // Study: Try these steps. If one fails, go to the error-handling steps below.
     try {
-        // Study: Set `user` to `req.user as AuthenticatedUser`.
+        // Study: Use the signed-in account attached to this request.
         const user = req.user as AuthenticatedUser;
 
-        // Study: Validate `req.params` with `labourAssignmentIdSchema` and obtain the parsed value and store the result as `params`.
+        // Study: Check `req.params` using the rule `labourAssignmentIdSchema` and obtain the parsed value and store the result as `params`.
         const params = labourAssignmentIdSchema.parse(req.params);
-        // Study: Run the following branch when `!user.organizationId && user.systemRole !== "SUPER_ADMIN"` is truthy and throw `new ForbiddenError("This operation requires an organization context.")`.
+        // Study: Do the next step if this check passes: `!user.organizationId && user.systemRole !== "SUPER_ADMIN"` . If so, stop and report "This operation requires an organization context."
         if (!user.organizationId && user.systemRole !== "SUPER_ADMIN") throw new ForbiddenError("This operation requires an organization context.");
         // Study: Set `assignment` to `user.systemRole === "SUPER_ADMIN" ? await labourAssignmentService.getPlatformAssign…`.
         const assignment = user.systemRole === "SUPER_ADMIN"
-            // Study: Use this value when the preceding condition is truthy.
+            // Study: Use this value if the check above passes.
             ? await labourAssignmentService.getPlatformAssignmentById(params.id)
-            // Study: Use this value when the preceding condition is falsy.
+            // Study: Use this value if the check above fails.
             : await labourAssignmentService.getAssignmentById(user.organizationId!, params.id);
 
-        // Study: Send a JSON response to the client.
+        // Study: Send named information back to the screen as JSON.
         res.status(200).json({
-            // Study: Set `success` to `true`.
+            // Study: Tell the screen that the request succeeded.
             success: true,
             // Study: Set `message` to `"Labour assignment retrieved successfully."`.
             message: "Labour assignment retrieved successfully.",
             // Study: Supply the values to write to the database.
             data: {
-                // Study: Pass the current `assignment` value under the same property name.
+                // Study: Carry the value of `assignment` into the new group under the same name.
                 assignment,
-            // Study: Close the object literal.
+            // Study: End this group of values.
             },
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
-    // Study: Handle an exception from the try block as `error`.
+    // Study: Handle a problem raised during the steps above.
     } catch (error) {
-        // Study: Pass the error to the next Express error handler.
+        // Study: Send the problem to the part of the backend that prepares an error reply.
         next(error);
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `updateLabourAssignment` as an async function that returns a promise.
+// Study: Make `updateLabourAssignment` available to other files. Its result arrives after its work finishes.
 export const updateLabourAssignment = async (
-    // Study: Accept `req` with type `Request`.
+    // Study: Read the information that came in with the request from the screen.
     req: Request,
-    // Study: Accept `res` with type `Response`.
+    // Study: Use this to send information or an error back to the screen.
     res: Response,
-    // Study: Accept `next` with type `NextFunction`.
+    // Study: Use this to move the request to the next check or action.
     next: NextFunction
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Run this block and handle failures in the associated catch block.
+    // Study: Try these steps. If one fails, go to the error-handling steps below.
     try {
-        // Study: Validate `req.body` with `updateLabourAssignmentSchema` and obtain the parsed value and store the result as `validatedData`.
+        // Study: Check `req.body` using the rule `updateLabourAssignmentSchema` and obtain the parsed value and store the result as `validatedData`.
         const validatedData = updateLabourAssignmentSchema.parse(req.body);
-        // Study: Set `user` to `req.user as AuthenticatedUser`.
+        // Study: Use the signed-in account attached to this request.
         const user = req.user as AuthenticatedUser;
 
-        // Study: Run the following branch when `!user.organizationId` is truthy.
+        // Study: Do the next step if this check passes: `!user.organizationId`.
         if (!user.organizationId) {
-            // Study: Stop this execution path by throwing `new ForbiddenError( "User is not associated with an organization." )`.
+            // Study: Stop here and pass the problem onward: `new ForbiddenError( "User is not associated with an organization." )`.
             throw new ForbiddenError(
                 // Study: Supply the literal string `"User is not associated with an organization."` here.
                 "User is not associated with an organization."
             // Study: Close the current group.
             );
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
 
-        // Study: Validate `req.params` with `labourAssignmentIdSchema` and obtain the parsed value and store the result as `params`.
+        // Study: Check `req.params` using the rule `labourAssignmentIdSchema` and obtain the parsed value and store the result as `params`.
         const params = labourAssignmentIdSchema.parse(req.params);
 
         // Study: Call `labourAssignmentService.updateAssignment` and wait for it to finish and store its result in `assignment`.
@@ -226,28 +226,28 @@ export const updateLabourAssignment = async (
             params.id,
             // Study: Supply `validatedData` to the surrounding statement.
             validatedData
-        // Study: Close the call arguments.
+        // Study: End the list of information being sent to this step.
         );
 
-        // Study: Send a JSON response to the client.
+        // Study: Send named information back to the screen as JSON.
         res.status(200).json({
-            // Study: Set `success` to `true`.
+            // Study: Tell the screen that the request succeeded.
             success: true,
             // Study: Set `message` to `"Labour assignment updated successfully."`.
             message: "Labour assignment updated successfully.",
             // Study: Supply the values to write to the database.
             data: {
-                // Study: Pass the current `assignment` value under the same property name.
+                // Study: Carry the value of `assignment` into the new group under the same name.
                 assignment,
-            // Study: Close the object literal.
+            // Study: End this group of values.
             },
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
-    // Study: Handle an exception from the try block as `error`.
+    // Study: Handle a problem raised during the steps above.
     } catch (error) {
-        // Study: Pass the error to the next Express error handler.
+        // Study: Send the problem to the part of the backend that prepares an error reply.
         next(error);
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-// Study: Close the code block.
+// Study: End this group of steps.
 };

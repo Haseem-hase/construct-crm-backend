@@ -1,5 +1,5 @@
-// Study: Load environment variables and expose the backend configuration.
-// Study: Import `dotenv` from `"dotenv"`.
+// Study: Collects settings supplied when the backend starts, such as the port it listens on.
+// Study: Bring in `dotenv` from `"dotenv"` so this file can use it.
 import dotenv from "dotenv";
 
 // Study: Call `dotenv.config`.
@@ -23,5 +23,5 @@ export const env = {
     // Study: Set `SUPER_ADMIN_PASSWORD` to `process.env.SUPER_ADMIN_PASSWORD!`.
     SUPER_ADMIN_PASSWORD: process.env.SUPER_ADMIN_PASSWORD!,
 
-// Study: Close the object literal.
+// Study: End this group of values.
 };

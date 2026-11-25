@@ -1,101 +1,101 @@
-// Study: Read and write database records through Prisma for account registration, sign-in, sign-out, and session token refresh.
-// Study: Import `prisma` from `'../../lib/prisma'`.
+// Study: This file is about signing in, signing out, creating an account, and staying signed in. Finds or saves information in the database, where the CRM keeps its records.
+// Study: Bring in `prisma` from `'../../lib/prisma'` so this file can use it.
 import prisma from '../../lib/prisma';
-// Study: Import `{ authenticatedUserSelect }` from `'../../shared/types/authenticated-user'`.
+// Study: Bring in `{ authenticatedUserSelect }` from `'../../shared/types/authenticated-user'` so this file can use it.
 import { authenticatedUserSelect } from '../../shared/types/authenticated-user';
-// Study: Import `{ CreateUserInput }` from `'./auth.types'`.
+// Study: Bring in `{ CreateUserInput }` from `'./auth.types'` so this file can use it.
 import { CreateUserInput } from './auth.types';
 
-// Study: Export `findUserByEmail` as an async function that returns a promise.
+// Study: Make `findUserByEmail` available to other files. Its result arrives after its work finishes.
 export const findUserByEmail = async (email: string) => {
-    // Study: Return `await prisma.user.findUnique({ where: { email, }, include: { organizationRole: { in…` to the caller.
+    // Study: Give `await prisma.user.findUnique({ where: { email, }, include: { organizationRole: { in…` back to the code that asked for it.
     return await prisma.user.findUnique({
-        // Study: Set the conditions that database records must match using email.
+        // Study: Set the conditions that records must meet using email.
         where: {
-            // Study: Pass the current `email` value under the same property name.
+            // Study: Carry the value of `email` into the new group under the same name.
             email,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-        // Study: Load related database records with the main result.
+        // Study: Ask for linked information along with the main record.
         include: {
             // Study: Start the nested value for `organizationRole`.
             organizationRole: {
-                // Study: Load related database records with the main result.
+                // Study: Ask for linked information along with the main record.
                 include: {
                     // Study: Set `role` to `true`.
                     role: true,
-                // Study: Close the object literal.
+                // Study: End this group of values.
                 },
-            // Study: Close the object literal.
+            // Study: End this group of values.
             },
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `findUserByPhone` as an async function that returns a promise.
+// Study: Make `findUserByPhone` available to other files. Its result arrives after its work finishes.
 export const findUserByPhone = async (phone: string) => {
-    // Study: Return `await prisma.user.findUnique({ where: { phone, }, })` to the caller.
+    // Study: Give `await prisma.user.findUnique({ where: { phone, }, })` back to the code that asked for it.
     return await prisma.user.findUnique({
-        // Study: Set the conditions that database records must match using phone.
+        // Study: Set the conditions that records must meet using phone.
         where: {
-            // Study: Pass the current `phone` value under the same property name.
+            // Study: Carry the value of `phone` into the new group under the same name.
             phone,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `findRoleByName` as an async function that returns a promise.
+// Study: Make `findRoleByName` available to other files. Its result arrives after its work finishes.
 export const findRoleByName = async (name: string) => {
-    // Study: Return `await prisma.role.findFirst({ where: { name, isGlobal: true, }, })` to the caller.
+    // Study: Give `await prisma.role.findFirst({ where: { name, isGlobal: true, }, })` back to the code that asked for it.
     return await prisma.role.findFirst({
-        // Study: Set the conditions that database records must match using name, isGlobal.
+        // Study: Set the conditions that records must meet using name, isGlobal.
         where: {
-            // Study: Pass the current `name` value under the same property name.
+            // Study: Carry the value of `name` into the new group under the same name.
             name,
             // Study: Set `isGlobal` to `true`.
             isGlobal: true,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `createUser` as an async function that returns a promise.
+// Study: Make `createUser` available to other files. Its result arrives after its work finishes.
 export const createUser = async (
-    // Study: Accept `data` with type `CreateUserInput`.
+    // Study: This step receives `data`. `CreateUserInput` describes what that information should look like.
     data: CreateUserInput
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Return `await prisma.user.create({ data, })` to the caller.
+    // Study: Give `await prisma.user.create({ data, })` back to the code that asked for it.
     return await prisma.user.create({
-        // Study: Pass the current `data` value under the same property name.
+        // Study: Carry the value of `data` into the new group under the same name.
         data,
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `findUserById` as an async function that returns a promise.
+// Study: Make `findUserById` available to other files. Its result arrives after its work finishes.
 export const findUserById = async (id: string) => {
-    // Study: Return `await prisma.user.findUnique({ where: { id, }, select: authenticatedUserSelect })` to the caller.
+    // Study: Give `await prisma.user.findUnique({ where: { id, }, select: authenticatedUserSelect })` back to the code that asked for it.
     return await prisma.user.findUnique({
-        // Study: Set the conditions that database records must match using id.
+        // Study: Set the conditions that records must meet using id.
         where: {
-            // Study: Pass the current `id` value under the same property name.
+            // Study: Carry the value of `id` into the new group under the same name.
             id,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-        // Study: Choose which fields Prisma returns using `authenticatedUserSelect`.
+        // Study: Choose which details the database gives back using `authenticatedUserSelect`.
         select: authenticatedUserSelect
         
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };

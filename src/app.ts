@@ -1,35 +1,35 @@
-// Study: Configure Express middleware, public uploads, and the API router.
-// Study: Import `express` from `"express"`.
+// Study: Sets up the shared steps requests go through, such as reading submitted information, before they reach a feature.
+// Study: Bring in `express` from `"express"` so this file can use it.
 import express from "express";
-// Study: Import `cors` from `"cors"`.
+// Study: Bring in `cors` from `"cors"` so this file can use it.
 import cors from "cors";
-// Study: Import `helmet` from `"helmet"`.
+// Study: Bring in `helmet` from `"helmet"` so this file can use it.
 import helmet from "helmet";
-// Study: Import `compression` from `"compression"`.
+// Study: Bring in `compression` from `"compression"` so this file can use it.
 import compression from "compression";
-// Study: Import `cookieParser` from `"cookie-parser"`.
+// Study: Bring in `cookieParser` from `"cookie-parser"` so this file can use it.
 import cookieParser from "cookie-parser";
-// Study: Import `path` from `"path"`.
+// Study: Bring in `path` from `"path"` so this file can use it.
 import path from "path";
-// Study: Import `routes` from `"./routes"`.
+// Study: Bring in `routes` from `"./routes"` so this file can use it.
 import routes from "./routes";
-// Study: Import `{ errorHandler }` from `"./middlewares/error.middleware"`.
+// Study: Bring in `{ errorHandler }` from `"./middlewares/error.middleware"` so this file can use it.
 import { errorHandler } from "./middlewares/error.middleware";
 
 // Study: Call `express` and store the result as `app`.
 const app = express();
 
-// Study: Register `cors({ origin: "http://localhost:3000" })` in the Express middleware stack.
+// Study: Register `cors({ origin: "http://localhost:3000" })` as a shared step for incoming requests.
 app.use(cors({ origin: "http://localhost:3000" }));
-// Study: Register `helmet()` in the Express middleware stack.
+// Study: Register `helmet()` as a shared step for incoming requests.
 app.use(helmet());
-// Study: Register `compression()` in the Express middleware stack.
+// Study: Register `compression()` as a shared step for incoming requests.
 app.use(compression());
-// Study: Register `express.json()` in the Express middleware stack.
+// Study: Read information sent in JSON, the text format the screen uses to send named values.
 app.use(express.json());
-// Study: Register `cookieParser()` in the Express middleware stack.
+// Study: Register `cookieParser()` as a shared step for incoming requests.
 app.use(cookieParser());
-// Study: Register `"/uploads"` in the Express middleware stack.
+// Study: Register `"/uploads"` as a shared step for incoming requests.
 app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads"), {
     // Study: Set `fallthrough` to `false`.
     fallthrough: false,
@@ -37,27 +37,27 @@ app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads"), {
     immutable: true,
     // Study: Set `maxAge` to `"1y"`.
     maxAge: "1y",
-    // Study: Provide the callback used for `setHeaders`.
+    // Study: Give `setHeaders` a step to run later when it needs a result.
     setHeaders: (res) => res.setHeader("Cross-Origin-Resource-Policy", "cross-origin"),
-// Study: Close the object literal.
+// Study: End this group of values.
 }));
-// Study: Register `"/api"` in the Express middleware stack.
+// Study: Send requests whose addresses start with /api to the list of CRM features.
 app.use("/api", routes);
-// Study: Register `errorHandler` in the Express middleware stack.
+// Study: Use the shared error handling step when a route reports a problem.
 app.use(errorHandler);
 
 // Study: Call `app.get`.
 app.get("/", (_req, res) => {
-    // Study: Send a JSON response to the client.
+    // Study: Send named information back to the screen as JSON.
     res.status(200).json({
-        // Study: Set `success` to `true`.
+        // Study: Tell the screen that the request succeeded.
         success: true,
         // Study: Set `message` to `"Construct CRM Backend is running 🚀"`.
         message: "Construct CRM Backend is running 🚀"
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 });
 
-// Study: Expose `app` as the default export.
+// Study: Make `app` the main thing other files can get from this file.
 export default app;

@@ -1,9 +1,9 @@
-// Study: Populate the database with baseline records used by the CRM.
-// Study: Import `{ PrismaClient, Module, Action }` from `"@prisma/client"`.
+// Study: Adds starter information to the database, such as values the application expects to find.
+// Study: Bring in `{ PrismaClient, Module, Action }` from `"@prisma/client"` so this file can use it.
 import { PrismaClient, Module, Action } from "@prisma/client";
-// Study: Import `bcrypt` from `"bcrypt"`.
+// Study: Bring in `bcrypt` from `"bcrypt"` so this file can use it.
 import bcrypt from "bcrypt";
-// Study: Import `dotenv` from `"dotenv"`.
+// Study: Bring in `dotenv` from `"dotenv"` so this file can use it.
 import dotenv from "dotenv";
 
 // Study: Call `dotenv.config`.
@@ -32,7 +32,7 @@ async function main() {
             action: Action.CREATE,
             // Study: Set `description` to `"Create projects"`.
             description: "Create projects",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -42,7 +42,7 @@ async function main() {
             action: Action.VIEW,
             // Study: Set `description` to `"View projects"`.
             description: "View projects",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -52,7 +52,7 @@ async function main() {
             action: Action.UPDATE,
             // Study: Set `description` to `"Update projects"`.
             description: "Update projects",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -62,7 +62,7 @@ async function main() {
             action: Action.DELETE,
             // Study: Set `description` to `"Delete projects"`.
             description: "Delete projects",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -72,7 +72,7 @@ async function main() {
             action: Action.APPROVE,
             // Study: Set `description` to `"Approve projects"`.
             description: "Approve projects",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -82,7 +82,7 @@ async function main() {
             action: Action.EXPORT,
             // Study: Set `description` to `"Export project data"`.
             description: "Export project data",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -92,7 +92,7 @@ async function main() {
             action: Action.ASSIGN,
             // Study: Set `description` to `"Assign users and labour to projects"`.
             description: "Assign users and labour to projects",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
 
         // LABOUR
@@ -104,7 +104,7 @@ async function main() {
             action: Action.CREATE,
             // Study: Set `description` to `"Create labour records"`.
             description: "Create labour records",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -114,7 +114,7 @@ async function main() {
             action: Action.VIEW,
             // Study: Set `description` to `"View labour records"`.
             description: "View labour records",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -124,7 +124,7 @@ async function main() {
             action: Action.UPDATE,
             // Study: Set `description` to `"Update labour records"`.
             description: "Update labour records",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -134,7 +134,7 @@ async function main() {
             action: Action.DELETE,
             // Study: Set `description` to `"Delete labour records"`.
             description: "Delete labour records",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -144,7 +144,7 @@ async function main() {
             action: Action.ASSIGN,
             // Study: Set `description` to `"Assign labour to projects"`.
             description: "Assign labour to projects",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
 
         // COMPANY
@@ -156,7 +156,7 @@ async function main() {
             action: Action.CREATE,
             // Study: Set `description` to `"Create company records"`.
             description: "Create company records",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -166,7 +166,7 @@ async function main() {
             action: Action.VIEW,
             // Study: Set `description` to `"View company records"`.
             description: "View company records",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -176,7 +176,7 @@ async function main() {
             action: Action.UPDATE,
             // Study: Set `description` to `"Update company records"`.
             description: "Update company records",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -186,7 +186,7 @@ async function main() {
             action: Action.DELETE,
             // Study: Set `description` to `"Delete company records"`.
             description: "Delete company records",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
 
         // CUSTOMER
@@ -198,7 +198,7 @@ async function main() {
             action: Action.CREATE,
             // Study: Set `description` to `"Create customers"`.
             description: "Create customers",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -208,7 +208,7 @@ async function main() {
             action: Action.VIEW,
             // Study: Set `description` to `"View customers"`.
             description: "View customers",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -218,7 +218,7 @@ async function main() {
             action: Action.UPDATE,
             // Study: Set `description` to `"Update customers"`.
             description: "Update customers",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -228,7 +228,7 @@ async function main() {
             action: Action.DELETE,
             // Study: Set `description` to `"Delete customers"`.
             description: "Delete customers",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
 
         // ATTENDANCE
@@ -240,7 +240,7 @@ async function main() {
             action: Action.CREATE,
             // Study: Set `description` to `"Create attendance records"`.
             description: "Create attendance records",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -250,7 +250,7 @@ async function main() {
             action: Action.VIEW,
             // Study: Set `description` to `"View attendance records"`.
             description: "View attendance records",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -260,7 +260,7 @@ async function main() {
             action: Action.UPDATE,
             // Study: Set `description` to `"Update attendance records"`.
             description: "Update attendance records",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -270,7 +270,7 @@ async function main() {
             action: Action.DELETE,
             // Study: Set `description` to `"Delete attendance records"`.
             description: "Delete attendance records",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -280,7 +280,7 @@ async function main() {
             action: Action.APPROVE,
             // Study: Set `description` to `"Approve attendance records"`.
             description: "Approve attendance records",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -290,7 +290,7 @@ async function main() {
             action: Action.EXPORT,
             // Study: Set `description` to `"Export attendance records"`.
             description: "Export attendance records",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
 
         // PAYROLL
@@ -302,7 +302,7 @@ async function main() {
             action: Action.CREATE,
             // Study: Set `description` to `"Create payroll records"`.
             description: "Create payroll records",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -312,7 +312,7 @@ async function main() {
             action: Action.VIEW,
             // Study: Set `description` to `"View payroll records"`.
             description: "View payroll records",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -322,7 +322,7 @@ async function main() {
             action: Action.UPDATE,
             // Study: Set `description` to `"Update payroll records"`.
             description: "Update payroll records",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -332,7 +332,7 @@ async function main() {
             action: Action.DELETE,
             // Study: Set `description` to `"Delete payroll records"`.
             description: "Delete payroll records",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -342,7 +342,7 @@ async function main() {
             action: Action.APPROVE,
             // Study: Set `description` to `"Approve payroll"`.
             description: "Approve payroll",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -352,7 +352,7 @@ async function main() {
             action: Action.EXPORT,
             // Study: Set `description` to `"Export payroll data"`.
             description: "Export payroll data",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
 
         // INVENTORY
@@ -364,7 +364,7 @@ async function main() {
             action: Action.CREATE,
             // Study: Set `description` to `"Create inventory records"`.
             description: "Create inventory records",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -374,7 +374,7 @@ async function main() {
             action: Action.VIEW,
             // Study: Set `description` to `"View inventory"`.
             description: "View inventory",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -384,7 +384,7 @@ async function main() {
             action: Action.UPDATE,
             // Study: Set `description` to `"Update inventory"`.
             description: "Update inventory",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -394,7 +394,7 @@ async function main() {
             action: Action.APPROVE,
             // Study: Set `description` to `"Approve or reject inventory requests and returns"`.
             description: "Approve or reject inventory requests and returns",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -404,7 +404,7 @@ async function main() {
             action: Action.DELETE,
             // Study: Set `description` to `"Delete inventory"`.
             description: "Delete inventory",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // REPORT
         // Study: Start the object passed to the surrounding expression.
@@ -415,7 +415,7 @@ async function main() {
             action: Action.VIEW,
             // Study: Set `description` to `"View reports"`.
             description: "View reports",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -425,7 +425,7 @@ async function main() {
             action: Action.EXPORT,
             // Study: Set `description` to `"Export reports"`.
             description: "Export reports",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
 
         // ROLE
@@ -437,7 +437,7 @@ async function main() {
             action: Action.CREATE,
             // Study: Set `description` to `"Create organization roles"`.
             description: "Create organization roles",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -447,7 +447,7 @@ async function main() {
             action: Action.VIEW,
             // Study: Set `description` to `"View organization roles"`.
             description: "View organization roles",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -457,7 +457,7 @@ async function main() {
             action: Action.UPDATE,
             // Study: Set `description` to `"Update organization roles"`.
             description: "Update organization roles",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -467,7 +467,7 @@ async function main() {
             action: Action.DELETE,
             // Study: Set `description` to `"Delete organization roles"`.
             description: "Delete organization roles",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -477,7 +477,7 @@ async function main() {
             action: Action.ASSIGN,
             // Study: Set `description` to `"Assign permissions to roles"`.
             description: "Assign permissions to roles",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
 
         // USER
@@ -489,7 +489,7 @@ async function main() {
             action: Action.CREATE,
             // Study: Set `description` to `"Create organization users"`.
             description: "Create organization users",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -499,7 +499,7 @@ async function main() {
             action: Action.VIEW,
             // Study: Set `description` to `"View organization users"`.
             description: "View organization users",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -509,7 +509,7 @@ async function main() {
             action: Action.UPDATE,
             // Study: Set `description` to `"Update organization users"`.
             description: "Update organization users",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -519,7 +519,7 @@ async function main() {
             action: Action.DELETE,
             // Study: Set `description` to `"Delete organization users"`.
             description: "Delete organization users",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -529,7 +529,7 @@ async function main() {
             action: Action.ASSIGN,
             // Study: Set `description` to `"Assign roles to users"`.
             description: "Assign roles to users",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
 
         // CONTRACTOR
@@ -541,7 +541,7 @@ async function main() {
             action: Action.CREATE,
             // Study: Set `description` to `"Create contractor records"`.
             description: "Create contractor records",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -551,7 +551,7 @@ async function main() {
             action: Action.VIEW,
             // Study: Set `description` to `"View contractor records"`.
             description: "View contractor records",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -561,7 +561,7 @@ async function main() {
             action: Action.UPDATE,
             // Study: Set `description` to `"Update contractor records"`.
             description: "Update contractor records",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -571,7 +571,7 @@ async function main() {
             action: Action.DELETE,
             // Study: Set `description` to `"Delete contractor records"`.
             description: "Delete contractor records",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the object passed to the surrounding expression.
         {
@@ -581,16 +581,16 @@ async function main() {
             action: Action.ASSIGN,
             // Study: Set `description` to `"Assign contractors to projects"`.
             description: "Assign contractors to projects",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the array literal.
+    // Study: End this group of values.
     ];
 
     // Study: Iterate over each item from `permissions` using `const permission`.
     for (const permission of permissions) {
         // Study: Update the matching record or create it if it is missing through `prisma.permission` and wait for it to finish.
         await prisma.permission.upsert({
-            // Study: Set the conditions that database records must match using module_action.
+            // Study: Set the conditions that records must meet using module_action.
             where: {
                 // Study: Start the nested value for `module_action`.
                 module_action: {
@@ -598,21 +598,21 @@ async function main() {
                     module: permission.module,
                     // Study: Set `action` to `permission.action`.
                     action: permission.action,
-                // Study: Close the object literal.
+                // Study: End this group of values.
                 },
-            // Study: Close the object literal.
+            // Study: End this group of values.
             },
             // Study: Start the nested value for `update`.
             update: {
                 // Study: Set `description` to `permission.description`.
                 description: permission.description,
-            // Study: Close the object literal.
+            // Study: End this group of values.
             },
             // Study: Set `create` to `permission`.
             create: permission,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // Study: Call `console.log`.
@@ -624,20 +624,20 @@ async function main() {
 
 // Study: Set `orgOwnerRoleName` to `"ORGANIZATION_OWNER"`.
 const orgOwnerRoleName = "ORGANIZATION_OWNER";
-// Study: Fetch the first record that matches the filters through `prisma.role` and wait for it to finish and store its result in `existingOrgOwnerRole`.
+// Study: Find the first record that meets these checks using `prisma.role` and wait for it to finish and store its result in `existingOrgOwnerRole`.
 const existingOrgOwnerRole = await prisma.role.findFirst({
-    // Study: Set the conditions that database records must match using name, organizationId.
+    // Study: Set the conditions that records must meet using name, organizationId.
     where: {
         // Study: Set `name` to `orgOwnerRoleName`.
         name: orgOwnerRoleName,
         // Study: Set the organization identifier used for this record or operation using `null`.
         organizationId: null,
-    // Study: Close the object literal.
+    // Study: End this group of values.
     },
-// Study: Close the object literal.
+// Study: End this group of values.
 });
 
-// Study: Run the following branch when `!existingOrgOwnerRole` is truthy.
+// Study: Do the next step if there is no value for `existingOrgOwnerRole`.
 if (!existingOrgOwnerRole) {
     // Study: Insert a new record through `prisma.role` and wait for it to finish.
     await prisma.role.create({
@@ -651,9 +651,9 @@ if (!existingOrgOwnerRole) {
             isGlobal: true,
             // Study: Set the organization identifier used for this record or operation using `null`.
             organizationId: null,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
     // Study: Call `console.log`.
     console.log("✅ ORGANIZATION_OWNER Role Created");
@@ -661,11 +661,11 @@ if (!existingOrgOwnerRole) {
 } else {
     // Study: Update the uniquely identified record through `prisma.role` and wait for it to finish.
     await prisma.role.update({
-        // Study: Set the conditions that database records must match using id.
+        // Study: Set the conditions that records must meet using id.
         where: {
             // Study: Set `id` to `existingOrgOwnerRole.id`.
             id: existingOrgOwnerRole.id,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Supply the values to write to the database.
         data: {
@@ -673,13 +673,13 @@ if (!existingOrgOwnerRole) {
             description: "Default organization owner role",
             // Study: Set `isGlobal` to `true`.
             isGlobal: true,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
     // Study: Call `console.log`.
     console.log("✅ ORGANIZATION_OWNER Role Updated");
-// Study: Close the code block.
+// Study: End this group of steps.
 }
 
 //////////////////////////////////////////////////
@@ -695,7 +695,7 @@ const superAdminName = process.env.SUPER_ADMIN_NAME;
 // Study: Set `superAdminPhone` to `process.env.SUPER_ADMIN_PHONE`.
 const superAdminPhone = process.env.SUPER_ADMIN_PHONE;
 
-// Study: Run the following branch when `!superAdminEmail || !superAdminPassword || !superAdminName` is truthy.
+// Study: Do the next step if this check passes: `!superAdminEmail || !superAdminPassword || !superAdminName`.
 if (
     // Study: Evaluate `!superAdminEmail || !superAdminPassword || !superAdminName`.
     !superAdminEmail ||
@@ -703,37 +703,37 @@ if (
     !superAdminPassword ||
     // Study: Supply `superAdminName` to the surrounding statement.
     !superAdminName
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) {
-    // Study: Stop this execution path by throwing `new Error( "SUPER_ADMIN_EMAIL, SUPER_ADMIN_PASSWORD and SUPER_ADMIN_NAME must be co…`.
+    // Study: Stop here and pass the problem onward: `new Error( "SUPER_ADMIN_EMAIL, SUPER_ADMIN_PASSWORD and SUPER_ADMIN_NAME must be co…`.
     throw new Error(
         // Study: Supply the literal string `"SUPER_ADMIN_EMAIL, SUPER_ADMIN_PASSWORD and SUPER_ADMIN_NAME must be configured in…` here.
         "SUPER_ADMIN_EMAIL, SUPER_ADMIN_PASSWORD and SUPER_ADMIN_NAME must be configured in .env"
     // Study: Close the current group.
     );
-// Study: Close the code block.
+// Study: End this group of steps.
 }
 
 // Study: Look up a single record using a unique key through `prisma.user` and wait for it to finish and store its result in `existingAdmin`.
 const existingAdmin = await prisma.user.findUnique({
-    // Study: Set the conditions that database records must match using email.
+    // Study: Set the conditions that records must meet using email.
     where: {
         // Study: Set `email` to `superAdminEmail`.
         email: superAdminEmail,
-    // Study: Close the object literal.
+    // Study: End this group of values.
     },
-// Study: Close the object literal.
+// Study: End this group of values.
 });
 
-// Study: Run the following branch when `!existingAdmin` is truthy.
+// Study: Do the next step if there is no value for `existingAdmin`.
 if (!existingAdmin) {
-    // Study: Call `bcrypt.hash` and wait for it to finish and store its result in `hashedPassword`.
+    // Study: Scramble the password into a one-way fingerprint so the original password does not have to be stored.
     const hashedPassword = await bcrypt.hash(
         // Study: Supply `superAdminPassword` to the surrounding statement.
         superAdminPassword,
-        // Study: Set the bcrypt cost factor to 12 for this password hash.
+        // Study: Use 12 as bcrypt’s work setting. Higher settings take longer to calculate and make password guessing slower.
         12
-    // Study: Close the call arguments.
+    // Study: End the list of information being sent to this step.
     );
 
     // Study: Insert a new record through `prisma.user` and wait for it to finish.
@@ -761,9 +761,9 @@ if (!existingAdmin) {
             emailVerified: true,
             // Study: Set `phoneVerified` to `true`.
             phoneVerified: true,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
 
     // Study: Call `console.log`.
@@ -772,11 +772,11 @@ if (!existingAdmin) {
 } else {
     // Study: Update the uniquely identified record through `prisma.user` and wait for it to finish.
     await prisma.user.update({
-        // Study: Set the conditions that database records must match using id.
+        // Study: Set the conditions that records must meet using id.
         where: {
             // Study: Set `id` to `existingAdmin.id`.
             id: existingAdmin.id,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Supply the values to write to the database.
         data: {
@@ -786,14 +786,14 @@ if (!existingAdmin) {
             organizationId: null,
             // Study: Set `organizationRoleId` to `null`.
             organizationRoleId: null,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
 
     // Study: Call `console.log`.
     console.log("✅ Super Admin Updated");
-// Study: Close the code block.
+// Study: End this group of steps.
 }
 
     //////////////////////////////////////////////////
@@ -818,18 +818,18 @@ if (!existingAdmin) {
         { name: "Steel Fixer", description: "Positions and secures steel reinforcing bars and mesh used in reinforced concrete." },
         // Study: Start the object passed to the surrounding expression.
         { name: "Tile Worker", description: "Applies hard tile, marble, and wood tile to walls, floors, ceilings, and roof decks." },
-    // Study: Close the array literal.
+    // Study: End this group of values.
     ];
 
     // Study: Iterate over each item from `professions` using `const prof`.
     for (const prof of professions) {
         // Study: Update the matching record or create it if it is missing through `prisma.profession` and wait for it to finish.
         await prisma.profession.upsert({
-            // Study: Set the conditions that database records must match using name.
+            // Study: Set the conditions that records must meet using name.
             where: {
                 // Study: Set `name` to `prof.name`.
                 name: prof.name,
-            // Study: Close the object literal.
+            // Study: End this group of values.
             },
             // Study: Start the nested value for `update`.
             update: {
@@ -837,7 +837,7 @@ if (!existingAdmin) {
                 description: prof.description,
                 // Study: Set `isActive` to `true`.
                 isActive: true,
-            // Study: Close the object literal.
+            // Study: End this group of values.
             },
             // Study: Start the nested value for `create`.
             create: {
@@ -847,11 +847,11 @@ if (!existingAdmin) {
                 description: prof.description,
                 // Study: Set `isActive` to `true`.
                 isActive: true,
-            // Study: Close the object literal.
+            // Study: End this group of values.
             },
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // Study: Call `console.log`.
@@ -879,18 +879,18 @@ if (!existingAdmin) {
         { name: "WORK_PROGRESS_TRACKING", description: "Monitoring and reporting project work progress and completion." },
         // Study: Start the object passed to the surrounding expression.
         { name: "SITE_INSPECTION", description: "Inspecting site activities and verifying compliance with project requirements." },
-    // Study: Close the array literal.
+    // Study: End this group of values.
     ];
 
     // Study: Iterate over each item from `responsibilities` using `const resp`.
     for (const resp of responsibilities) {
         // Study: Update the matching record or create it if it is missing through `prisma.responsibility` and wait for it to finish.
         await prisma.responsibility.upsert({
-            // Study: Set the conditions that database records must match using name.
+            // Study: Set the conditions that records must meet using name.
             where: {
                 // Study: Set `name` to `resp.name`.
                 name: resp.name,
-            // Study: Close the object literal.
+            // Study: End this group of values.
             },
             // Study: Start the nested value for `update`.
             update: {
@@ -898,7 +898,7 @@ if (!existingAdmin) {
                 description: resp.description,
                 // Study: Set `isActive` to `true`.
                 isActive: true,
-            // Study: Close the object literal.
+            // Study: End this group of values.
             },
             // Study: Start the nested value for `create`.
             create: {
@@ -908,11 +908,11 @@ if (!existingAdmin) {
                 description: resp.description,
                 // Study: Set `isActive` to `true`.
                 isActive: true,
-            // Study: Close the object literal.
+            // Study: End this group of values.
             },
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // Study: Call `console.log`.
@@ -924,7 +924,7 @@ if (!existingAdmin) {
 
     // Study: Call `console.log`.
     console.log("🎉 Database Seed Completed Successfully");
-// Study: Close the code block.
+// Study: End this group of steps.
 }
 
 // Study: Call `main() .catch((error) => { console.error("❌ Database Seed Failed:"); console.error(…`.
@@ -937,11 +937,11 @@ main()
         console.error(error);
         // Study: Call `process.exit`.
         process.exit(1);
-    // Study: Close the code block.
+    // Study: End this group of steps.
     })
     // Study: Continue the chain with `finally`.
     .finally(async () => {
-        // Study: Call `prisma.$disconnect` and wait for it to finish.
+        // Study: Close the connection to the database when the work is finished.
         await prisma.$disconnect();
-    // Study: Close the code block.
+    // Study: End this group of steps.
     });

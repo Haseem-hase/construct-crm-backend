@@ -1,24 +1,24 @@
-// Study: Define TypeScript data contracts for construction projects, their site details, and image galleries.
-// Study: Import `{ z }` from `'zod'`.
+// Study: This file is about construction jobs, their site details, and their photos. Lists the names and kinds of information this part of the code expects.
+// Study: Bring in `{ z }` from `'zod'` so this file can use it.
 import { z } from 'zod';
-// Study: Import `{ createProjectSchema, updateProjectSchema }` from `'./project.validation'`.
+// Study: Bring in `{ createProjectSchema, updateProjectSchema }` from `'./project.validation'` so this file can use it.
 import { createProjectSchema, updateProjectSchema } from './project.validation';
 
-// Study: Define the compile-time contract named `CreateProjectInput` from the Zod schema so the types follow validation.
+// Study: Derive the expected information for `CreateProjectInput` from the same rules that check submitted values.
 export type CreateProjectInput = z.infer<
     // Study: Supply `createProjectSchema` to the surrounding statement.
     typeof createProjectSchema
-// Study: Close the generic type arguments that determine the resulting TypeScript type.
+// Study: End the list of details used to describe this kind of information.
 >;
 
-// Study: Define the compile-time contract named `UpdateProjectInput` from the Zod schema so the types follow validation.
+// Study: Derive the expected information for `UpdateProjectInput` from the same rules that check submitted values.
 export type UpdateProjectInput = z.infer<
     // Study: Supply `updateProjectSchema` to the surrounding statement.
     typeof updateProjectSchema
-// Study: Close the generic type arguments that determine the resulting TypeScript type.
+// Study: End the list of details used to describe this kind of information.
 >;
 
-// Study: Define the compile-time contract named `ProjectImageMutation`.
+// Study: Describe which information `ProjectImageMutation` can contain so TypeScript can catch mistakes while checking the code.
 export type ProjectImageMutation = {
     // Study: Define `kind` as optional with type `'DESIGN' | 'SITE'`.
     kind?: 'DESIGN' | 'SITE';

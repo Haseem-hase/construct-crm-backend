@@ -1,33 +1,33 @@
-// Study: Define TypeScript data contracts for account registration, sign-in, sign-out, and session token refresh.
-// Study: Import `{ z }` from `"zod"`.
+// Study: This file is about signing in, signing out, creating an account, and staying signed in. Lists the names and kinds of information this part of the code expects.
+// Study: Bring in `{ z }` from `"zod"` so this file can use it.
 import { z } from "zod";
-// Study: Import `{ loginSchema, registerCustomerSchema, refreshTokenSchema, }` from `"./auth.validation"`.
+// Study: Bring in `{ loginSchema, registerCustomerSchema, refreshTokenSchema, }` from `"./auth.validation"` so this file can use it.
 import { loginSchema, registerCustomerSchema, refreshTokenSchema, } from "./auth.validation";
-// Study: Import `{ AuthenticatedUser }` from `"../../shared/types/authenticated-user"`.
+// Study: Bring in `{ AuthenticatedUser }` from `"../../shared/types/authenticated-user"` so this file can use it.
 import { AuthenticatedUser } from "../../shared/types/authenticated-user";
 
-// Study: Define the compile-time contract named `RegisterCustomerInput` from the Zod schema so the types follow validation.
+// Study: Derive the expected information for `RegisterCustomerInput` from the same rules that check submitted values.
 export type RegisterCustomerInput = z.infer<
     // Study: Supply `registerCustomerSchema` to the surrounding statement.
     typeof registerCustomerSchema
-// Study: Close the generic type arguments that determine the resulting TypeScript type.
+// Study: End the list of details used to describe this kind of information.
 >;
 
-// Study: Define the compile-time contract named `LoginInput` from the Zod schema so the types follow validation.
+// Study: Derive the expected information for `LoginInput` from the same rules that check submitted values.
 export type LoginInput = z.infer<
     // Study: Supply `loginSchema` to the surrounding statement.
     typeof loginSchema
-// Study: Close the generic type arguments that determine the resulting TypeScript type.
+// Study: End the list of details used to describe this kind of information.
 >;
 
-// Study: Define the compile-time contract named `RefreshTokenInput` from the Zod schema so the types follow validation.
+// Study: Derive the expected information for `RefreshTokenInput` from the same rules that check submitted values.
 export type RefreshTokenInput = z.infer<
     // Study: Supply `refreshTokenSchema` to the surrounding statement.
     typeof refreshTokenSchema
-// Study: Close the generic type arguments that determine the resulting TypeScript type.
+// Study: End the list of details used to describe this kind of information.
 >;
 
-// Study: Define the compile-time contract named `CreateUserInput`.
+// Study: Describe which information `CreateUserInput` can contain so TypeScript can catch mistakes while checking the code.
 export interface CreateUserInput {
     // Study: Define `fullName` with type `string`.
     fullName: string;
@@ -42,7 +42,7 @@ export interface CreateUserInput {
 // Study: Close the interface declaration.
 }
 
-// Study: Define the compile-time contract named `AuthUser`.
+// Study: Describe which information `AuthUser` can contain so TypeScript can catch mistakes while checking the code.
 export interface AuthUser {
     // Study: Define `id` with type `string`.
     id: string;
@@ -55,7 +55,7 @@ export interface AuthUser {
 // Study: Close the interface declaration.
 }
 
-// Study: Define the compile-time contract named `LoginResponse`.
+// Study: Describe which information `LoginResponse` can contain so TypeScript can catch mistakes while checking the code.
 export interface LoginResponse {
     // Study: Define `accessToken` with type `string`.
     accessToken: string;
@@ -66,14 +66,14 @@ export interface LoginResponse {
 // Study: Close the interface declaration.
 }
 
-// Study: Define the compile-time contract named `MeResponse`.
+// Study: Describe which information `MeResponse` can contain so TypeScript can catch mistakes while checking the code.
 export interface MeResponse {
     // Study: Define `user` with type `AuthenticatedUser`.
     user: AuthenticatedUser
 // Study: Close the interface declaration.
 }
 
-// Study: Define the compile-time contract named `CreateRefreshTokenInput`.
+// Study: Describe which information `CreateRefreshTokenInput` can contain so TypeScript can catch mistakes while checking the code.
 export interface CreateRefreshTokenInput {
     // Study: Define `hashedToken` with type `string`.
     hashedToken: string;

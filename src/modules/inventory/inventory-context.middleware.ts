@@ -1,90 +1,90 @@
-// Study: Prepare or check HTTP request context for inventory assets, warehouse stock, requests, returns, and condition reports.
-// Study: Import `{ NextFunction, Request, Response }` from `"express"`.
+// Study: This file is about tools, equipment, and materials that warehouses store, issue, and take back. Runs a check or prepares information before the main work happens.
+// Study: Bring in `{ NextFunction, Request, Response }` from `"express"` so this file can use it.
 import { NextFunction, Request, Response } from "express";
-// Study: Import `prisma` from `"../../lib/prisma"`.
+// Study: Bring in `prisma` from `"../../lib/prisma"` so this file can use it.
 import prisma from "../../lib/prisma";
-// Study: Import `{ ForbiddenError }` from `"../../errors/ForbiddenError"`.
+// Study: Bring in `{ ForbiddenError }` from `"../../errors/ForbiddenError"` so this file can use it.
 import { ForbiddenError } from "../../errors/ForbiddenError";
-// Study: Import `{ BadRequestError }` from `"../../errors/BadRequestError"`.
+// Study: Bring in `{ BadRequestError }` from `"../../errors/BadRequestError"` so this file can use it.
 import { BadRequestError } from "../../errors/BadRequestError";
 
 /** Establishes a single trusted tenant context for every inventory request. */
-// Study: Export `requireInventoryOrganization` as an async function that returns a promise.
+// Study: Make `requireInventoryOrganization` available to other files. Its result arrives after its work finishes.
 export const requireInventoryOrganization = async (
-    // Study: Accept `req` with type `Request`.
+    // Study: Read the information that came in with the request from the screen.
     req: Request,
-    // Study: Accept `res` with type `Response`.
+    // Study: Use this to send information or an error back to the screen.
     res: Response,
-    // Study: Accept `next` with type `NextFunction`.
+    // Study: Use this to move the request to the next check or action.
     next: NextFunction
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Run this block and handle failures in the associated catch block.
+    // Study: Try these steps. If one fails, go to the error-handling steps below.
     try {
         // Study: Set `user` to `req.user!`.
         const user = req.user!;
         // Study: Call `req.header` and store the result as `requestedOrganizationId`.
         const requestedOrganizationId = req.header("x-organization-id");
 
-        // Study: Run the following branch when `user.systemRole === "SUPER_ADMIN"` is truthy.
+        // Study: Do the next step if this check passes: `user.systemRole === "SUPER_ADMIN"`.
         if (user.systemRole === "SUPER_ADMIN") {
-            // Study: Run the following branch when `!requestedOrganizationId` is truthy.
+            // Study: Do the next step if there is no value for `requestedOrganizationId`.
             if (!requestedOrganizationId) {
-                // Study: Stop this execution path by throwing `new BadRequestError("Super Admin inventory access requires x-organization-id.")`.
+                // Study: Stop here and report this problem: "Super Admin inventory access requires x-organization-id."
                 throw new BadRequestError("Super Admin inventory access requires x-organization-id.");
-            // Study: Close the code block.
+            // Study: End this group of steps.
             }
             // Study: Look up a single record using a unique key through `prisma.organization` and wait for it to finish and store its result in `organization`.
             const organization = await prisma.organization.findUnique({
-                // Study: Set the conditions that database records must match using id.
+                // Study: Set the conditions that records must meet using id.
                 where: { id: requestedOrganizationId },
-                // Study: Choose which fields Prisma returns.
+                // Study: Choose which details the database gives back.
                 select: { id: true },
-            // Study: Close the object literal.
+            // Study: End this group of values.
             });
-            // Study: Run the following branch when `!organization` is truthy and throw `new BadRequestError("Selected organization was not found.")`.
+            // Study: Do the next step if there is no value for `organization` . If so, stop and report "Selected organization was not found."
             if (!organization) throw new BadRequestError("Selected organization was not found.");
             // Study: Assign `organization.id` to `res.locals.inventoryOrganizationId`.
             res.locals.inventoryOrganizationId = organization.id;
-            // Study: Continue to the next Express middleware or handler.
+            // Study: Allow the request to move to its next check or action.
             next();
             // Study: Exit the function here.
             return;
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
 
-        // Study: Run the following branch when `!user.organizationId` is truthy.
+        // Study: Do the next step if this check passes: `!user.organizationId`.
         if (!user.organizationId) {
-            // Study: Stop this execution path by throwing `new ForbiddenError("Inventory access requires an organization context.")`.
+            // Study: Stop here and report this problem: "Inventory access requires an organization context."
             throw new ForbiddenError("Inventory access requires an organization context.");
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
-        // Study: Run the following branch when `requestedOrganizationId && requestedOrganizationId !== user.organizationId` is truthy.
+        // Study: Do the next step if this check passes: `requestedOrganizationId && requestedOrganizationId !== user.organizationId`.
         if (requestedOrganizationId && requestedOrganizationId !== user.organizationId) {
-            // Study: Stop this execution path by throwing `new ForbiddenError("You cannot access inventory outside your organization.")`.
+            // Study: Stop here and report this problem: "You cannot access inventory outside your organization."
             throw new ForbiddenError("You cannot access inventory outside your organization.");
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
         // Study: Assign `user.organizationId` to `res.locals.inventoryOrganizationId`.
         res.locals.inventoryOrganizationId = user.organizationId;
-        // Study: Continue to the next Express middleware or handler.
+        // Study: Allow the request to move to its next check or action.
         next();
-    // Study: Handle an exception from the try block as `error`.
+    // Study: Handle a problem raised during the steps above.
     } catch (error) {
-        // Study: Pass the error to the next Express error handler.
+        // Study: Send the problem to the part of the backend that prepares an error reply.
         next(error);
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `inventoryOrganizationId` as a reusable function.
+// Study: Set up a reusable step named `inventoryOrganizationId`.
 export const inventoryOrganizationId = (res: Response): string => {
     // Study: Set `organizationId` to `res.locals.inventoryOrganizationId as string | undefined`.
     const organizationId = res.locals.inventoryOrganizationId as string | undefined;
-    // Study: Run the following branch when `!organizationId` is truthy and throw `new ForbiddenError("Inventory organization context is missing.")`.
+    // Study: Do the next step if there is no value for `organizationId` . If so, stop and report "Inventory organization context is missing."
     if (!organizationId) throw new ForbiddenError("Inventory organization context is missing.");
-    // Study: Return `organizationId` to the caller.
+    // Study: Give `organizationId` back to the code that asked for it.
     return organizationId;
-// Study: Close the code block.
+// Study: End this group of steps.
 };

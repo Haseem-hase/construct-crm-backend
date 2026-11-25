@@ -1,104 +1,104 @@
-// Study: Apply business rules and coordinate database operations for contractor records.
-// Study: Import `* as contractorRepository` from `"./contractor.repository"`.
+// Study: This file is about the details the CRM keeps about contractors. Applies the rules for this part of the CRM, such as what must be checked before saving a change.
+// Study: Bring in `* as contractorRepository` from `"./contractor.repository"` so this file can use it.
 import * as contractorRepository from "./contractor.repository";
-// Study: Import `{ CreateContractorInput, UpdateContractorInput }` from `"./contractor.types"`.
+// Study: Bring in `{ CreateContractorInput, UpdateContractorInput }` from `"./contractor.types"` so this file can use it.
 import { CreateContractorInput, UpdateContractorInput } from "./contractor.types";
-// Study: Import `{ NotFoundError }` from `"../../errors/NotFoundError"`.
+// Study: Bring in `{ NotFoundError }` from `"../../errors/NotFoundError"` so this file can use it.
 import { NotFoundError } from "../../errors/NotFoundError";
-// Study: Import `{ ConflictError }` from `"../../errors/ConflictError"`.
+// Study: Bring in `{ ConflictError }` from `"../../errors/ConflictError"` so this file can use it.
 import { ConflictError } from "../../errors/ConflictError";
 
-// Study: Export `createContractor` as an async function that returns a promise.
+// Study: Make `createContractor` available to other files. Its result arrives after its work finishes.
 export const createContractor = async (
-    // Study: Accept `organizationId` with type `string`.
+    // Study: This step receives `organizationId`. `string` describes what that information should look like.
     organizationId: string,
-    // Study: Accept `data` with type `CreateContractorInput`.
+    // Study: This step receives `data`. `CreateContractorInput` describes what that information should look like.
     data: CreateContractorInput
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
     // Check phone uniqueness
     // Study: Call `contractorRepository.findContractorByPhone` and wait for it to finish and store its result in `existingByPhone`.
     const existingByPhone = await contractorRepository.findContractorByPhone(
         // Study: Supply `organizationId` to the surrounding statement.
         organizationId,
-        // Study: Supply `data` to the surrounding statement.
+        // Study: Use the phone that was submitted for this step.
         data.phone
-    // Study: Close the call arguments.
+    // Study: End the list of information being sent to this step.
     );
     
-    // Study: Run the following branch when `existingByPhone` is truthy.
+    // Study: Do the next step if this check passes: `existingByPhone`.
     if (existingByPhone) {
-        // Study: Stop this execution path by throwing `new ConflictError("A contractor with this phone number already exists in this organ…`.
+        // Study: Stop here and pass the problem onward: `new ConflictError("A contractor with this phone number already exists in this organ…`.
         throw new ConflictError("A contractor with this phone number already exists in this organization.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // Check email uniqueness if provided
-    // Study: Run the following branch when `data.email && data.email !== ""` is truthy.
+    // Study: Do the next step if this check passes: `data.email && data.email !== ""`.
     if (data.email && data.email !== "") {
         // Study: Call `contractorRepository.findContractorByEmail` and wait for it to finish and store its result in `existingByEmail`.
         const existingByEmail = await contractorRepository.findContractorByEmail(
             // Study: Supply `organizationId` to the surrounding statement.
             organizationId,
-            // Study: Supply `data` to the surrounding statement.
+            // Study: Use the email that was submitted for this step.
             data.email
-        // Study: Close the call arguments.
+        // Study: End the list of information being sent to this step.
         );
         
-        // Study: Run the following branch when `existingByEmail` is truthy.
+        // Study: Do the next step if this check passes: `existingByEmail`.
         if (existingByEmail) {
-            // Study: Stop this execution path by throwing `new ConflictError("A contractor with this email already exists in this organization.")`.
+            // Study: Stop here and report this problem: "A contractor with this email already exists in this organization."
             throw new ConflictError("A contractor with this email already exists in this organization.");
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // Study: Call `contractorRepository.createContractor` and wait for it to finish and store its result in `contractor`.
     const contractor = await contractorRepository.createContractor({
         // Study: Expand the values from `data` into the surrounding collection.
         ...data,
-        // Study: Pass the current `organizationId` value under the same property name.
+        // Study: Carry the value of `organizationId` into the new group under the same name.
         organizationId,
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
 
-    // Study: Return `contractor` to the caller.
+    // Study: Give `contractor` back to the code that asked for it.
     return contractor;
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `getOrganizationContractors` as an async function that returns a promise.
+// Study: Make `getOrganizationContractors` available to other files. Its result arrives after its work finishes.
 export const getOrganizationContractors = async (
-    // Study: Accept `organizationId` with type `string`.
+    // Study: This step receives `organizationId`. `string` describes what that information should look like.
     organizationId: string
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Return `await contractorRepository.findContractors(organizationId)` to the caller.
+    // Study: Give `await contractorRepository.findContractors(organizationId)` back to the code that asked for it.
     return await contractorRepository.findContractors(organizationId);
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `getPlatformContractors` as an async function that returns a promise.
+// Study: Make `getPlatformContractors` available to other files. Its result arrives after its work finishes.
 export const getPlatformContractors = async () => contractorRepository.findAllPlatformContractors();
-// Study: Export `getPlatformContractorById` as an async function that returns a promise.
+// Study: Make `getPlatformContractorById` available to other files. Its result arrives after its work finishes.
 export const getPlatformContractorById = async (contractorId: string) => {
     // Study: Call `contractorRepository.findPlatformContractorById` and wait for it to finish and store its result in `contractor`.
     const contractor = await contractorRepository.findPlatformContractorById(contractorId);
-    // Study: Run the following branch when `!contractor` is truthy and throw `new NotFoundError("Contractor not found.")`.
+    // Study: Do the next step if there is no value for `contractor` . If so, stop and report "Contractor not found."
     if (!contractor) throw new NotFoundError("Contractor not found.");
-    // Study: Return `contractor` to the caller.
+    // Study: Give `contractor` back to the code that asked for it.
     return contractor;
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `getContractorById` as an async function that returns a promise.
+// Study: Make `getContractorById` available to other files. Its result arrives after its work finishes.
 export const getContractorById = async (
-    // Study: Accept `contractorId` with type `string`.
+    // Study: This step receives `contractorId`. `string` describes what that information should look like.
     contractorId: string,
-    // Study: Accept `organizationId` with type `string`.
+    // Study: This step receives `organizationId`. `string` describes what that information should look like.
     organizationId: string
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
     // Study: Call `contractorRepository.findContractorById` and wait for it to finish and store its result in `contractor`.
     const contractor = await contractorRepository.findContractorById(
@@ -106,30 +106,30 @@ export const getContractorById = async (
         contractorId,
         // Study: Supply `organizationId` to the surrounding statement.
         organizationId
-    // Study: Close the call arguments.
+    // Study: End the list of information being sent to this step.
     );
     
-    // Study: Run the following branch when `!contractor` is truthy.
+    // Study: Do the next step if there is no value for `contractor`.
     if (!contractor) {
-        // Study: Stop this execution path by throwing `new NotFoundError("Contractor not found.")`.
+        // Study: Stop here and report this problem: "Contractor not found."
         throw new NotFoundError("Contractor not found.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Return `contractor` to the caller.
+    // Study: Give `contractor` back to the code that asked for it.
     return contractor;
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `updateContractor` as an async function that returns a promise.
+// Study: Make `updateContractor` available to other files. Its result arrives after its work finishes.
 export const updateContractor = async (
-    // Study: Accept `contractorId` with type `string`.
+    // Study: This step receives `contractorId`. `string` describes what that information should look like.
     contractorId: string,
-    // Study: Accept `organizationId` with type `string`.
+    // Study: This step receives `organizationId`. `string` describes what that information should look like.
     organizationId: string,
-    // Study: Accept `data` with type `UpdateContractorInput`.
+    // Study: This step receives `data`. `UpdateContractorInput` describes what that information should look like.
     data: UpdateContractorInput
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
     // Verify existence
     // Study: Call `contractorRepository.findContractorById` and wait for it to finish and store its result in `existingContractor`.
@@ -138,56 +138,56 @@ export const updateContractor = async (
         contractorId,
         // Study: Supply `organizationId` to the surrounding statement.
         organizationId
-    // Study: Close the call arguments.
+    // Study: End the list of information being sent to this step.
     );
     
-    // Study: Run the following branch when `!existingContractor` is truthy.
+    // Study: Do the next step if there is no value for `existingContractor`.
     if (!existingContractor) {
-        // Study: Stop this execution path by throwing `new NotFoundError("Contractor not found.")`.
+        // Study: Stop here and report this problem: "Contractor not found."
         throw new NotFoundError("Contractor not found.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // Check phone uniqueness if being changed
-    // Study: Run the following branch when `data.phone && data.phone !== existingContractor.phone` is truthy.
+    // Study: Do the next step if this check passes: `data.phone && data.phone !== existingContractor.phone`.
     if (data.phone && data.phone !== existingContractor.phone) {
         // Study: Call `contractorRepository.findContractorByPhone` and wait for it to finish and store its result in `existingByPhone`.
         const existingByPhone = await contractorRepository.findContractorByPhone(
             // Study: Supply `organizationId` to the surrounding statement.
             organizationId,
-            // Study: Supply `data` to the surrounding statement.
+            // Study: Use the phone that was submitted for this step.
             data.phone
-        // Study: Close the call arguments.
+        // Study: End the list of information being sent to this step.
         );
         
-        // Study: Run the following branch when `existingByPhone` is truthy.
+        // Study: Do the next step if this check passes: `existingByPhone`.
         if (existingByPhone) {
-            // Study: Stop this execution path by throwing `new ConflictError("A contractor with this phone number already exists in this organ…`.
+            // Study: Stop here and pass the problem onward: `new ConflictError("A contractor with this phone number already exists in this organ…`.
             throw new ConflictError("A contractor with this phone number already exists in this organization.");
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // Check email uniqueness if being changed
-    // Study: Run the following branch when `data.email && data.email !== "" && data.email !== existingContractor.email` is truthy.
+    // Study: Do the next step if this check passes: `data.email && data.email !== "" && data.email !== existingContractor.email`.
     if (data.email && data.email !== "" && data.email !== existingContractor.email) {
         // Study: Call `contractorRepository.findContractorByEmail` and wait for it to finish and store its result in `existingByEmail`.
         const existingByEmail = await contractorRepository.findContractorByEmail(
             // Study: Supply `organizationId` to the surrounding statement.
             organizationId,
-            // Study: Supply `data` to the surrounding statement.
+            // Study: Use the email that was submitted for this step.
             data.email
-        // Study: Close the call arguments.
+        // Study: End the list of information being sent to this step.
         );
         
-        // Study: Run the following branch when `existingByEmail` is truthy.
+        // Study: Do the next step if this check passes: `existingByEmail`.
         if (existingByEmail) {
-            // Study: Stop this execution path by throwing `new ConflictError("A contractor with this email already exists in this organization.")`.
+            // Study: Stop here and report this problem: "A contractor with this email already exists in this organization."
             throw new ConflictError("A contractor with this email already exists in this organization.");
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // Study: Call `contractorRepository.updateContractor` and wait for it to finish and store its result in `updatedContractor`.
@@ -198,17 +198,17 @@ export const updateContractor = async (
         organizationId,
         // Study: Supply `data` to the surrounding statement.
         data
-    // Study: Close the call arguments.
+    // Study: End the list of information being sent to this step.
     );
 
-    // Study: Run the following branch when `!updatedContractor` is truthy.
+    // Study: Do the next step if there is no value for `updatedContractor`.
     if (!updatedContractor) {
-        // Study: Stop this execution path by throwing `new NotFoundError("Contractor not found.")`.
+        // Study: Stop here and report this problem: "Contractor not found."
         throw new NotFoundError("Contractor not found.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Return `updatedContractor` to the caller.
+    // Study: Give `updatedContractor` back to the code that asked for it.
     return updatedContractor;
-// Study: Close the code block.
+// Study: End this group of steps.
 };

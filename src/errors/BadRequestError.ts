@@ -1,5 +1,5 @@
 // Study: Define the BadRequestError class used by the HTTP error-handling flow.
-// Study: Import `{ AppError }` from `"./AppError"`.
+// Study: Bring in `{ AppError }` from `"./AppError"` so this file can use it.
 import { AppError } from "./AppError";
 
 // Study: Define `BadRequestError` with `extends AppError`.
@@ -8,7 +8,7 @@ export class BadRequestError extends AppError {
     constructor(message: string) {
         // Study: Call `super`.
         super(message, 400);
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 // Study: Close the class declaration.
 }

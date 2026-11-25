@@ -1,30 +1,30 @@
-// Study: Define TypeScript data contracts for organizations and their owners.
-// Study: Import `{ z }` from `"zod"`.
+// Study: This file is about the companies using the CRM and the people who own their accounts. Lists the names and kinds of information this part of the code expects.
+// Study: Bring in `{ z }` from `"zod"` so this file can use it.
 import { z } from "zod";
-// Study: Import `{ createOrganizationSchema, listOrganizationsQuerySchema, registerOrganizationSchem…` from `"./organization.validation"`.
+// Study: Bring in `{ createOrganizationSchema, listOrganizationsQuerySchema, registerOrganizationSchem…` from `"./organization.validation"` so this file can use it.
 import {
-    // Study: Bring `createOrganizationSchema` into scope from the imported module.
+    // Study: Make `createOrganizationSchema` from the other file available here.
     createOrganizationSchema,
-    // Study: Bring `listOrganizationsQuerySchema` into scope from the imported module.
+    // Study: Make `listOrganizationsQuerySchema` from the other file available here.
     listOrganizationsQuerySchema,
-    // Study: Bring `registerOrganizationSchema` into scope from the imported module.
+    // Study: Make `registerOrganizationSchema` from the other file available here.
     registerOrganizationSchema,
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 } from "./organization.validation";
 
-// Study: Define the compile-time contract named `RegisterOrganizationInput` from the Zod schema so the types follow validation.
+// Study: Derive the expected information for `RegisterOrganizationInput` from the same rules that check submitted values.
 export type RegisterOrganizationInput = z.infer<
     // Study: Supply `registerOrganizationSchema` to the surrounding statement.
     typeof registerOrganizationSchema
-// Study: Close the generic type arguments that determine the resulting TypeScript type.
+// Study: End the list of details used to describe this kind of information.
 >;
 
-// Study: Define the compile-time contract named `CreateOrganizationRequest` from the Zod schema so the types follow validation.
+// Study: Derive the expected information for `CreateOrganizationRequest` from the same rules that check submitted values.
 export type CreateOrganizationRequest = z.infer<typeof createOrganizationSchema>;
-// Study: Define the compile-time contract named `ListOrganizationsQuery` from the Zod schema so the types follow validation.
+// Study: Derive the expected information for `ListOrganizationsQuery` from the same rules that check submitted values.
 export type ListOrganizationsQuery = z.infer<typeof listOrganizationsQuerySchema>;
 
-// Study: Define the compile-time contract named `CreateOrganizationInput`.
+// Study: Describe which information `CreateOrganizationInput` can contain so TypeScript can catch mistakes while checking the code.
 export interface CreateOrganizationInput {
     // Study: Define `organizationName` with type `string`.
     organizationName: string;

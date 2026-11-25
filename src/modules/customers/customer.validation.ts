@@ -1,34 +1,34 @@
-// Study: Use Zod to parse and validate inputs for customer accounts and parent-child customer relationships.
-// Study: Import `{ z }` from `"zod"`.
+// Study: This file is about customer accounts and which customers belong under a parent customer. Checks whether incoming information is complete and in the expected form.
+// Study: Bring in `{ z }` from `"zod"` so this file can use it.
 import { z } from "zod";
 
-// Study: Build a Zod validation rule with `z.string().trim().refine` and store the result as `customerProfileImageUrl`.
+// Study: Set up a check for incoming information using `z.string().trim().refine` and store the result as `customerProfileImageUrl`.
 const customerProfileImageUrl = z.string().trim().refine(
     // Study: Accept `value`.
     value => /^\/uploads\/customers\/[0-9a-f-]{36}\/[a-zA-Z0-9-]+\.(jpg|png|webp)$/i.test(value),
     // Study: Supply the literal string `"Upload a JPEG, PNG, or WebP customer photo."` here.
     "Upload a JPEG, PNG, or WebP customer photo.",
-// Study: Close the call arguments.
+// Study: End the list of information being sent to this step.
 );
 
-// Study: Build a Zod validation rule with `z.object` and store the result as `createCustomerSchema`.
+// Study: Set up a check for incoming information using `z.object` and store the result as `createCustomerSchema`.
 export const createCustomerSchema = z.object({
     // Study: Set `name` to `z .string() .trim() .min(2, "Customer name must be at least 2 characters.") .max(15…`.
     name: z
-        // Study: Continue the chain with `string`.
+        // Study: Require this value to be text.
         .string()
-        // Study: Remove surrounding whitespace.
+        // Study: Remove extra spaces at the beginning and end of the text.
         .trim()
-        // Study: Enforce a minimum value or length.
+        // Study: Require at least 2 here. For text, the limit counts characters.
         .min(2, "Customer name must be at least 2 characters.")
-        // Study: Enforce a maximum value or length.
+        // Study: Require at most 150 here. For text, the limit counts characters.
         .max(150, "Customer name must not exceed 150 characters."),
 
-    // Study: Validate `type` with `z.enum(["COMPANY", "GOVERNMENT", "INDIVIDUAL", "OTHER"], { message: "Invalid custom…`.
+    // Study: Check `type` using the rule `z.enum(["COMPANY", "GOVERNMENT", "INDIVIDUAL", "OTHER"], { message: "Invalid custom…`.
     type: z.enum(["COMPANY", "GOVERNMENT", "INDIVIDUAL", "OTHER"], {
         // Study: Set `message` to `"Invalid customer type."`.
         message: "Invalid customer type.",
-    // Study: Close the object literal.
+    // Study: End this group of values.
     }),
 
     // Study: Set `profileImageUrl` to `customerProfileImageUrl.optional()`.
@@ -36,65 +36,65 @@ export const createCustomerSchema = z.object({
 
     // Study: Set `country` to `z .string() .trim() .max(100, "Country must not exceed 100 characters.")`.
     country: z
-        // Study: Continue the chain with `string`.
+        // Study: Require this value to be text.
         .string()
-        // Study: Remove surrounding whitespace.
+        // Study: Remove extra spaces at the beginning and end of the text.
         .trim()
-        // Study: Enforce a maximum value or length.
+        // Study: Require at most 100 here. For text, the limit counts characters.
         .max(100, "Country must not exceed 100 characters."),
 
     // Study: Set `city` to `z .string() .trim() .max(100, "City must not exceed 100 characters.")`.
     city: z
-        // Study: Continue the chain with `string`.
+        // Study: Require this value to be text.
         .string()
-        // Study: Remove surrounding whitespace.
+        // Study: Remove extra spaces at the beginning and end of the text.
         .trim()
-        // Study: Enforce a maximum value or length.
+        // Study: Require at most 100 here. For text, the limit counts characters.
         .max(100, "City must not exceed 100 characters."),
 
     // Study: Set `address` to `z .string() .trim() .max(255, "Address must not exceed 255 characters.") .optional()`.
     address: z
-        // Study: Continue the chain with `string`.
+        // Study: Require this value to be text.
         .string()
-        // Study: Remove surrounding whitespace.
+        // Study: Remove extra spaces at the beginning and end of the text.
         .trim()
-        // Study: Enforce a maximum value or length.
+        // Study: Require at most 255 here. For text, the limit counts characters.
         .max(255, "Address must not exceed 255 characters.")
         // Study: Allow this value to be omitted.
         .optional(),
 
     // Study: Set `parentCustomerId` to `z .string() .uuid("Invalid parent customer ID.") .optional()`.
     parentCustomerId: z
-        // Study: Continue the chain with `string`.
+        // Study: Require this value to be text.
         .string()
         // Study: Continue the chain with `uuid`.
         .uuid("Invalid parent customer ID.")
         // Study: Allow this value to be omitted.
         .optional(),
-// Study: Close the object literal.
+// Study: End this group of values.
 });
 
 
-// Study: Build a Zod validation rule with `z.object` and store the result as `updateCustomerSchema`.
+// Study: Set up a check for incoming information using `z.object` and store the result as `updateCustomerSchema`.
 export const updateCustomerSchema = z.object({
     // Study: Set `name` to `z .string() .trim() .min(2, "Customer name must be at least 2 characters.") .max(15…`.
     name: z
-        // Study: Continue the chain with `string`.
+        // Study: Require this value to be text.
         .string()
-        // Study: Remove surrounding whitespace.
+        // Study: Remove extra spaces at the beginning and end of the text.
         .trim()
-        // Study: Enforce a minimum value or length.
+        // Study: Require at least 2 here. For text, the limit counts characters.
         .min(2, "Customer name must be at least 2 characters.")
-        // Study: Enforce a maximum value or length.
+        // Study: Require at most 150 here. For text, the limit counts characters.
         .max(150, "Customer name must not exceed 150 characters.")
         // Study: Allow this value to be omitted.
         .optional(),
 
-    // Study: Validate `type` with `z.enum(["COMPANY", "GOVERNMENT", "INDIVIDUAL", "OTHER"], { message: "Invalid custom…`.
+    // Study: Check `type` using the rule `z.enum(["COMPANY", "GOVERNMENT", "INDIVIDUAL", "OTHER"], { message: "Invalid custom…`.
     type: z.enum(["COMPANY", "GOVERNMENT", "INDIVIDUAL", "OTHER"], {
         // Study: Set `message` to `"Invalid customer type."`.
         message: "Invalid customer type.",
-    // Study: Close this group and continue the enclosing expression.
+    // Study: Finish this group and continue the surrounding step.
     }).optional(),
 
     // Study: Set `profileImageUrl` to `customerProfileImageUrl.optional().or(z.literal(""))`.
@@ -102,40 +102,40 @@ export const updateCustomerSchema = z.object({
 
     // Study: Set `country` to `z .string() .trim() .max(100, "Country must not exceed 100 characters.") .optional()`.
     country: z
-        // Study: Continue the chain with `string`.
+        // Study: Require this value to be text.
         .string()
-        // Study: Remove surrounding whitespace.
+        // Study: Remove extra spaces at the beginning and end of the text.
         .trim()
-        // Study: Enforce a maximum value or length.
+        // Study: Require at most 100 here. For text, the limit counts characters.
         .max(100, "Country must not exceed 100 characters.")
         // Study: Allow this value to be omitted.
         .optional(),
 
     // Study: Set `city` to `z .string() .trim() .max(100, "City must not exceed 100 characters.") .optional()`.
     city: z
-        // Study: Continue the chain with `string`.
+        // Study: Require this value to be text.
         .string()
-        // Study: Remove surrounding whitespace.
+        // Study: Remove extra spaces at the beginning and end of the text.
         .trim()
-        // Study: Enforce a maximum value or length.
+        // Study: Require at most 100 here. For text, the limit counts characters.
         .max(100, "City must not exceed 100 characters.")
         // Study: Allow this value to be omitted.
         .optional(),
 
     // Study: Set `address` to `z .string() .trim() .max(255, "Address must not exceed 255 characters.") .optional()`.
     address: z
-        // Study: Continue the chain with `string`.
+        // Study: Require this value to be text.
         .string()
-        // Study: Remove surrounding whitespace.
+        // Study: Remove extra spaces at the beginning and end of the text.
         .trim()
-        // Study: Enforce a maximum value or length.
+        // Study: Require at most 255 here. For text, the limit counts characters.
         .max(255, "Address must not exceed 255 characters.")
         // Study: Allow this value to be omitted.
         .optional(),
 
     // Study: Set `parentCustomerId` to `z .string() .uuid("Invalid parent customer ID.") .optional()`.
     parentCustomerId: z
-        // Study: Continue the chain with `string`.
+        // Study: Require this value to be text.
         .string()
         // Study: Continue the chain with `uuid`.
         .uuid("Invalid parent customer ID.")
@@ -148,12 +148,12 @@ export const updateCustomerSchema = z.object({
         .preprocess(value => typeof value === "string" ? value === "true" : value, z.boolean())
         // Study: Allow this value to be omitted.
         .optional(),
-// Study: Close the object literal.
+// Study: End this group of values.
 });
 
-// Study: Build a Zod validation rule with `z.object` and store the result as `customerIdSchema`.
+// Study: Set up a check for incoming information using `z.object` and store the result as `customerIdSchema`.
 export const customerIdSchema = z.object({
-    // Study: Validate `id` with `z.string().uuid("Invalid customer ID.")`.
+    // Study: Check `id` using the rule `z.string().uuid("Invalid customer ID.")`.
     id: z.string().uuid("Invalid customer ID."),
-// Study: Close the object literal.
+// Study: End this group of values.
 });

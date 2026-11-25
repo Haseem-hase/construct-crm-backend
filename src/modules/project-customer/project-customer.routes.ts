@@ -1,28 +1,28 @@
-// Study: Connect HTTP methods and paths to middleware and handlers for relationships between projects and customers.
-// Study: Import `{ Router }` from `"express"`.
+// Study: This file is about which customers are connected to each job and in what role. Matches each request from the screen to the checks and work it needs.
+// Study: Bring in `{ Router }` from `"express"` so this file can use it.
 import { Router } from "express";
-// Study: Import `{ Module, Action }` from `"@prisma/client"`.
+// Study: Bring in `{ Module, Action }` from `"@prisma/client"` so this file can use it.
 import { Module, Action } from "@prisma/client";
-// Study: Import `{ authenticate }` from `"../../middlewares/authenticate"`.
+// Study: Bring in `{ authenticate }` from `"../../middlewares/authenticate"` so this file can use it.
 import { authenticate } from "../../middlewares/authenticate";
-// Study: Import `{ authorize }` from `"../../middlewares/authorize"`.
+// Study: Bring in `{ authorize }` from `"../../middlewares/authorize"` so this file can use it.
 import { authorize } from "../../middlewares/authorize";
-// Study: Import `* as projectCustomerController` from `"./project-customer.controller"`.
+// Study: Bring in `* as projectCustomerController` from `"./project-customer.controller"` so this file can use it.
 import * as projectCustomerController from "./project-customer.controller";
 
 // Study: Call `Router` and store the result as `router`.
 const router = Router();
 
-// Study: Register GET /:projectId/customers with `projectCustomerController.getProjectCustomers` after the listed middleware.
+// Study: When the screen asks to read information, use this GET address (`/:projectId/customers`). First check who is signed in, then check their permission. Send the request to `projectCustomerController.getProjectCustomers`.
 router.get("/:projectId/customers", authenticate, authorize(Module.PROJECT, Action.VIEW), projectCustomerController.getProjectCustomers);
-// Study: Register POST /:projectId/customers with `projectCustomerController.createProjectCustomer` after the listed middleware.
+// Study: When the screen asks to submit information, use this POST address (`/:projectId/customers`). First check who is signed in, then check their permission. Send the request to `projectCustomerController.createProjectCustomer`.
 router.post("/:projectId/customers", authenticate, authorize(Module.PROJECT, Action.UPDATE), projectCustomerController.createProjectCustomer);
-// Study: Register GET /:projectId/customers/:projectCustomerId with `projectCustomerController.getProjectCustomer` after the listed middleware.
+// Study: When the screen asks to read information, use this GET address (`/:projectId/customers/:projectCustomerId`). First check who is signed in, then check their permission. Send the request to `projectCustomerController.getProjectCustomer`.
 router.get("/:projectId/customers/:projectCustomerId", authenticate, authorize(Module.PROJECT, Action.VIEW), projectCustomerController.getProjectCustomer);
-// Study: Register PATCH /:projectId/customers/:projectCustomerId with `projectCustomerController.updateProjectCustomer` after the listed middleware.
+// Study: When the screen asks to update part of a record, use this PATCH address (`/:projectId/customers/:projectCustomerId`). First check who is signed in, then check their permission. Send the request to `projectCustomerController.updateProjectCustomer`.
 router.patch("/:projectId/customers/:projectCustomerId", authenticate, authorize(Module.PROJECT, Action.UPDATE), projectCustomerController.updateProjectCustomer);
-// Study: Register DELETE /:projectId/customers/:projectCustomerId with `projectCustomerController.deleteProjectCustomer` after the listed middleware.
+// Study: When the screen asks to remove a record, use this DELETE address (`/:projectId/customers/:projectCustomerId`). First check who is signed in, then check their permission. Send the request to `projectCustomerController.deleteProjectCustomer`.
 router.delete("/:projectId/customers/:projectCustomerId", authenticate, authorize(Module.PROJECT, Action.UPDATE), projectCustomerController.deleteProjectCustomer);
 
-// Study: Expose `router` as the default export.
+// Study: Make `router` the main thing other files can get from this file.
 export default router;

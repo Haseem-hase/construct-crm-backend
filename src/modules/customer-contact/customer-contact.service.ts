@@ -1,34 +1,34 @@
-// Study: Apply business rules and coordinate database operations for contacts attached to customer accounts.
-// Study: Import `* as customerContactRepository` from `"./customer-contact.repository"`.
+// Study: This file is about the people you can contact at a customer account. Applies the rules for this part of the CRM, such as what must be checked before saving a change.
+// Study: Bring in `* as customerContactRepository` from `"./customer-contact.repository"` so this file can use it.
 import * as customerContactRepository from "./customer-contact.repository";
-// Study: Import `* as customerRepository` from `"../customers/customer.repository"`.
+// Study: Bring in `* as customerRepository` from `"../customers/customer.repository"` so this file can use it.
 import * as customerRepository from "../customers/customer.repository";
-// Study: Import `{ CreateCustomerContactInput, UpdateCustomerContactInput }` from `"./customer-contact.types"`.
+// Study: Bring in `{ CreateCustomerContactInput, UpdateCustomerContactInput }` from `"./customer-contact.types"` so this file can use it.
 import { CreateCustomerContactInput, UpdateCustomerContactInput } from "./customer-contact.types";
-// Study: Import `{ AuthenticatedUser }` from `"../../shared/types/authenticated-user"`.
+// Study: Bring in `{ AuthenticatedUser }` from `"../../shared/types/authenticated-user"` so this file can use it.
 import { AuthenticatedUser } from "../../shared/types/authenticated-user";
-// Study: Import `{ ForbiddenError }` from `"../../errors/ForbiddenError"`.
+// Study: Bring in `{ ForbiddenError }` from `"../../errors/ForbiddenError"` so this file can use it.
 import { ForbiddenError } from "../../errors/ForbiddenError";
-// Study: Import `{ NotFoundError }` from `"../../errors/NotFoundError"`.
+// Study: Bring in `{ NotFoundError }` from `"../../errors/NotFoundError"` so this file can use it.
 import { NotFoundError } from "../../errors/NotFoundError";
-// Study: Import `prisma` from `"../../lib/prisma"`.
+// Study: Bring in `prisma` from `"../../lib/prisma"` so this file can use it.
 import prisma from "../../lib/prisma";
 
-// Study: Export `createCustomerContact` as an async function that returns a promise.
+// Study: Make `createCustomerContact` available to other files. Its result arrives after its work finishes.
 export const createCustomerContact = async (
-    // Study: Accept `customerId` with type `string`.
+    // Study: This step receives `customerId`. `string` describes what that information should look like.
     customerId: string,
-    // Study: Accept `data` with type `CreateCustomerContactInput`.
+    // Study: This step receives `data`. `CreateCustomerContactInput` describes what that information should look like.
     data: CreateCustomerContactInput,
-    // Study: Accept `user` with type `AuthenticatedUser`.
+    // Study: This step receives `user`. `AuthenticatedUser` describes what that information should look like.
     user: AuthenticatedUser
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Run the following branch when `!user.organizationId` is truthy.
+    // Study: Do the next step if this check passes: `!user.organizationId`.
     if (!user.organizationId) {
-        // Study: Stop this execution path by throwing `new ForbiddenError("This operation requires an organization context.")`.
+        // Study: Stop here and report this problem: "This operation requires an organization context."
         throw new ForbiddenError("This operation requires an organization context.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // Study: Call `customerRepository.findCustomerByIdAndOrganization` and wait for it to finish and store its result in `customer`.
@@ -37,150 +37,150 @@ export const createCustomerContact = async (
         customerId,
         // Study: Supply `user` to the surrounding statement.
         user.organizationId
-    // Study: Close the call arguments.
+    // Study: End the list of information being sent to this step.
     );
 
-    // Study: Run the following branch when `!customer` is truthy.
+    // Study: Do the next step if there is no value for `customer`.
     if (!customer) {
-        // Study: Stop this execution path by throwing `new NotFoundError("Customer not found.")`.
+        // Study: Stop here and report this problem: "Customer not found."
         throw new NotFoundError("Customer not found.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Run the following branch when `data.isPrimary` is truthy.
+    // Study: Do the next step if this check passes: `data.isPrimary`.
     if (data.isPrimary) {
         // Handle atomic primary switch
-        // Study: Return `await prisma.$transaction(async (tx) => { // Unset existing primary contact(s) for …` to the caller.
+        // Study: Give `await prisma.$transaction(async (tx) => { // Unset existing primary contact(s) for …` back to the code that asked for it.
         return await prisma.$transaction(async (tx) => {
             // Unset existing primary contact(s) for this customer via the repository
             // Study: Call `customerContactRepository.unsetPrimaryContacts` and wait for it to finish.
             await customerContactRepository.unsetPrimaryContacts(customerId, undefined, tx);
 
             // Create the new primary contact via the repository
-            // Study: Return `await customerContactRepository.createCustomerContact(customerId, data, tx)` to the caller.
+            // Study: Give `await customerContactRepository.createCustomerContact(customerId, data, tx)` back to the code that asked for it.
             return await customerContactRepository.createCustomerContact(customerId, data, tx);
-        // Study: Close the code block.
+        // Study: End this group of steps.
         });
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Return `await customerContactRepository.createCustomerContact(customerId, data)` to the caller.
+    // Study: Give `await customerContactRepository.createCustomerContact(customerId, data)` back to the code that asked for it.
     return await customerContactRepository.createCustomerContact(customerId, data);
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `getCustomerContacts` as an async function that returns a promise.
+// Study: Make `getCustomerContacts` available to other files. Its result arrives after its work finishes.
 export const getCustomerContacts = async (
-    // Study: Accept `customerId` with type `string`.
+    // Study: This step receives `customerId`. `string` describes what that information should look like.
     customerId: string,
-    // Study: Accept `user` with type `AuthenticatedUser`.
+    // Study: This step receives `user`. `AuthenticatedUser` describes what that information should look like.
     user: AuthenticatedUser
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
     // Study: Set `customer` to `user.systemRole === "SUPER_ADMIN" ? await customerRepository.findPlatformCustomerBy…`.
     const customer = user.systemRole === "SUPER_ADMIN"
-        // Study: Use this value when the preceding condition is truthy.
+        // Study: Use this value if the check above passes.
         ? await customerRepository.findPlatformCustomerById(customerId)
-        // Study: Use this value when the preceding condition is falsy.
+        // Study: Use this value if the check above fails.
         : user.organizationId
-            // Study: Use this value when the preceding condition is truthy.
+            // Study: Use this value if the check above passes.
             ? await customerRepository.findCustomerByIdAndOrganization(customerId, user.organizationId)
-            // Study: Use this value when the preceding condition is falsy.
+            // Study: Use this value if the check above fails.
             : null;
 
-    // Study: Run the following branch when `!customer` is truthy.
+    // Study: Do the next step if there is no value for `customer`.
     if (!customer) {
-        // Study: Stop this execution path by throwing `new NotFoundError("Customer not found.")`.
+        // Study: Stop here and report this problem: "Customer not found."
         throw new NotFoundError("Customer not found.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Return `await customerContactRepository.findContactsByCustomerId(customerId)` to the caller.
+    // Study: Give `await customerContactRepository.findContactsByCustomerId(customerId)` back to the code that asked for it.
     return await customerContactRepository.findContactsByCustomerId(customerId);
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `getCustomerContactById` as an async function that returns a promise.
+// Study: Make `getCustomerContactById` available to other files. Its result arrives after its work finishes.
 export const getCustomerContactById = async (
-    // Study: Accept `customerId` with type `string`.
+    // Study: This step receives `customerId`. `string` describes what that information should look like.
     customerId: string,
-    // Study: Accept `contactId` with type `string`.
+    // Study: This step receives `contactId`. `string` describes what that information should look like.
     contactId: string,
-    // Study: Accept `user` with type `AuthenticatedUser`.
+    // Study: This step receives `user`. `AuthenticatedUser` describes what that information should look like.
     user: AuthenticatedUser
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
     // Study: Set `customer` to `user.systemRole === "SUPER_ADMIN" ? await customerRepository.findPlatformCustomerBy…`.
     const customer = user.systemRole === "SUPER_ADMIN"
-        // Study: Use this value when the preceding condition is truthy.
+        // Study: Use this value if the check above passes.
         ? await customerRepository.findPlatformCustomerById(customerId)
-        // Study: Use this value when the preceding condition is falsy.
+        // Study: Use this value if the check above fails.
         : user.organizationId
-            // Study: Use this value when the preceding condition is truthy.
+            // Study: Use this value if the check above passes.
             ? await customerRepository.findCustomerByIdAndOrganization(customerId, user.organizationId)
-            // Study: Use this value when the preceding condition is falsy.
+            // Study: Use this value if the check above fails.
             : null;
 
-    // Study: Run the following branch when `!customer` is truthy.
+    // Study: Do the next step if there is no value for `customer`.
     if (!customer) {
-        // Study: Stop this execution path by throwing `new NotFoundError("Customer not found.")`.
+        // Study: Stop here and report this problem: "Customer not found."
         throw new NotFoundError("Customer not found.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // Study: Call `customerContactRepository.findContactByIdAndCustomer` and wait for it to finish and store its result in `contact`.
     const contact = await customerContactRepository.findContactByIdAndCustomer(contactId, customerId);
 
-    // Study: Run the following branch when `!contact` is truthy.
+    // Study: Do the next step if there is no value for `contact`.
     if (!contact) {
-        // Study: Stop this execution path by throwing `new NotFoundError("Customer contact not found.")`.
+        // Study: Stop here and report this problem: "Customer contact not found."
         throw new NotFoundError("Customer contact not found.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Return `contact` to the caller.
+    // Study: Give `contact` back to the code that asked for it.
     return contact;
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `updateCustomerContact` as an async function that returns a promise.
+// Study: Make `updateCustomerContact` available to other files. Its result arrives after its work finishes.
 export const updateCustomerContact = async (
-    // Study: Accept `customerId` with type `string`.
+    // Study: This step receives `customerId`. `string` describes what that information should look like.
     customerId: string,
-    // Study: Accept `contactId` with type `string`.
+    // Study: This step receives `contactId`. `string` describes what that information should look like.
     contactId: string,
-    // Study: Accept `data` with type `UpdateCustomerContactInput`.
+    // Study: This step receives `data`. `UpdateCustomerContactInput` describes what that information should look like.
     data: UpdateCustomerContactInput,
-    // Study: Accept `user` with type `AuthenticatedUser`.
+    // Study: This step receives `user`. `AuthenticatedUser` describes what that information should look like.
     user: AuthenticatedUser
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Run the following branch when `!user.organizationId` is truthy and throw `new ForbiddenError("This operation requires an organization context.")`.
+    // Study: Do the next step if this check passes: `!user.organizationId` . If so, stop and report "This operation requires an organization context."
     if (!user.organizationId) throw new ForbiddenError("This operation requires an organization context.");
     // Study: Call `customerRepository.findCustomerByIdAndOrganization` and wait for it to finish and store its result in `customer`.
     const customer = await customerRepository.findCustomerByIdAndOrganization(customerId, user.organizationId);
 
-    // Study: Run the following branch when `!customer` is truthy.
+    // Study: Do the next step if there is no value for `customer`.
     if (!customer) {
-        // Study: Stop this execution path by throwing `new NotFoundError("Customer not found.")`.
+        // Study: Stop here and report this problem: "Customer not found."
         throw new NotFoundError("Customer not found.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // Verify contact actually exists and belongs to this customer
     // Study: Call `customerContactRepository.findContactByIdAndCustomer` and wait for it to finish and store its result in `existingContact`.
     const existingContact = await customerContactRepository.findContactByIdAndCustomer(contactId, customerId);
-    // Study: Run the following branch when `!existingContact` is truthy.
+    // Study: Do the next step if there is no value for `existingContact`.
     if (!existingContact) {
-        // Study: Stop this execution path by throwing `new NotFoundError("Customer contact not found.")`.
+        // Study: Stop here and report this problem: "Customer contact not found."
         throw new NotFoundError("Customer contact not found.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Run the following branch when `data.isPrimary === true` is truthy.
+    // Study: Do the next step if this check passes: `data.isPrimary === true`.
     if (data.isPrimary === true) {
         // Atomic switch: unset previous primary, set this one to primary
-        // Study: Return `await prisma.$transaction(async (tx) => { // Ensure any other primary contact is se…` to the caller.
+        // Study: Give `await prisma.$transaction(async (tx) => { // Ensure any other primary contact is se…` back to the code that asked for it.
         return await prisma.$transaction(async (tx) => {
             // Ensure any other primary contact is set to false via the repository
             // Study: Call `customerContactRepository.unsetPrimaryContacts` and wait for it to finish.
@@ -190,73 +190,73 @@ export const updateCustomerContact = async (
             // Study: Call `customerContactRepository.updateCustomerContact` and wait for it to finish and store its result in `updatedContact`.
             const updatedContact = await customerContactRepository.updateCustomerContact(contactId, customerId, data, tx);
 
-            // Study: Run the following branch when `!updatedContact` is truthy.
+            // Study: Do the next step if there is no value for `updatedContact`.
             if (!updatedContact) {
-                // Study: Stop this execution path by throwing `new NotFoundError("Customer contact not found.")`.
+                // Study: Stop here and report this problem: "Customer contact not found."
                 throw new NotFoundError("Customer contact not found.");
-            // Study: Close the code block.
+            // Study: End this group of steps.
             }
 
-            // Study: Return `updatedContact` to the caller.
+            // Study: Give `updatedContact` back to the code that asked for it.
             return updatedContact;
-        // Study: Close the code block.
+        // Study: End this group of steps.
         });
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // Normal update (isPrimary is false or undefined)
     // Study: Call `customerContactRepository.updateCustomerContact` and wait for it to finish and store its result in `updatedContact`.
     const updatedContact = await customerContactRepository.updateCustomerContact(contactId, customerId, data);
     
-    // Study: Run the following branch when `!updatedContact` is truthy.
+    // Study: Do the next step if there is no value for `updatedContact`.
     if (!updatedContact) {
-        // Study: Stop this execution path by throwing `new NotFoundError("Customer contact not found.")`.
+        // Study: Stop here and report this problem: "Customer contact not found."
         throw new NotFoundError("Customer contact not found.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Return `updatedContact` to the caller.
+    // Study: Give `updatedContact` back to the code that asked for it.
     return updatedContact;
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `deleteCustomerContact` as an async function that returns a promise.
+// Study: Make `deleteCustomerContact` available to other files. Its result arrives after its work finishes.
 export const deleteCustomerContact = async (
-    // Study: Accept `customerId` with type `string`.
+    // Study: This step receives `customerId`. `string` describes what that information should look like.
     customerId: string,
-    // Study: Accept `contactId` with type `string`.
+    // Study: This step receives `contactId`. `string` describes what that information should look like.
     contactId: string,
-    // Study: Accept `user` with type `AuthenticatedUser`.
+    // Study: This step receives `user`. `AuthenticatedUser` describes what that information should look like.
     user: AuthenticatedUser
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Run the following branch when `!user.organizationId` is truthy and throw `new ForbiddenError("This operation requires an organization context.")`.
+    // Study: Do the next step if this check passes: `!user.organizationId` . If so, stop and report "This operation requires an organization context."
     if (!user.organizationId) throw new ForbiddenError("This operation requires an organization context.");
     // Study: Call `customerRepository.findCustomerByIdAndOrganization` and wait for it to finish and store its result in `customer`.
     const customer = await customerRepository.findCustomerByIdAndOrganization(customerId, user.organizationId);
 
-    // Study: Run the following branch when `!customer` is truthy.
+    // Study: Do the next step if there is no value for `customer`.
     if (!customer) {
-        // Study: Stop this execution path by throwing `new NotFoundError("Customer not found.")`.
+        // Study: Stop here and report this problem: "Customer not found."
         throw new NotFoundError("Customer not found.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // Study: Call `customerContactRepository.deleteCustomerContact` and wait for it to finish and store its result in `deleted`.
     const deleted = await customerContactRepository.deleteCustomerContact(contactId, customerId);
     
-    // Study: Run the following branch when `!deleted` is truthy.
+    // Study: Do the next step if there is no value for `deleted`.
     if (!deleted) {
-        // Study: Stop this execution path by throwing `new NotFoundError("Customer contact not found.")`.
+        // Study: Stop here and report this problem: "Customer contact not found."
         throw new NotFoundError("Customer contact not found.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Return `{ message: "Customer contact deleted successfully.", }` to the caller.
+    // Study: Give `{ message: "Customer contact deleted successfully.", }` back to the code that asked for it.
     return {
         // Study: Set `message` to `"Customer contact deleted successfully."`.
         message: "Customer contact deleted successfully.",
-    // Study: Close the object literal.
+    // Study: End this group of values.
     };
-// Study: Close the code block.
+// Study: End this group of steps.
 };

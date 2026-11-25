@@ -1,219 +1,219 @@
-// Study: Read and write database records through Prisma for contacts attached to customer accounts.
-// Study: Import `prisma` from `"../../lib/prisma"`.
+// Study: This file is about the people you can contact at a customer account. Finds or saves information in the database, where the CRM keeps its records.
+// Study: Bring in `prisma` from `"../../lib/prisma"` so this file can use it.
 import prisma from "../../lib/prisma";
-// Study: Import `{ CreateCustomerContactInput, UpdateCustomerContactInput }` from `"./customer-contact.types"`.
+// Study: Bring in `{ CreateCustomerContactInput, UpdateCustomerContactInput }` from `"./customer-contact.types"` so this file can use it.
 import {
-    // Study: Bring `CreateCustomerContactInput` into scope from the imported module.
+    // Study: Make `CreateCustomerContactInput` from the other file available here.
     CreateCustomerContactInput,
-    // Study: Bring `UpdateCustomerContactInput` into scope from the imported module.
+    // Study: Make `UpdateCustomerContactInput` from the other file available here.
     UpdateCustomerContactInput
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 } from "./customer-contact.types";
-// Study: Import `{ Prisma }` from `"@prisma/client"`.
+// Study: Bring in `{ Prisma }` from `"@prisma/client"` so this file can use it.
 import { Prisma } from "@prisma/client";
 
-// Study: Export `createCustomerContact` as an async function that returns a promise.
+// Study: Make `createCustomerContact` available to other files. Its result arrives after its work finishes.
 export const createCustomerContact = async (
-    // Study: Accept `customerId` with type `string`.
+    // Study: This step receives `customerId`. `string` describes what that information should look like.
     customerId: string,
-    // Study: Accept `data` with type `CreateCustomerContactInput`.
+    // Study: This step receives `data`. `CreateCustomerContactInput` describes what that information should look like.
     data: CreateCustomerContactInput,
-    // Study: Accept `tx` as optional with type `Prisma.TransactionClient`.
+    // Study: This step receives `tx` as optional. `Prisma.TransactionClient` describes what that information should look like.
     tx?: Prisma.TransactionClient
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
     // Study: Set `db` to `tx || prisma`.
     const db = tx || prisma;
-    // Study: Return `await db.customerContact.create({ data: { ...data, customerId, }, })` to the caller.
+    // Study: Give `await db.customerContact.create({ data: { ...data, customerId, }, })` back to the code that asked for it.
     return await db.customerContact.create({
         // Study: Supply the values to write to the database.
         data: {
             // Study: Expand the values from `data` into the surrounding collection.
             ...data,
-            // Study: Pass the current `customerId` value under the same property name.
+            // Study: Carry the value of `customerId` into the new group under the same name.
             customerId,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `unsetPrimaryContacts` as an async function that returns a promise.
+// Study: Make `unsetPrimaryContacts` available to other files. Its result arrives after its work finishes.
 export const unsetPrimaryContacts = async (
-    // Study: Accept `customerId` with type `string`.
+    // Study: This step receives `customerId`. `string` describes what that information should look like.
     customerId: string,
-    // Study: Accept `excludeContactId` as optional with type `string`.
+    // Study: This step receives `excludeContactId` as optional. `string` describes what that information should look like.
     excludeContactId?: string,
-    // Study: Accept `tx` as optional with type `Prisma.TransactionClient`.
+    // Study: This step receives `tx` as optional. `Prisma.TransactionClient` describes what that information should look like.
     tx?: Prisma.TransactionClient
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
     // Study: Set `db` to `tx || prisma`.
     const db = tx || prisma;
-    // Study: Return `await db.customerContact.updateMany({ where: { customerId, isPrimary: true, ...(exc…` to the caller.
+    // Study: Give `await db.customerContact.updateMany({ where: { customerId, isPrimary: true, ...(exc…` back to the code that asked for it.
     return await db.customerContact.updateMany({
-        // Study: Set the conditions that database records must match using customerId, isPrimary.
+        // Study: Set the conditions that records must meet using customerId, isPrimary.
         where: {
-            // Study: Pass the current `customerId` value under the same property name.
+            // Study: Carry the value of `customerId` into the new group under the same name.
             customerId,
             // Study: Set `isPrimary` to `true`.
             isPrimary: true,
             // Study: Expand the values from `(excludeContactId ? { id: { not: excludeContactId } } : {})` into the surrounding collection.
             ...(excludeContactId ? { id: { not: excludeContactId } } : {})
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Supply the values to write to the database.
         data: { isPrimary: false },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `findContactsByCustomerId` as an async function that returns a promise.
+// Study: Make `findContactsByCustomerId` available to other files. Its result arrives after its work finishes.
 export const findContactsByCustomerId = async (
-    // Study: Accept `customerId` with type `string`.
+    // Study: This step receives `customerId`. `string` describes what that information should look like.
     customerId: string,
-    // Study: Accept `tx` as optional with type `Prisma.TransactionClient`.
+    // Study: This step receives `tx` as optional. `Prisma.TransactionClient` describes what that information should look like.
     tx?: Prisma.TransactionClient
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
     // Study: Set `db` to `tx || prisma`.
     const db = tx || prisma;
-    // Study: Return `await db.customerContact.findMany({ where: { customerId }, orderBy: { createdAt: "d…` to the caller.
+    // Study: Give `await db.customerContact.findMany({ where: { customerId }, orderBy: { createdAt: "d…` back to the code that asked for it.
     return await db.customerContact.findMany({
-        // Study: Set the conditions that database records must match using customerId.
+        // Study: Set the conditions that records must meet using customerId.
         where: { customerId },
         // Study: Set the sort order for the returned records.
         orderBy: { createdAt: "desc" },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `findContactById` as an async function that returns a promise.
+// Study: Make `findContactById` available to other files. Its result arrives after its work finishes.
 export const findContactById = async (
-    // Study: Accept `contactId` with type `string`.
+    // Study: This step receives `contactId`. `string` describes what that information should look like.
     contactId: string,
-    // Study: Accept `tx` as optional with type `Prisma.TransactionClient`.
+    // Study: This step receives `tx` as optional. `Prisma.TransactionClient` describes what that information should look like.
     tx?: Prisma.TransactionClient
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
     // Study: Set `db` to `tx || prisma`.
     const db = tx || prisma;
-    // Study: Return `await db.customerContact.findUnique({ where: { id: contactId }, })` to the caller.
+    // Study: Give `await db.customerContact.findUnique({ where: { id: contactId }, })` back to the code that asked for it.
     return await db.customerContact.findUnique({
-        // Study: Set the conditions that database records must match using id.
+        // Study: Set the conditions that records must meet using id.
         where: { id: contactId },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `findContactByIdAndCustomer` as an async function that returns a promise.
+// Study: Make `findContactByIdAndCustomer` available to other files. Its result arrives after its work finishes.
 export const findContactByIdAndCustomer = async (
-    // Study: Accept `contactId` with type `string`.
+    // Study: This step receives `contactId`. `string` describes what that information should look like.
     contactId: string,
-    // Study: Accept `customerId` with type `string`.
+    // Study: This step receives `customerId`. `string` describes what that information should look like.
     customerId: string,
-    // Study: Accept `tx` as optional with type `Prisma.TransactionClient`.
+    // Study: This step receives `tx` as optional. `Prisma.TransactionClient` describes what that information should look like.
     tx?: Prisma.TransactionClient
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
     // Study: Set `db` to `tx || prisma`.
     const db = tx || prisma;
-    // Study: Return `await db.customerContact.findFirst({ where: { id: contactId, customerId: customerId…` to the caller.
+    // Study: Give `await db.customerContact.findFirst({ where: { id: contactId, customerId: customerId…` back to the code that asked for it.
     return await db.customerContact.findFirst({
-        // Study: Set the conditions that database records must match using id, customerId.
+        // Study: Set the conditions that records must meet using id, customerId.
         where: {
             // Study: Set `id` to `contactId`.
             id: contactId,
             // Study: Set `customerId` to `customerId`.
             customerId: customerId,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `updateCustomerContact` as an async function that returns a promise.
+// Study: Make `updateCustomerContact` available to other files. Its result arrives after its work finishes.
 export const updateCustomerContact = async (
-    // Study: Accept `contactId` with type `string`.
+    // Study: This step receives `contactId`. `string` describes what that information should look like.
     contactId: string,
-    // Study: Accept `customerId` with type `string`.
+    // Study: This step receives `customerId`. `string` describes what that information should look like.
     customerId: string,
-    // Study: Accept `data` with type `UpdateCustomerContactInput`.
+    // Study: This step receives `data`. `UpdateCustomerContactInput` describes what that information should look like.
     data: UpdateCustomerContactInput,
-    // Study: Accept `tx` as optional with type `Prisma.TransactionClient`.
+    // Study: This step receives `tx` as optional. `Prisma.TransactionClient` describes what that information should look like.
     tx?: Prisma.TransactionClient
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
     // Study: Set `db` to `tx || prisma`.
     const db = tx || prisma;
     // Study: Call `db.customerContact.updateMany` and wait for it to finish and store its result in `result`.
     const result = await db.customerContact.updateMany({
-        // Study: Set the conditions that database records must match using id, customerId.
+        // Study: Set the conditions that records must meet using id, customerId.
         where: {
             // Study: Set `id` to `contactId`.
             id: contactId,
-            // Study: Pass the current `customerId` value under the same property name.
+            // Study: Carry the value of `customerId` into the new group under the same name.
             customerId,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-        // Study: Pass the current `data` value under the same property name.
+        // Study: Carry the value of `data` into the new group under the same name.
         data,
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
 
-    // Study: Run the following branch when `result.count === 0` is truthy.
+    // Study: Do the next step if this check passes: `result.count === 0`.
     if (result.count === 0) {
-        // Study: Return `null` to the caller.
+        // Study: Give `null` back to the code that asked for it.
         return null;
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Return `await db.customerContact.findFirst({ where: { id: contactId, customerId, }, })` to the caller.
+    // Study: Give `await db.customerContact.findFirst({ where: { id: contactId, customerId, }, })` back to the code that asked for it.
     return await db.customerContact.findFirst({
-        // Study: Set the conditions that database records must match using id, customerId.
+        // Study: Set the conditions that records must meet using id, customerId.
         where: {
             // Study: Set `id` to `contactId`.
             id: contactId,
-            // Study: Pass the current `customerId` value under the same property name.
+            // Study: Carry the value of `customerId` into the new group under the same name.
             customerId,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `deleteCustomerContact` as an async function that returns a promise.
+// Study: Make `deleteCustomerContact` available to other files. Its result arrives after its work finishes.
 export const deleteCustomerContact = async (
-    // Study: Accept `contactId` with type `string`.
+    // Study: This step receives `contactId`. `string` describes what that information should look like.
     contactId: string,
-    // Study: Accept `customerId` with type `string`.
+    // Study: This step receives `customerId`. `string` describes what that information should look like.
     customerId: string,
-    // Study: Accept `tx` as optional with type `Prisma.TransactionClient`.
+    // Study: This step receives `tx` as optional. `Prisma.TransactionClient` describes what that information should look like.
     tx?: Prisma.TransactionClient
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
     // Study: Set `db` to `tx || prisma`.
     const db = tx || prisma;
     // Study: Call `db.customerContact.deleteMany` and wait for it to finish and store its result in `result`.
     const result = await db.customerContact.deleteMany({
-        // Study: Set the conditions that database records must match using id, customerId.
+        // Study: Set the conditions that records must meet using id, customerId.
         where: {
             // Study: Set `id` to `contactId`.
             id: contactId,
             // Study: Set `customerId` to `customerId`.
             customerId: customerId,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
 
-    // Study: Return `result.count > 0` to the caller.
+    // Study: Give `result.count > 0` back to the code that asked for it.
     return result.count > 0;
-// Study: Close the code block.
+// Study: End this group of steps.
 };

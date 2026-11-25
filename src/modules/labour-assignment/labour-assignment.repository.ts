@@ -1,7 +1,7 @@
-// Study: Read and write database records through Prisma for worker placements on construction projects.
-// Study: Import `prisma` from `"../../lib/prisma"`.
+// Study: This file is about which workers are assigned to each job. Finds or saves information in the database, where the CRM keeps its records.
+// Study: Bring in `prisma` from `"../../lib/prisma"` so this file can use it.
 import prisma from "../../lib/prisma";
-// Study: Import `{ Prisma }` from `"@prisma/client"`.
+// Study: Bring in `{ Prisma }` from `"@prisma/client"` so this file can use it.
 import { Prisma } from "@prisma/client";
 
 // Study: Build the object `defaultIncludes` with the entries below.
@@ -10,51 +10,51 @@ const defaultIncludes = {
     labour: { include: { organization: { select: { id: true, name: true } } } },
     // Study: Start the nested value for `assignment`.
     assignment: {
-        // Study: Load related database records with the main result.
+        // Study: Ask for linked information along with the main record.
         include: {
             // Study: Start the nested value for `project`.
             project: { include: { organization: { select: { id: true, name: true } } } },
             // Study: Start the nested value for `contractor`.
             contractor: { include: { organization: { select: { id: true, name: true } } } },
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     },
-// Study: Close the object literal.
+// Study: End this group of values.
 };
 
-// Study: Export `findById` as an async function that returns a promise.
+// Study: Make `findById` available to other files. Its result arrives after its work finishes.
 export const findById = async (id: string, organizationId: string) => {
-    // Study: Return `await prisma.labourAssignment.findFirst({ where: { id, assignment: { project: { org…` to the caller.
+    // Study: Give `await prisma.labourAssignment.findFirst({ where: { id, assignment: { project: { org…` back to the code that asked for it.
     return await prisma.labourAssignment.findFirst({
-        // Study: Set the conditions that database records must match using id, assignment.
+        // Study: Set the conditions that records must meet using id, assignment.
         where: {
-            // Study: Pass the current `id` value under the same property name.
+            // Study: Carry the value of `id` into the new group under the same name.
             id,
             // Study: Start the nested value for `assignment`.
             assignment: {
                 // Study: Start the nested value for `project`.
                 project: {
-                    // Study: Pass the current `organizationId` value under the same property name.
+                    // Study: Carry the value of `organizationId` into the new group under the same name.
                     organizationId,
-                // Study: Close the object literal.
+                // Study: End this group of values.
                 },
-            // Study: Close the object literal.
+            // Study: End this group of values.
             },
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-        // Study: Load related database records with the main result using `defaultIncludes`.
+        // Study: Ask for linked information along with the main record using `defaultIncludes`.
         include: defaultIncludes,
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `findMany` as an async function that returns a promise.
+// Study: Make `findMany` available to other files. Its result arrives after its work finishes.
 export const findMany = async (
-    // Study: Accept `organizationId` with type `string`.
+    // Study: This step receives `organizationId`. `string` describes what that information should look like.
     organizationId: string,
-    // Study: Accept `filters` with type `{ labourId?: string; contractorProjectAssignmentId?: string; status?: Prisma.EnumLa…` with initial value `{}`.
+    // Study: This step receives `filters`. `{ labourId?: string; contractorProjectAssignmentId?: string; status?: Prisma.EnumLa…` with initial value `{}` describes what that information should look like.
     filters: {
         // Study: Define `labourId` as optional with type `string`.
         labourId?: string;
@@ -62,23 +62,23 @@ export const findMany = async (
         contractorProjectAssignmentId?: string;
         // Study: Define `status` as optional with type `Prisma.EnumLabourAssignmentStatusFilter | "ACTIVE" | "COMPLETED" | "CANCELLED"`.
         status?: Prisma.EnumLabourAssignmentStatusFilter | "ACTIVE" | "COMPLETED" | "CANCELLED";
-    // Study: Close this group and continue the enclosing expression.
+    // Study: Finish this group and continue the surrounding step.
     } = {}
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Return `await prisma.labourAssignment.findMany({ where: { assignment: { project: { organiza…` to the caller.
+    // Study: Give `await prisma.labourAssignment.findMany({ where: { assignment: { project: { organiza…` back to the code that asked for it.
     return await prisma.labourAssignment.findMany({
-        // Study: Set the conditions that database records must match using assignment.
+        // Study: Set the conditions that records must meet using assignment.
         where: {
             // Study: Start the nested value for `assignment`.
             assignment: {
                 // Study: Start the nested value for `project`.
                 project: {
-                    // Study: Pass the current `organizationId` value under the same property name.
+                    // Study: Carry the value of `organizationId` into the new group under the same name.
                     organizationId,
-                // Study: Close the object literal.
+                // Study: End this group of values.
                 },
-            // Study: Close the object literal.
+            // Study: End this group of values.
             },
             // Study: Expand the values from `(filters.labourId && { labourId: filters.labourId })` into the surrounding collection.
             ...(filters.labourId && { labourId: filters.labourId }),
@@ -86,22 +86,22 @@ export const findMany = async (
             ...(filters.contractorProjectAssignmentId && { contractorProjectAssignmentId: filters.contractorProjectAssignmentId }),
             // Study: Expand the values from `(filters.status && { status: filters.status })` into the surrounding collection.
             ...(filters.status && { status: filters.status }),
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-        // Study: Load related database records with the main result using `defaultIncludes`.
+        // Study: Ask for linked information along with the main record using `defaultIncludes`.
         include: defaultIncludes,
         // Study: Set the sort order for the returned records.
         orderBy: {
             // Study: Set `startDate` to `"desc"`.
             startDate: "desc",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `findAllPlatform` as an async function that returns a promise.
+// Study: Make `findAllPlatform` available to other files. Its result arrives after its work finishes.
 export const findAllPlatform = async (filters: {
     // Study: Define `labourId` as optional with type `string`.
     labourId?: string;
@@ -109,9 +109,9 @@ export const findAllPlatform = async (filters: {
     contractorProjectAssignmentId?: string;
     // Study: Define `status` as optional with type `Prisma.EnumLabourAssignmentStatusFilter | "ACTIVE" | "COMPLETED" | "CANCELLED"`.
     status?: Prisma.EnumLabourAssignmentStatusFilter | "ACTIVE" | "COMPLETED" | "CANCELLED";
-// Study: Fetch records matching the query through `prisma.labourAssignment`.
+// Study: Find all matching records using `prisma.labourAssignment`.
 } = {}) => prisma.labourAssignment.findMany({
-    // Study: Set the conditions that database records must match.
+    // Study: Set the conditions that records must meet.
     where: {
         // Study: Expand the values from `(filters.labourId && { labourId: filters.labourId })` into the surrounding collection.
         ...(filters.labourId && { labourId: filters.labourId }),
@@ -119,152 +119,152 @@ export const findAllPlatform = async (filters: {
         ...(filters.contractorProjectAssignmentId && { contractorProjectAssignmentId: filters.contractorProjectAssignmentId }),
         // Study: Expand the values from `(filters.status && { status: filters.status })` into the surrounding collection.
         ...(filters.status && { status: filters.status }),
-    // Study: Close the object literal.
+    // Study: End this group of values.
     },
-    // Study: Load related database records with the main result using `defaultIncludes`.
+    // Study: Ask for linked information along with the main record using `defaultIncludes`.
     include: defaultIncludes,
     // Study: Set the sort order for the returned records.
     orderBy: { startDate: "desc" },
-// Study: Close the object literal.
+// Study: End this group of values.
 });
 
-// Study: Export `findPlatformById` as an async function that returns a promise.
+// Study: Make `findPlatformById` available to other files. Its result arrives after its work finishes.
 export const findPlatformById = async (id: string) => prisma.labourAssignment.findUnique({
-    // Study: Set the conditions that database records must match using id.
+    // Study: Set the conditions that records must meet using id.
     where: { id },
-    // Study: Load related database records with the main result using `defaultIncludes`.
+    // Study: Ask for linked information along with the main record using `defaultIncludes`.
     include: defaultIncludes,
-// Study: Close the object literal.
+// Study: End this group of values.
 });
 
-// Study: Export `findByLabour` as an async function that returns a promise.
+// Study: Make `findByLabour` available to other files. Its result arrives after its work finishes.
 export const findByLabour = async (labourId: string, organizationId: string) => {
-    // Study: Return `await prisma.labourAssignment.findMany({ where: { labourId, assignment: { project: …` to the caller.
+    // Study: Give `await prisma.labourAssignment.findMany({ where: { labourId, assignment: { project: …` back to the code that asked for it.
     return await prisma.labourAssignment.findMany({
-        // Study: Set the conditions that database records must match using labourId, assignment.
+        // Study: Set the conditions that records must meet using labourId, assignment.
         where: {
-            // Study: Pass the current `labourId` value under the same property name.
+            // Study: Carry the value of `labourId` into the new group under the same name.
             labourId,
             // Study: Start the nested value for `assignment`.
             assignment: {
                 // Study: Start the nested value for `project`.
                 project: {
-                    // Study: Pass the current `organizationId` value under the same property name.
+                    // Study: Carry the value of `organizationId` into the new group under the same name.
                     organizationId,
-                // Study: Close the object literal.
+                // Study: End this group of values.
                 },
-            // Study: Close the object literal.
+            // Study: End this group of values.
             },
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-        // Study: Load related database records with the main result using `defaultIncludes`.
+        // Study: Ask for linked information along with the main record using `defaultIncludes`.
         include: defaultIncludes,
         // Study: Set the sort order for the returned records.
         orderBy: {
             // Study: Set `startDate` to `"desc"`.
             startDate: "desc",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `findOverlappingAssignments` as an async function that returns a promise.
+// Study: Make `findOverlappingAssignments` available to other files. Its result arrives after its work finishes.
 export const findOverlappingAssignments = async (
-    // Study: Accept `labourId` with type `string`.
+    // Study: This step receives `labourId`. `string` describes what that information should look like.
     labourId: string,
-    // Study: Accept `startDate` with type `Date`.
+    // Study: This step receives `startDate`. `Date` describes what that information should look like.
     startDate: Date,
-    // Study: Accept `endDate` with type `Date`.
+    // Study: This step receives `endDate`. `Date` describes what that information should look like.
     endDate: Date,
-    // Study: Accept `organizationId` with type `string`.
+    // Study: This step receives `organizationId`. `string` describes what that information should look like.
     organizationId: string,
-    // Study: Accept `excludeId` as optional with type `string`.
+    // Study: This step receives `excludeId` as optional. `string` describes what that information should look like.
     excludeId?: string
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
     // Study: Build the object `whereClause` with the entries below.
     const whereClause: Prisma.LabourAssignmentWhereInput = {
-        // Study: Pass the current `labourId` value under the same property name.
+        // Study: Carry the value of `labourId` into the new group under the same name.
         labourId,
         // Study: Start the nested value for `startDate`.
         startDate: {
             // Study: Set `lte` to `endDate`.
             lte: endDate,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the nested value for `endDate`.
         endDate: {
             // Study: Set `gte` to `startDate`.
             gte: startDate,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Start the nested value for `assignment`.
         assignment: {
             // Study: Start the nested value for `project`.
             project: {
-                // Study: Pass the current `organizationId` value under the same property name.
+                // Study: Carry the value of `organizationId` into the new group under the same name.
                 organizationId,
-            // Study: Close the object literal.
+            // Study: End this group of values.
             },
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     };
 
-    // Study: Run the following branch when `excludeId` is truthy.
+    // Study: Do the next step if this check passes: `excludeId`.
     if (excludeId) {
         // Study: Assign `{ not: excludeId, }` to `whereClause.id`.
         whereClause.id = {
             // Study: Set `not` to `excludeId`.
             not: excludeId,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         };
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Return `await prisma.labourAssignment.findMany({ where: whereClause, include: defaultInclud…` to the caller.
+    // Study: Give `await prisma.labourAssignment.findMany({ where: whereClause, include: defaultInclud…` back to the code that asked for it.
     return await prisma.labourAssignment.findMany({
         // Study: Set `where` to `whereClause`.
         where: whereClause,
-        // Study: Load related database records with the main result using `defaultIncludes`.
+        // Study: Ask for linked information along with the main record using `defaultIncludes`.
         include: defaultIncludes,
         // Study: Set the sort order for the returned records.
         orderBy: {
             // Study: Set `startDate` to `"asc"`.
             startDate: "asc",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `create` as an async function that returns a promise.
+// Study: Make `create` available to other files. Its result arrives after its work finishes.
 export const create = async (data: Prisma.LabourAssignmentUncheckedCreateInput) => {
-    // Study: Return `await prisma.labourAssignment.create({ data, include: defaultIncludes, })` to the caller.
+    // Study: Give `await prisma.labourAssignment.create({ data, include: defaultIncludes, })` back to the code that asked for it.
     return await prisma.labourAssignment.create({
-        // Study: Pass the current `data` value under the same property name.
+        // Study: Carry the value of `data` into the new group under the same name.
         data,
-        // Study: Load related database records with the main result using `defaultIncludes`.
+        // Study: Ask for linked information along with the main record using `defaultIncludes`.
         include: defaultIncludes,
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `update` as an async function that returns a promise.
+// Study: Make `update` available to other files. Its result arrives after its work finishes.
 export const update = async (id: string, data: Prisma.LabourAssignmentUncheckedUpdateInput) => {
-    // Study: Return `await prisma.labourAssignment.update({ where: { id }, data, include: defaultInclude…` to the caller.
+    // Study: Give `await prisma.labourAssignment.update({ where: { id }, data, include: defaultInclude…` back to the code that asked for it.
     return await prisma.labourAssignment.update({
-        // Study: Set the conditions that database records must match using id.
+        // Study: Set the conditions that records must meet using id.
         where: { id },
-        // Study: Pass the current `data` value under the same property name.
+        // Study: Carry the value of `data` into the new group under the same name.
         data,
-        // Study: Load related database records with the main result using `defaultIncludes`.
+        // Study: Ask for linked information along with the main record using `defaultIncludes`.
         include: defaultIncludes,
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };

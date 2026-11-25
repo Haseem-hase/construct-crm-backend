@@ -18,7 +18,7 @@ export class AppError extends Error {
 
         // Study: Call `Error.captureStackTrace`.
         Error.captureStackTrace(this, this.constructor);
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 // Study: Close the class declaration.
 }

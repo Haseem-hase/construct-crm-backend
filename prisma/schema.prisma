@@ -1,4 +1,4 @@
-// Study: Define the PostgreSQL data model and the Prisma client types and relationships.
+// Study: Describes the records the CRM keeps, the information on each record, and how records link together.
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
@@ -9,7 +9,7 @@
 generator client {
   // Study: Choose "prisma-client-js" as the generator provider.
   provider = "prisma-client-js"
-// Study: End the client generator.
+// Study: End the definition for client.
 }
 
 // Study: Configure the database Prisma connects to.
@@ -18,7 +18,7 @@ datasource db {
   provider = "postgresql"
   // Study: Read the database connection string from DATABASE_URL.
   url      = env("DATABASE_URL")
-// Study: End the db datasource.
+// Study: End the definition for db.
 }
 
 /////////////////////////////////////////////////
@@ -31,22 +31,22 @@ datasource db {
 
 // Study: Store reusable role templates, either global or owned by an organization.
 model Role {
-  // Study: Identify each record by its primary key of type String and default to uuid(.
+  // Study: Give each record an identifier that distinguishes it from the others. Its stored type is String and default to uuid(.
   id String @id @default(uuid())
 
   // Study: Store name as a String.
   name        String
-  // Study: Store description as a nullable String.
+  // Study: Store description as an optional (can be empty) String.
   description String?
 
   // true  = global role created by SUPER_ADMIN
   // false = custom role created by ORGANIZATION_OWNER
-  // Study: Store is global as a Boolean and default to true.
+  // Study: Store is global as a Boolean and start with yes if no value is supplied.
   isGlobal Boolean @default(true)
 
   // NULL for global roles.
   // Set for organization-specific custom roles.
-  // Study: Store organization id as a nullable String.
+  // Study: Store organization id as an optional (can be empty) String.
   organizationId String?
   // Study: Relate this record to Organization using organizationId → id when present and delete dependent records when the referenced record is deleted.
   organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -65,12 +65,12 @@ model Role {
   @@index([organizationId])
   // Study: Use "roles" as the database name for this Prisma model.
   @@map("roles")
-// Study: End the Role model.
+// Study: End the definition for Role.
 }
 
 // Study: Make a role available within a particular organization.
 model OrganizationRole {
-  // Study: Identify each record by its primary key of type String and default to uuid(.
+  // Study: Give each record an identifier that distinguishes it from the others. Its stored type is String and default to uuid(.
   id String @id @default(uuid())
 
   // Study: Store organization id as a String.
@@ -103,10 +103,10 @@ model OrganizationRole {
   @@index([roleId])
   // Study: Use "organization_roles" as the database name for this Prisma model.
   @@map("organization_roles")
-// Study: End the OrganizationRole model.
+// Study: End the definition for OrganizationRole.
 }
 
-// Study: Limit module to the allowed values listed here.
+// Study: Choose the possible values for module from this list.
 enum Module {
   // Study: Accept PROJECT as a possible module value.
   PROJECT
@@ -132,10 +132,10 @@ enum Module {
   USER
   // Study: Accept CONTRACTOR as a possible module value.
   CONTRACTOR
-// Study: End the Module enum.
+// Study: End the definition for Module.
 }
 
-// Study: Limit action to the allowed values listed here.
+// Study: Choose the possible values for action from this list.
 enum Action {
   // Study: Accept CREATE as a possible action value.
   CREATE
@@ -151,12 +151,12 @@ enum Action {
   EXPORT
   // Study: Accept ASSIGN as a possible action value.
   ASSIGN
-// Study: End the Action enum.
+// Study: End the definition for Action.
 }
 
 // Study: Define the database records and relations for permission.
 model Permission {
-  // Study: Identify each record by its primary key of type String and default to uuid(.
+  // Study: Give each record an identifier that distinguishes it from the others. Its stored type is String and default to uuid(.
   id String @id @default(uuid())
 
   // Study: Store module as a Module.
@@ -164,7 +164,7 @@ model Permission {
   // Study: Store action as a Action.
   action Action
 
-  // Study: Store description as a nullable String.
+  // Study: Store description as an optional (can be empty) String.
   description String?
 
   // Study: Store created at as a DateTime and default to now(.
@@ -179,12 +179,12 @@ model Permission {
   @@unique([module, action])
   // Study: Use "permissions" as the database name for this Prisma model.
   @@map("permissions")
-// Study: End the Permission model.
+// Study: End the definition for Permission.
 }
 
 // Study: Link an organization role to an allowed permission.
 model RolePermission {
-  // Study: Identify each record by its primary key of type String and default to uuid(.
+  // Study: Give each record an identifier that distinguishes it from the others. Its stored type is String and default to uuid(.
   id String @id @default(uuid())
 
   // Study: Store organization role id as a String.
@@ -209,10 +209,10 @@ model RolePermission {
   @@index([permissionId])
   // Study: Use "role_permissions" as the database name for this Prisma model.
   @@map("role_permissions")
-// Study: End the RolePermission model.
+// Study: End the definition for RolePermission.
 }
 
-// Study: Limit user status to the allowed values listed here.
+// Study: Choose the possible values for user status from this list.
 enum UserStatus {
   // Study: Accept ACTIVE as a possible user status value.
   ACTIVE
@@ -222,29 +222,29 @@ enum UserStatus {
   SUSPENDED
   // Study: Accept PENDING as a possible user status value.
   PENDING
-// Study: End the UserStatus enum.
+// Study: End the definition for UserStatus.
 }
 
-// Study: Limit system role to the allowed values listed here.
+// Study: Choose the possible values for system role from this list.
 enum SystemRole {
   // Study: Accept SUPER_ADMIN as a possible system role value.
   SUPER_ADMIN
-// Study: End the SystemRole enum.
+// Study: End the definition for SystemRole.
 }
 
 // Study: Define the database records and relations for user.
 model User {
-  // Study: Identify each record by its primary key of type String and default to uuid(.
+  // Study: Give each record an identifier that distinguishes it from the others. Its stored type is String and default to uuid(.
   id String @id @default(uuid())
 
   // Study: Store full name as a String.
   fullName  String
-  // Study: Store avatar url as a nullable String.
+  // Study: Store avatar url as an optional (can be empty) String.
   avatarUrl String?
 
   // Study: Store email as a String and require a unique value.
   email String  @unique
-  // Study: Store phone as a nullable String and require a unique value.
+  // Study: Store phone as an optional (can be empty) String and require a unique value.
   phone String? @unique
 
   // Study: Store password as a String.
@@ -253,23 +253,23 @@ model User {
   // Study: Store status as a UserStatus and default to ACTIVE.
   status UserStatus @default(ACTIVE)
 
-  // Study: Store email verified as a Boolean and default to false.
+  // Study: Store email verified as a Boolean and start with no if no value is supplied.
   emailVerified Boolean @default(false)
-  // Study: Store phone verified as a Boolean and default to false.
+  // Study: Store phone verified as a Boolean and start with no if no value is supplied.
   phoneVerified Boolean @default(false)
 
-  // Study: Store last login at as a nullable DateTime.
+  // Study: Store last login at as an optional (can be empty) DateTime.
   lastLoginAt DateTime?
 
-  // Study: Store system role as a nullable SystemRole.
+  // Study: Store system role as an optional (can be empty) SystemRole.
   systemRole SystemRole?
 
-  // Study: Store organization id as a nullable String.
+  // Study: Store organization id as an optional (can be empty) String.
   organizationId String?
   // Study: Relate this record to Organization using organizationId → id when present.
   organization   Organization? @relation(fields: [organizationId], references: [id])
 
-  // Study: Store organization role id as a nullable String.
+  // Study: Store organization role id as an optional (can be empty) String.
   organizationRoleId String?
   // Study: Relate this record to OrganizationRole using organizationRoleId → id when present.
   organizationRole   OrganizationRole? @relation(fields: [organizationRoleId], references: [id])
@@ -301,12 +301,12 @@ model User {
 
   // Study: Use "users" as the database name for this Prisma model.
   @@map("users")
-// Study: End the User model.
+// Study: End the definition for User.
 }
 
 // Study: Track refresh tokens used to renew a signed-in session.
 model RefreshToken {
-  // Study: Identify each record by its primary key of type String and default to uuid(.
+  // Study: Give each record an identifier that distinguishes it from the others. Its stored type is String and default to uuid(.
   id String @id @default(uuid())
 
   // Study: Store token as a String and require a unique value.
@@ -314,7 +314,7 @@ model RefreshToken {
 
   // Study: Store expires at as a DateTime.
   expiresAt DateTime
-  // Study: Store revoked at as a nullable DateTime.
+  // Study: Store revoked at as an optional (can be empty) DateTime.
   revokedAt DateTime?
 
   // Study: Store user id as a String.
@@ -327,7 +327,7 @@ model RefreshToken {
 
   // Study: Use "refresh_tokens" as the database name for this Prisma model.
   @@map("refresh_tokens")
-// Study: End the RefreshToken model.
+// Study: End the definition for RefreshToken.
 }
 
 /////////////////////////////////////////////////
@@ -336,11 +336,11 @@ model RefreshToken {
 
 // Study: Define the database records and relations for organization.
 model Organization {
-  // Study: Identify each record by its primary key of type String and default to uuid(.
+  // Study: Give each record an identifier that distinguishes it from the others. Its stored type is String and default to uuid(.
   id          String  @id @default(uuid())
   // Study: Store name as a String.
   name        String
-  // Study: Store description as a nullable String.
+  // Study: Store description as an optional (can be empty) String.
   description String?
 
   // Study: Expose the related User records through this list.
@@ -378,10 +378,10 @@ model Organization {
 
   // Study: Use "organizations" as the database name for this Prisma model.
   @@map("organizations")
-// Study: End the Organization model.
+// Study: End the definition for Organization.
 }
 
-// Study: Limit customer type to the allowed values listed here.
+// Study: Choose the possible values for customer type from this list.
 enum CustomerType {
   // Study: Accept COMPANY as a possible customer type value.
   COMPANY
@@ -391,7 +391,7 @@ enum CustomerType {
   INDIVIDUAL
   // Study: Accept OTHER as a possible customer type value.
   OTHER
-// Study: End the CustomerType enum.
+// Study: End the definition for CustomerType.
 }
 
 /////////////////////////////////////////////////
@@ -400,7 +400,7 @@ enum CustomerType {
 
 // Study: Store customer accounts, including the links for a parent-child hierarchy.
 model Customer {
-  // Study: Identify each record by its primary key of type String and default to uuid(.
+  // Study: Give each record an identifier that distinguishes it from the others. Its stored type is String and default to uuid(.
   id String @id @default(uuid())
 
   // Study: Store organization id as a String.
@@ -415,24 +415,24 @@ model Customer {
   name            String
   // Study: Store type as a CustomerType.
   type            CustomerType
-  // Study: Store profile image url as a nullable String.
+  // Study: Store profile image url as an optional (can be empty) String.
   profileImageUrl String?
 
   // Study: Store country as a String.
   country String
   // Study: Store city as a String.
   city    String
-  // Study: Store address as a nullable String.
+  // Study: Store address as an optional (can be empty) String.
   address String?
 
-  // Study: Store parent customer id as a nullable String.
+  // Study: Store parent customer id as an optional (can be empty) String.
   parentCustomerId String?
   // Study: Relate this record to Customer using parentCustomerId, organizationId → id, organizationId when present and delete dependent records when the referenced record is deleted.
   parentCustomer   Customer?  @relation("CustomerHierarchy", fields: [parentCustomerId, organizationId], references: [id, organizationId], onDelete: Cascade)
   // Study: Expose the related Customer records through this list.
   childCustomers   Customer[] @relation("CustomerHierarchy")
 
-  // Study: Store is active as a Boolean and default to true.
+  // Study: Store is active as a Boolean and start with yes if no value is supplied.
   isActive Boolean @default(true)
 
   // Study: Expose the related ProjectCustomer records through this list.
@@ -453,12 +453,12 @@ model Customer {
   @@index([parentCustomerId])
   // Study: Use "customers" as the database name for this Prisma model.
   @@map("customers")
-// Study: End the Customer model.
+// Study: End the definition for Customer.
 }
 
 // Study: Define the database records and relations for customer contact.
 model CustomerContact {
-  // Study: Identify each record by its primary key of type String and default to uuid(.
+  // Study: Give each record an identifier that distinguishes it from the others. Its stored type is String and default to uuid(.
   id String @id @default(uuid())
 
   // Study: Store customer id as a String.
@@ -472,13 +472,13 @@ model CustomerContact {
   designation     String
   // Study: Store phone as a String.
   phone           String
-  // Study: Store other phone as a nullable String.
+  // Study: Store other phone as an optional (can be empty) String.
   otherPhone      String?
   // Study: Store email as a String.
   email           String
-  // Study: Store profile image url as a nullable String.
+  // Study: Store profile image url as an optional (can be empty) String.
   profileImageUrl String?
-  // Study: Store is primary as a Boolean and default to false.
+  // Study: Store is primary as a Boolean and start with no if no value is supplied.
   isPrimary       Boolean @default(false)
 
   // Study: Store created at as a DateTime and default to now(.
@@ -490,14 +490,14 @@ model CustomerContact {
   @@index([customerId])
   // Study: Use "customer_contacts" as the database name for this Prisma model.
   @@map("customer_contacts")
-// Study: End the CustomerContact model.
+// Study: End the definition for CustomerContact.
 }
 
 /////////////////////////////////////////////////
 // PROJECT
 /////////////////////////////////////////////////
 
-// Study: Limit project status to the allowed values listed here.
+// Study: Choose the possible values for project status from this list.
 enum ProjectStatus {
   // Study: Accept PLANNING as a possible project status value.
   PLANNING
@@ -509,23 +509,23 @@ enum ProjectStatus {
   COMPLETED
   // Study: Accept CANCELLED as a possible project status value.
   CANCELLED
-// Study: End the ProjectStatus enum.
+// Study: End the definition for ProjectStatus.
 }
 
 // Study: Define the database records and relations for project.
 model Project {
-  // Study: Identify each record by its primary key of type String and default to uuid(.
+  // Study: Give each record an identifier that distinguishes it from the others. Its stored type is String and default to uuid(.
   id String @id @default(uuid())
 
   // Study: Store project code as a String and default to dbgenerated("('PROJ-'::text || lpad((nextval('project_code_seq'::regclass and require a unique value.
   projectCode String  @unique @default(dbgenerated("('PROJ-'::text || lpad((nextval('project_code_seq'::regclass))::text, 6, '0'::text))"))
   // Study: Store name as a String.
   name        String
-  // Study: Store description as a nullable String.
+  // Study: Store description as an optional (can be empty) String.
   description String?
-  // Study: Store area sq ft as a nullable Decimal.
+  // Study: Store area sq ft as an optional (can be empty) Decimal.
   areaSqFt    Decimal? @db.Decimal(12, 2)
-  // Study: Store image url as a nullable String.
+  // Study: Store image url as an optional (can be empty) String.
   imageUrl    String?
 
   // Study: Store status as a ProjectStatus and default to PLANNING.
@@ -540,23 +540,23 @@ model Project {
   // Location
   // Study: Store country as a String.
   country   String
-  // Study: Store city as a nullable String.
+  // Study: Store city as an optional (can be empty) String.
   city      String?
-  // Study: Store address as a nullable String.
+  // Study: Store address as an optional (can be empty) String.
   address   String?
-  // Study: Store latitude as a nullable Decimal.
+  // Study: Store latitude as an optional (can be empty) Decimal.
   latitude  Decimal? @db.Decimal(10, 7)
-  // Study: Store longitude as a nullable Decimal.
+  // Study: Store longitude as an optional (can be empty) Decimal.
   longitude Decimal? @db.Decimal(10, 7)
 
   // Timeline
-  // Study: Store planned start date as a nullable DateTime.
+  // Study: Store planned start date as an optional (can be empty) DateTime.
   plannedStartDate DateTime?
-  // Study: Store planned end date as a nullable DateTime.
+  // Study: Store planned end date as an optional (can be empty) DateTime.
   plannedEndDate   DateTime?
-  // Study: Store actual start date as a nullable DateTime.
+  // Study: Store actual start date as an optional (can be empty) DateTime.
   actualStartDate  DateTime?
-  // Study: Store actual end date as a nullable DateTime.
+  // Study: Store actual end date as an optional (can be empty) DateTime.
   actualEndDate    DateTime?
 
   // Progress
@@ -564,7 +564,7 @@ model Project {
   progress Int @default(0)
 
   // Financial
-  // Study: Store budget as a nullable Decimal.
+  // Study: Store budget as an optional (can be empty) Decimal.
   budget Decimal? @db.Decimal(15, 2)
 
   // Study: Expose the related ProjectCustomer records through this list.
@@ -594,19 +594,19 @@ model Project {
   @@index([status])
   // Study: Use "projects" as the database name for this Prisma model.
   @@map("projects")
-// Study: End the Project model.
+// Study: End the definition for Project.
 }
 
-// Study: Limit project image kind to the allowed values listed here.
+// Study: Choose the possible values for project image kind from this list.
 enum ProjectImageKind {
   // Study: Accept DESIGN as a possible project image kind value.
   DESIGN
   // Study: Accept SITE as a possible project image kind value.
   SITE
-// Study: End the ProjectImageKind enum.
+// Study: End the definition for ProjectImageKind.
 }
 
-// Study: Limit project site stage to the allowed values listed here.
+// Study: Choose the possible values for project site stage from this list.
 enum ProjectSiteStage {
   // Study: Accept BEFORE_WORK as a possible project site stage value.
   BEFORE_WORK
@@ -614,12 +614,12 @@ enum ProjectSiteStage {
   IN_PROGRESS
   // Study: Accept COMPLETED as a possible project site stage value.
   COMPLETED
-// Study: End the ProjectSiteStage enum.
+// Study: End the definition for ProjectSiteStage.
 }
 
 // Study: Store each project image together with its category and project link.
 model ProjectImage {
-  // Study: Identify each record by its primary key of type String and default to uuid(.
+  // Study: Give each record an identifier that distinguishes it from the others. Its stored type is String and default to uuid(.
   id        String   @id @default(uuid())
   // Study: Store project id as a String.
   projectId String
@@ -627,19 +627,19 @@ model ProjectImage {
   project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   // Study: Store kind as a ProjectImageKind and default to DESIGN.
   kind      ProjectImageKind @default(DESIGN)
-  // Study: Store visited at as a nullable DateTime.
+  // Study: Store visited at as an optional (can be empty) DateTime.
   visitedAt DateTime?
-  // Study: Store site stage as a nullable ProjectSiteStage.
+  // Study: Store site stage as an optional (can be empty) ProjectSiteStage.
   siteStage ProjectSiteStage?
-  // Study: Store area sq ft as a nullable Decimal.
+  // Study: Store area sq ft as an optional (can be empty) Decimal.
   areaSqFt  Decimal? @db.Decimal(12, 2)
-  // Study: Store notes as a nullable String.
+  // Study: Store notes as an optional (can be empty) String.
   notes     String?
   // Study: Store image url as a String.
   imageUrl  String
-  // Study: Store alt as a nullable String.
+  // Study: Store alt as an optional (can be empty) String.
   alt       String?
-  // Study: Store is cover as a Boolean and default to false.
+  // Study: Store is cover as a Boolean and start with no if no value is supplied.
   isCover   Boolean  @default(false)
   // Study: Store position as a Int and default to 0.
   position  Int      @default(0)
@@ -650,14 +650,14 @@ model ProjectImage {
   @@index([projectId, position])
   // Study: Use "project_images" as the database name for this Prisma model.
   @@map("project_images")
-// Study: End the ProjectImage model.
+// Study: End the definition for ProjectImage.
 }
 
 /////////////////////////////////////////////////
 // SIMPLE INVENTORY
 /////////////////////////////////////////////////
 
-// Study: Limit inventory asset type to the allowed values listed here.
+// Study: Choose the possible values for inventory asset type from this list.
 enum InventoryAssetType {
   // Study: Accept MATERIAL as a possible inventory asset type value.
   MATERIAL
@@ -665,12 +665,12 @@ enum InventoryAssetType {
   TOOL
   // Study: Accept MACHINERY as a possible inventory asset type value.
   MACHINERY
-// Study: End the InventoryAssetType enum.
+// Study: End the definition for InventoryAssetType.
 }
 
 // Study: Define a tracked inventory item in an organization catalog.
 model InventoryAsset {
-  // Study: Identify each record by its primary key of type String and default to uuid(.
+  // Study: Give each record an identifier that distinguishes it from the others. Its stored type is String and default to uuid(.
   id             String             @id @default(uuid())
   // Study: Store organization id as a String.
   organizationId String
@@ -686,11 +686,11 @@ model InventoryAsset {
   quantity       Decimal            @default(0) @db.Decimal(18, 4)
   // Study: Store price as a Decimal and default to 0.
   price          Decimal            @default(0) @db.Decimal(18, 4)
-  // Study: Store description as a nullable String.
+  // Study: Store description as an optional (can be empty) String.
   description    String?
-  // Study: Store image url as a nullable String.
+  // Study: Store image url as an optional (can be empty) String.
   imageUrl       String?
-  // Study: Store is active as a Boolean and default to true.
+  // Study: Store is active as a Boolean and start with yes if no value is supplied.
   isActive       Boolean            @default(true)
   // Study: Store created at as a DateTime and default to now(.
   createdAt      DateTime           @default(now())
@@ -714,19 +714,19 @@ model InventoryAsset {
   @@index([organizationId, name])
   // Study: Use "inventory_assets" as the database name for this Prisma model.
   @@map("inventory_assets")
-// Study: End the InventoryAsset model.
+// Study: End the definition for InventoryAsset.
 }
 
-// Study: Limit inventory warehouse type to the allowed values listed here.
+// Study: Choose the possible values for inventory warehouse type from this list.
 enum InventoryWarehouseType {
   // Study: Accept CENTRAL as a possible inventory warehouse type value.
   CENTRAL
   // Study: Accept PROJECT_SITE as a possible inventory warehouse type value.
   PROJECT_SITE
-// Study: End the InventoryWarehouseType enum.
+// Study: End the definition for InventoryWarehouseType.
 }
 
-// Study: Limit inventory request status to the allowed values listed here.
+// Study: Choose the possible values for inventory request status from this list.
 enum InventoryRequestStatus {
   // Study: Accept SUBMITTED as a possible inventory request status value.
   SUBMITTED
@@ -742,10 +742,10 @@ enum InventoryRequestStatus {
   RETURNED
   // Study: Accept CANCELLED as a possible inventory request status value.
   CANCELLED
-// Study: End the InventoryRequestStatus enum.
+// Study: End the definition for InventoryRequestStatus.
 }
 
-// Study: Limit inventory return status to the allowed values listed here.
+// Study: Choose the possible values for inventory return status from this list.
 enum InventoryReturnStatus {
   // Study: Accept SUBMITTED as a possible inventory return status value.
   SUBMITTED
@@ -757,10 +757,10 @@ enum InventoryReturnStatus {
   RECEIVED
   // Study: Accept CANCELLED as a possible inventory return status value.
   CANCELLED
-// Study: End the InventoryReturnStatus enum.
+// Study: End the definition for InventoryReturnStatus.
 }
 
-// Study: Limit inventory condition report status to the allowed values listed here.
+// Study: Choose the possible values for inventory condition report status from this list.
 enum InventoryConditionReportStatus {
   // Study: Accept SUBMITTED as a possible inventory condition report status value.
   SUBMITTED
@@ -772,10 +772,10 @@ enum InventoryConditionReportStatus {
   RESOLVED
   // Study: Accept WRITTEN_OFF as a possible inventory condition report status value.
   WRITTEN_OFF
-// Study: End the InventoryConditionReportStatus enum.
+// Study: End the definition for InventoryConditionReportStatus.
 }
 
-// Study: Limit inventory stock movement type to the allowed values listed here.
+// Study: Choose the possible values for inventory stock movement type from this list.
 enum InventoryStockMovementType {
   // Study: Accept RECEIPT as a possible inventory stock movement type value.
   RECEIPT
@@ -791,12 +791,12 @@ enum InventoryStockMovementType {
   ADJUSTMENT_IN
   // Study: Accept ADJUSTMENT_OUT as a possible inventory stock movement type value.
   ADJUSTMENT_OUT
-// Study: End the InventoryStockMovementType enum.
+// Study: End the definition for InventoryStockMovementType.
 }
 
 // Study: Define the database records and relations for inventory warehouse.
 model InventoryWarehouse {
-  // Study: Identify each record by its primary key of type String and default to uuid(.
+  // Study: Give each record an identifier that distinguishes it from the others. Its stored type is String and default to uuid(.
   id             String                 @id @default(uuid())
   // Study: Store organization id as a String.
   organizationId String
@@ -808,15 +808,15 @@ model InventoryWarehouse {
   name           String
   // Study: Store type as a InventoryWarehouseType and default to CENTRAL.
   type           InventoryWarehouseType @default(CENTRAL)
-  // Study: Store project id as a nullable String.
+  // Study: Store project id as an optional (can be empty) String.
   projectId      String?
   // Study: Relate this record to Project using projectId → id when present and prevent deletion of the referenced record while this relation exists.
   project        Project?               @relation(fields: [projectId], references: [id], onDelete: Restrict)
-  // Study: Store address as a nullable String.
+  // Study: Store address as an optional (can be empty) String.
   address        String?
-  // Study: Store is default as a Boolean and default to false.
+  // Study: Store is default as a Boolean and start with no if no value is supplied.
   isDefault      Boolean                @default(false)
-  // Study: Store is active as a Boolean and default to true.
+  // Study: Store is active as a Boolean and start with yes if no value is supplied.
   isActive       Boolean                @default(true)
   // Study: Store created at as a DateTime and default to now(.
   createdAt      DateTime               @default(now())
@@ -840,12 +840,12 @@ model InventoryWarehouse {
   @@index([organizationId, isActive])
   // Study: Use "inventory_warehouses" as the database name for this Prisma model.
   @@map("inventory_warehouses")
-// Study: End the InventoryWarehouse model.
+// Study: End the definition for InventoryWarehouse.
 }
 
 // Study: Store the quantity of an asset held at a warehouse.
 model InventoryWarehouseStock {
-  // Study: Identify each record by its primary key of type String and default to uuid(.
+  // Study: Give each record an identifier that distinguishes it from the others. Its stored type is String and default to uuid(.
   id             String             @id @default(uuid())
   // Study: Store organization id as a String.
   organizationId String
@@ -876,12 +876,12 @@ model InventoryWarehouseStock {
   @@index([organizationId, assetId])
   // Study: Use "inventory_warehouse_stocks" as the database name for this Prisma model.
   @@map("inventory_warehouse_stocks")
-// Study: End the InventoryWarehouseStock model.
+// Study: End the definition for InventoryWarehouseStock.
 }
 
 // Study: Define the database records and relations for inventory request.
 model InventoryRequest {
-  // Study: Identify each record by its primary key of type String and default to uuid(.
+  // Study: Give each record an identifier that distinguishes it from the others. Its stored type is String and default to uuid(.
   id                             String                 @id @default(uuid())
   // Study: Store organization id as a String.
   organizationId                 String
@@ -897,7 +897,7 @@ model InventoryRequest {
   projectId                      String
   // Study: Relate this record to Project using projectId → id and prevent deletion of the referenced record while this relation exists.
   project                        Project                @relation(fields: [projectId], references: [id], onDelete: Restrict)
-  // Study: Store requested for labour assignment id as a nullable String.
+  // Study: Store requested for labour assignment id as an optional (can be empty) String.
   requestedForLabourAssignmentId String?
   // Study: Relate this record to LabourAssignment using requestedForLabourAssignmentId → id when present and prevent deletion of the referenced record while this relation exists.
   requestedForLabourAssignment   LabourAssignment?      @relation(fields: [requestedForLabourAssignmentId], references: [id], onDelete: Restrict)
@@ -905,21 +905,21 @@ model InventoryRequest {
   requestedById                  String
   // Study: Relate this record to User using requestedById → id and prevent deletion of the referenced record while this relation exists.
   requestedBy                    User                   @relation("InventoryRequestCreator", fields: [requestedById], references: [id], onDelete: Restrict)
-  // Study: Store reviewed by id as a nullable String.
+  // Study: Store reviewed by id as an optional (can be empty) String.
   reviewedById                   String?
   // Study: Relate this record to User using reviewedById → id when present and prevent deletion of the referenced record while this relation exists.
   reviewedBy                     User?                  @relation("InventoryRequestReviewer", fields: [reviewedById], references: [id], onDelete: Restrict)
   // Study: Store status as a InventoryRequestStatus and default to SUBMITTED.
   status                         InventoryRequestStatus @default(SUBMITTED)
-  // Study: Store purpose as a nullable String.
+  // Study: Store purpose as an optional (can be empty) String.
   purpose                        String?
-  // Study: Store review note as a nullable String.
+  // Study: Store review note as an optional (can be empty) String.
   reviewNote                     String?
   // Study: Store submitted at as a DateTime and default to now(.
   submittedAt                    DateTime               @default(now())
-  // Study: Store reviewed at as a nullable DateTime.
+  // Study: Store reviewed at as an optional (can be empty) DateTime.
   reviewedAt                     DateTime?
-  // Study: Store issued at as a nullable DateTime.
+  // Study: Store issued at as an optional (can be empty) DateTime.
   issuedAt                       DateTime?
   // Study: Store created at as a DateTime and default to now(.
   createdAt                      DateTime               @default(now())
@@ -945,12 +945,12 @@ model InventoryRequest {
   @@index([organizationId, requestedForLabourAssignmentId])
   // Study: Use "inventory_requests" as the database name for this Prisma model.
   @@map("inventory_requests")
-// Study: End the InventoryRequest model.
+// Study: End the definition for InventoryRequest.
 }
 
 // Study: Record one asset and its quantities on a stock request.
 model InventoryRequestLine {
-  // Study: Identify each record by its primary key of type String and default to uuid(.
+  // Study: Give each record an identifier that distinguishes it from the others. Its stored type is String and default to uuid(.
   id             String           @id @default(uuid())
   // Study: Store organization id as a String.
   organizationId String
@@ -964,7 +964,7 @@ model InventoryRequestLine {
   asset          InventoryAsset   @relation(fields: [assetId], references: [id], onDelete: Restrict)
   // Study: Store requested qty as a Decimal.
   requestedQty   Decimal          @db.Decimal(18, 4)
-  // Study: Store approved qty as a nullable Decimal.
+  // Study: Store approved qty as an optional (can be empty) Decimal.
   approvedQty    Decimal?         @db.Decimal(18, 4)
   // Study: Store issued qty as a Decimal and default to 0.
   issuedQty      Decimal          @default(0) @db.Decimal(18, 4)
@@ -986,12 +986,12 @@ model InventoryRequestLine {
   @@index([organizationId, requestId])
   // Study: Use "inventory_request_lines" as the database name for this Prisma model.
   @@map("inventory_request_lines")
-// Study: End the InventoryRequestLine model.
+// Study: End the definition for InventoryRequestLine.
 }
 
 // Study: Define the database records and relations for inventory return request.
 model InventoryReturnRequest {
-  // Study: Identify each record by its primary key of type String and default to uuid(.
+  // Study: Give each record an identifier that distinguishes it from the others. Its stored type is String and default to uuid(.
   id              String                @id @default(uuid())
   // Study: Store organization id as a String.
   organizationId  String
@@ -1011,19 +1011,19 @@ model InventoryReturnRequest {
   requestedById   String
   // Study: Relate this record to User using requestedById → id and prevent deletion of the referenced record while this relation exists.
   requestedBy     User                  @relation("InventoryReturnCreator", fields: [requestedById], references: [id], onDelete: Restrict)
-  // Study: Store reviewed by id as a nullable String.
+  // Study: Store reviewed by id as an optional (can be empty) String.
   reviewedById    String?
   // Study: Relate this record to User using reviewedById → id when present and prevent deletion of the referenced record while this relation exists.
   reviewedBy      User?                 @relation("InventoryReturnReviewer", fields: [reviewedById], references: [id], onDelete: Restrict)
   // Study: Store status as a InventoryReturnStatus and default to SUBMITTED.
   status          InventoryReturnStatus @default(SUBMITTED)
-  // Study: Store review note as a nullable String.
+  // Study: Store review note as an optional (can be empty) String.
   reviewNote      String?
   // Study: Store submitted at as a DateTime and default to now(.
   submittedAt     DateTime              @default(now())
-  // Study: Store reviewed at as a nullable DateTime.
+  // Study: Store reviewed at as an optional (can be empty) DateTime.
   reviewedAt      DateTime?
-  // Study: Store received at as a nullable DateTime.
+  // Study: Store received at as an optional (can be empty) DateTime.
   receivedAt      DateTime?
   // Study: Store created at as a DateTime and default to now(.
   createdAt       DateTime              @default(now())
@@ -1041,12 +1041,12 @@ model InventoryReturnRequest {
   @@index([organizationId, status, submittedAt])
   // Study: Use "inventory_return_requests" as the database name for this Prisma model.
   @@map("inventory_return_requests")
-// Study: End the InventoryReturnRequest model.
+// Study: End the definition for InventoryReturnRequest.
 }
 
 // Study: Record the asset and quantity involved in a return.
 model InventoryReturnLine {
-  // Study: Identify each record by its primary key of type String and default to uuid(.
+  // Study: Give each record an identifier that distinguishes it from the others. Its stored type is String and default to uuid(.
   id              String                 @id @default(uuid())
   // Study: Store organization id as a String.
   organizationId  String
@@ -1060,7 +1060,7 @@ model InventoryReturnLine {
   requestLine     InventoryRequestLine   @relation(fields: [requestLineId], references: [id], onDelete: Restrict)
   // Study: Store quantity as a Decimal.
   quantity        Decimal                @db.Decimal(18, 4)
-  // Study: Store condition as a nullable String.
+  // Study: Store condition as an optional (can be empty) String.
   condition       String?
   // Study: Store created at as a DateTime and default to now(.
   createdAt       DateTime               @default(now())
@@ -1071,12 +1071,12 @@ model InventoryReturnLine {
   @@index([organizationId, returnRequestId])
   // Study: Use "inventory_return_lines" as the database name for this Prisma model.
   @@map("inventory_return_lines")
-// Study: End the InventoryReturnLine model.
+// Study: End the definition for InventoryReturnLine.
 }
 
 // Study: Define the database records and relations for inventory condition report.
 model InventoryConditionReport {
-  // Study: Identify each record by its primary key of type String and default to uuid(.
+  // Study: Give each record an identifier that distinguishes it from the others. Its stored type is String and default to uuid(.
   id             String                         @id @default(uuid())
   // Study: Store organization id as a String.
   organizationId String
@@ -1090,11 +1090,11 @@ model InventoryConditionReport {
   warehouseId    String
   // Study: Relate this record to InventoryWarehouse using warehouseId → id and prevent deletion of the referenced record while this relation exists.
   warehouse      InventoryWarehouse             @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
-  // Study: Store request id as a nullable String.
+  // Study: Store request id as an optional (can be empty) String.
   requestId      String?
   // Study: Relate this record to InventoryRequest using requestId → id when present and clear the foreign key when the referenced record is deleted.
   request        InventoryRequest?              @relation(fields: [requestId], references: [id], onDelete: SetNull)
-  // Study: Store request line id as a nullable String.
+  // Study: Store request line id as an optional (can be empty) String.
   requestLineId  String?
   // Study: Relate this record to InventoryRequestLine using requestLineId → id when present and clear the foreign key when the referenced record is deleted.
   requestLine    InventoryRequestLine?          @relation(fields: [requestLineId], references: [id], onDelete: SetNull)
@@ -1102,7 +1102,7 @@ model InventoryConditionReport {
   reportedById   String
   // Study: Relate this record to User using reportedById → id and prevent deletion of the referenced record while this relation exists.
   reportedBy     User                           @relation("InventoryConditionReporter", fields: [reportedById], references: [id], onDelete: Restrict)
-  // Study: Store reviewed by id as a nullable String.
+  // Study: Store reviewed by id as an optional (can be empty) String.
   reviewedById   String?
   // Study: Relate this record to User using reviewedById → id when present and prevent deletion of the referenced record while this relation exists.
   reviewedBy     User?                          @relation("InventoryConditionReviewer", fields: [reviewedById], references: [id], onDelete: Restrict)
@@ -1112,11 +1112,11 @@ model InventoryConditionReport {
   description    String
   // Study: Store status as a InventoryConditionReportStatus and default to SUBMITTED.
   status         InventoryConditionReportStatus @default(SUBMITTED)
-  // Study: Store resolution note as a nullable String.
+  // Study: Store resolution note as an optional (can be empty) String.
   resolutionNote String?
-  // Study: Store reviewed at as a nullable DateTime.
+  // Study: Store reviewed at as an optional (can be empty) DateTime.
   reviewedAt     DateTime?
-  // Study: Store resolved at as a nullable DateTime.
+  // Study: Store resolved at as an optional (can be empty) DateTime.
   resolvedAt     DateTime?
   // Study: Store created at as a DateTime and default to now(.
   createdAt      DateTime                       @default(now())
@@ -1130,12 +1130,12 @@ model InventoryConditionReport {
   @@index([organizationId, status, createdAt])
   // Study: Use "inventory_condition_reports" as the database name for this Prisma model.
   @@map("inventory_condition_reports")
-// Study: End the InventoryConditionReport model.
+// Study: End the definition for InventoryConditionReport.
 }
 
 // Study: Record changes to stock for an audit trail.
 model InventoryStockMovement {
-  // Study: Identify each record by its primary key of type String and default to uuid(.
+  // Study: Give each record an identifier that distinguishes it from the others. Its stored type is String and default to uuid(.
   id                String                     @id @default(uuid())
   // Study: Store organization id as a String.
   organizationId    String
@@ -1149,19 +1149,19 @@ model InventoryStockMovement {
   warehouseId       String
   // Study: Relate this record to InventoryWarehouse using warehouseId → id and prevent deletion of the referenced record while this relation exists.
   warehouse         InventoryWarehouse         @relation(fields: [warehouseId], references: [id], onDelete: Restrict)
-  // Study: Store request id as a nullable String.
+  // Study: Store request id as an optional (can be empty) String.
   requestId         String?
   // Study: Relate this record to InventoryRequest using requestId → id when present and clear the foreign key when the referenced record is deleted.
   request           InventoryRequest?          @relation(fields: [requestId], references: [id], onDelete: SetNull)
-  // Study: Store request line id as a nullable String.
+  // Study: Store request line id as an optional (can be empty) String.
   requestLineId     String?
   // Study: Relate this record to InventoryRequestLine using requestLineId → id when present and clear the foreign key when the referenced record is deleted.
   requestLine       InventoryRequestLine?      @relation(fields: [requestLineId], references: [id], onDelete: SetNull)
-  // Study: Store return request id as a nullable String.
+  // Study: Store return request id as an optional (can be empty) String.
   returnRequestId   String?
   // Study: Relate this record to InventoryReturnRequest using returnRequestId → id when present and clear the foreign key when the referenced record is deleted.
   returnRequest     InventoryReturnRequest?    @relation(fields: [returnRequestId], references: [id], onDelete: SetNull)
-  // Study: Store condition report id as a nullable String.
+  // Study: Store condition report id as an optional (can be empty) String.
   conditionReportId String?
   // Study: Relate this record to InventoryConditionReport using conditionReportId → id when present and clear the foreign key when the referenced record is deleted.
   conditionReport   InventoryConditionReport?  @relation(fields: [conditionReportId], references: [id], onDelete: SetNull)
@@ -1169,7 +1169,7 @@ model InventoryStockMovement {
   type              InventoryStockMovementType
   // Study: Store quantity delta as a Decimal.
   quantityDelta     Decimal                    @db.Decimal(18, 4)
-  // Study: Store reason as a nullable String.
+  // Study: Store reason as an optional (can be empty) String.
   reason            String?
   // Study: Store actor id as a String.
   actorId           String
@@ -1184,14 +1184,14 @@ model InventoryStockMovement {
   @@index([organizationId, warehouseId, occurredAt])
   // Study: Use "inventory_stock_movements" as the database name for this Prisma model.
   @@map("inventory_stock_movements")
-// Study: End the InventoryStockMovement model.
+// Study: End the definition for InventoryStockMovement.
 }
 
 /////////////////////////////////////////////////
 // PROJECT MEMBERS
 /////////////////////////////////////////////////
 
-// Study: Limit project member role to the allowed values listed here.
+// Study: Choose the possible values for project member role from this list.
 enum ProjectMemberRole {
   // Study: Accept CONTRACTOR as a possible project member role value.
   CONTRACTOR
@@ -1201,12 +1201,12 @@ enum ProjectMemberRole {
   SUPERVISOR
   // Study: Accept SITE_ENGINEER as a possible project member role value.
   SITE_ENGINEER
-// Study: End the ProjectMemberRole enum.
+// Study: End the definition for ProjectMemberRole.
 }
 
 // Study: Define the database records and relations for project member.
 model ProjectMember {
-  // Study: Identify each record by its primary key of type String and default to uuid(.
+  // Study: Give each record an identifier that distinguishes it from the others. Its stored type is String and default to uuid(.
   id String @id @default(uuid())
 
   // Study: Store project id as a String.
@@ -1224,7 +1224,7 @@ model ProjectMember {
 
   // Study: Store assigned at as a DateTime and default to now(.
   assignedAt DateTime  @default(now())
-  // Study: Store removed at as a nullable DateTime.
+  // Study: Store removed at as an optional (can be empty) DateTime.
   removedAt  DateTime?
 
   // Study: Store created at as a DateTime and default to now(.
@@ -1240,14 +1240,14 @@ model ProjectMember {
   @@index([userId])
   // Study: Use "project_members" as the database name for this Prisma model.
   @@map("project_members")
-// Study: End the ProjectMember model.
+// Study: End the definition for ProjectMember.
 }
 
 /////////////////////////////////////////////////
 // PROJECT CUSTOMERS
 /////////////////////////////////////////////////
 
-// Study: Limit project customer relationship type to the allowed values listed here.
+// Study: Choose the possible values for project customer relationship type from this list.
 enum ProjectCustomerRelationshipType {
   // Study: Accept OWNER as a possible project customer relationship type value.
   OWNER
@@ -1261,12 +1261,12 @@ enum ProjectCustomerRelationshipType {
   PARTNER
   // Study: Accept OTHER as a possible project customer relationship type value.
   OTHER
-// Study: End the ProjectCustomerRelationshipType enum.
+// Study: End the definition for ProjectCustomerRelationshipType.
 }
 
 // Study: Link projects and customers with a defined relationship type.
 model ProjectCustomer {
-  // Study: Identify each record by its primary key of type String and default to uuid(.
+  // Study: Give each record an identifier that distinguishes it from the others. Its stored type is String and default to uuid(.
   id String @id @default(uuid())
 
   // Study: Store project id as a String.
@@ -1282,7 +1282,7 @@ model ProjectCustomer {
   // Study: Store relationship type as a ProjectCustomerRelationshipType.
   relationshipType ProjectCustomerRelationshipType
 
-  // Study: Store is primary as a Boolean and default to false.
+  // Study: Store is primary as a Boolean and start with no if no value is supplied.
   isPrimary Boolean @default(false)
 
   // Study: Store created at as a DateTime and default to now(.
@@ -1298,7 +1298,7 @@ model ProjectCustomer {
   @@index([customerId])
   // Study: Use "project_customers" as the database name for this Prisma model.
   @@map("project_customers")
-// Study: End the ProjectCustomer model.
+// Study: End the definition for ProjectCustomer.
 }
 
 /////////////////////////////////////////////////
@@ -1307,13 +1307,13 @@ model ProjectCustomer {
 
 // Study: Define the database records and relations for profession.
 model Profession {
-  // Study: Identify each record by its primary key of type String and default to uuid(.
+  // Study: Give each record an identifier that distinguishes it from the others. Its stored type is String and default to uuid(.
   id          String  @id @default(uuid())
   // Study: Store name as a String and require a unique value.
   name        String  @unique
-  // Study: Store description as a nullable String.
+  // Study: Store description as an optional (can be empty) String.
   description String?
-  // Study: Store is active as a Boolean and default to true.
+  // Study: Store is active as a Boolean and start with yes if no value is supplied.
   isActive    Boolean @default(true)
 
   // Study: Expose the related Labour records through this list.
@@ -1326,10 +1326,10 @@ model Profession {
 
   // Study: Use "professions" as the database name for this Prisma model.
   @@map("professions")
-// Study: End the Profession model.
+// Study: End the definition for Profession.
 }
 
-// Study: Limit weekday to the allowed values listed here.
+// Study: Choose the possible values for weekday from this list.
 enum Weekday {
   // Study: Accept MONDAY as a possible weekday value.
   MONDAY
@@ -1345,21 +1345,21 @@ enum Weekday {
   SATURDAY
   // Study: Accept SUNDAY as a possible weekday value.
   SUNDAY
-// Study: End the Weekday enum.
+// Study: End the definition for Weekday.
 }
 
-// Study: Limit labour status to the allowed values listed here.
+// Study: Choose the possible values for labour status from this list.
 enum LabourStatus {
   // Study: Accept ACTIVE as a possible labour status value.
   ACTIVE
   // Study: Accept INACTIVE as a possible labour status value.
   INACTIVE
-// Study: End the LabourStatus enum.
+// Study: End the definition for LabourStatus.
 }
 
 // Study: Define the database records and relations for labour.
 model Labour {
-  // Study: Identify each record by its primary key of type String and default to uuid(.
+  // Study: Give each record an identifier that distinguishes it from the others. Its stored type is String and default to uuid(.
   id String @id @default(uuid())
 
   // Study: Store organization id as a String.
@@ -1376,34 +1376,34 @@ model Labour {
   fullName String
   // Study: Store phone as a String.
   phone    String
-  // Study: Store email as a nullable String.
+  // Study: Store email as an optional (can be empty) String.
   email    String?
 
-  // Study: Store date of birth as a nullable DateTime.
+  // Study: Store date of birth as an optional (can be empty) DateTime.
   dateOfBirth DateTime?
 
-  // Study: Store profile image url as a nullable String.
+  // Study: Store profile image url as an optional (can be empty) String.
   profileImageUrl String?
 
   // Study: Store country as a String.
   country String
   // Study: Store city as a String.
   city    String
-  // Study: Store address as a nullable String.
+  // Study: Store address as an optional (can be empty) String.
   address String?
 
-  // Study: Store emergency contact name as a nullable String.
+  // Study: Store emergency contact name as an optional (can be empty) String.
   emergencyContactName  String?
-  // Study: Store emergency contact phone as a nullable String.
+  // Study: Store emergency contact phone as an optional (can be empty) String.
   emergencyContactPhone String?
 
-  // Study: Store joining date as a nullable DateTime.
+  // Study: Store joining date as an optional (can be empty) DateTime.
   joiningDate DateTime?
 
   // Study: Store status as a LabourStatus and default to ACTIVE.
   status LabourStatus @default(ACTIVE)
 
-  // Study: Store notes as a nullable String.
+  // Study: Store notes as an optional (can be empty) String.
   notes String?
 
   // Study: Expose the related LabourAssignment records through this list.
@@ -1422,14 +1422,14 @@ model Labour {
   @@index([organizationId, status])
   // Study: Use "labours" as the database name for this Prisma model.
   @@map("labours")
-// Study: End the Labour model.
+// Study: End the definition for Labour.
 }
 
 /////////////////////////////////////////////////
 // CONTRACTOR
 /////////////////////////////////////////////////
 
-// Study: Limit contractor status to the allowed values listed here.
+// Study: Choose the possible values for contractor status from this list.
 enum ContractorStatus {
   // Study: Accept PENDING as a possible contractor status value.
   PENDING
@@ -1441,12 +1441,12 @@ enum ContractorStatus {
   INACTIVE
   // Study: Accept TERMINATED as a possible contractor status value.
   TERMINATED
-// Study: End the ContractorStatus enum.
+// Study: End the definition for ContractorStatus.
 }
 
 // Study: Define the database records and relations for contractor.
 model Contractor {
-  // Study: Identify each record by its primary key of type String and default to uuid(.
+  // Study: Give each record an identifier that distinguishes it from the others. Its stored type is String and default to uuid(.
   id String @id @default(uuid())
 
   // Study: Store organization id as a String.
@@ -1460,34 +1460,34 @@ model Contractor {
   // Study: Store full name as a String.
   fullName String
 
-  // Study: Store profile image url as a nullable String.
+  // Study: Store profile image url as an optional (can be empty) String.
   profileImageUrl String?
 
-  // Study: Store email as a nullable String.
+  // Study: Store email as an optional (can be empty) String.
   email            String?
   // Study: Store phone as a String.
   phone            String
-  // Study: Store alternative phone as a nullable String.
+  // Study: Store alternative phone as an optional (can be empty) String.
   alternativePhone String?
 
   // Study: Store country as a String.
   country String
   // Study: Store city as a String.
   city    String
-  // Study: Store address as a nullable String.
+  // Study: Store address as an optional (can be empty) String.
   address String?
 
-  // Study: Store national id as a nullable String.
+  // Study: Store national id as an optional (can be empty) String.
   nationalId        String?
-  // Study: Store license number as a nullable String.
+  // Study: Store license number as an optional (can be empty) String.
   licenseNumber     String?
-  // Study: Store license expiry date as a nullable DateTime.
+  // Study: Store license expiry date as an optional (can be empty) DateTime.
   licenseExpiryDate DateTime?
 
   // Study: Store status as a ContractorStatus and default to PENDING.
   status ContractorStatus @default(PENDING)
 
-  // Study: Store notes as a nullable String.
+  // Study: Store notes as an optional (can be empty) String.
   notes String?
 
   // Study: Expose the related ContractorProjectAssignment records through this list.
@@ -1508,14 +1508,14 @@ model Contractor {
   @@index([organizationId, status])
   // Study: Use "contractors" as the database name for this Prisma model.
   @@map("contractors")
-// Study: End the Contractor model.
+// Study: End the definition for Contractor.
 }
 
 /////////////////////////////////////////////////
 // CONTRACTOR PROJECT ASSIGNMENT
 /////////////////////////////////////////////////
 
-// Study: Limit contractor assignment status to the allowed values listed here.
+// Study: Choose the possible values for contractor assignment status from this list.
 enum ContractorAssignmentStatus {
   // Study: Accept PENDING as a possible contractor assignment status value.
   PENDING
@@ -1529,18 +1529,18 @@ enum ContractorAssignmentStatus {
   TERMINATED
   // Study: Accept CANCELLED as a possible contractor assignment status value.
   CANCELLED
-// Study: End the ContractorAssignmentStatus enum.
+// Study: End the definition for ContractorAssignmentStatus.
 }
 
 // Study: Define the database records and relations for responsibility.
 model Responsibility {
-  // Study: Identify each record by its primary key of type String and default to uuid(.
+  // Study: Give each record an identifier that distinguishes it from the others. Its stored type is String and default to uuid(.
   id          String  @id @default(uuid())
   // Study: Store name as a String and require a unique value.
   name        String  @unique
-  // Study: Store description as a nullable String.
+  // Study: Store description as an optional (can be empty) String.
   description String?
-  // Study: Store is active as a Boolean and default to true.
+  // Study: Store is active as a Boolean and start with yes if no value is supplied.
   isActive    Boolean @default(true)
 
   // Study: Expose the related ContractorProjectAssignmentResponsibility records through this list.
@@ -1553,12 +1553,12 @@ model Responsibility {
 
   // Study: Use "responsibilities" as the database name for this Prisma model.
   @@map("responsibilities")
-// Study: End the Responsibility model.
+// Study: End the definition for Responsibility.
 }
 
 // Study: Define the database records and relations for contractor project assignment.
 model ContractorProjectAssignment {
-  // Study: Identify each record by its primary key of type String and default to uuid(.
+  // Study: Give each record an identifier that distinguishes it from the others. Its stored type is String and default to uuid(.
   id String @id @default(uuid())
 
   // Study: Store project id as a String.
@@ -1574,17 +1574,17 @@ model ContractorProjectAssignment {
   // Study: Expose the related ContractorProjectAssignmentResponsibility records through this list.
   responsibilities ContractorProjectAssignmentResponsibility[]
 
-  // Study: Store scope description as a nullable String.
+  // Study: Store scope description as an optional (can be empty) String.
   scopeDescription String?
 
-  // Study: Store start date as a nullable DateTime.
+  // Study: Store start date as an optional (can be empty) DateTime.
   startDate DateTime?
-  // Study: Store end date as a nullable DateTime.
+  // Study: Store end date as an optional (can be empty) DateTime.
   endDate   DateTime?
 
   // Study: Store status as a ContractorAssignmentStatus and default to PENDING.
   status ContractorAssignmentStatus @default(PENDING)
-  // Study: Store notes as a nullable String.
+  // Study: Store notes as an optional (can be empty) String.
   notes  String?
 
   // Study: Expose the related LabourAssignment records through this list.
@@ -1605,12 +1605,12 @@ model ContractorProjectAssignment {
   @@index([status])
   // Study: Use "contractor_project_assignments" as the database name for this Prisma model.
   @@map("contractor_project_assignments")
-// Study: End the ContractorProjectAssignment model.
+// Study: End the definition for ContractorProjectAssignment.
 }
 
 // Study: Link a contractor assignment with one responsibility.
 model ContractorProjectAssignmentResponsibility {
-  // Study: Identify each record by its primary key of type String and default to uuid(.
+  // Study: Give each record an identifier that distinguishes it from the others. Its stored type is String and default to uuid(.
   id String @id @default(uuid())
 
   // Study: Store assignment id as a String.
@@ -1634,14 +1634,14 @@ model ContractorProjectAssignmentResponsibility {
   @@index([responsibilityId])
   // Study: Use "contractor_project_assignment_responsibilities" as the database name for this Prisma model.
   @@map("contractor_project_assignment_responsibilities")
-// Study: End the ContractorProjectAssignmentResponsibility model.
+// Study: End the definition for ContractorProjectAssignmentResponsibility.
 }
 
 /////////////////////////////////////////////////
 // LABOUR ASSIGNMENT
 /////////////////////////////////////////////////
 
-// Study: Limit labour assignment status to the allowed values listed here.
+// Study: Choose the possible values for labour assignment status from this list.
 enum LabourAssignmentStatus {
   // Study: Accept ACTIVE as a possible labour assignment status value.
   ACTIVE
@@ -1649,12 +1649,12 @@ enum LabourAssignmentStatus {
   COMPLETED
   // Study: Accept CANCELLED as a possible labour assignment status value.
   CANCELLED
-// Study: End the LabourAssignmentStatus enum.
+// Study: End the definition for LabourAssignmentStatus.
 }
 
 // Study: Define the database records and relations for labour assignment.
 model LabourAssignment {
-  // Study: Identify each record by its primary key of type String and default to uuid(.
+  // Study: Give each record an identifier that distinguishes it from the others. Its stored type is String and default to uuid(.
   id String @id @default(uuid())
 
   // Study: Store labour id as a String.
@@ -1675,7 +1675,7 @@ model LabourAssignment {
   // Study: Store status as a LabourAssignmentStatus and default to ACTIVE.
   status LabourAssignmentStatus @default(ACTIVE)
 
-  // Study: Store notes as a nullable String.
+  // Study: Store notes as an optional (can be empty) String.
   notes String?
 
   // Study: Store created at as a DateTime and default to now(.
@@ -1696,5 +1696,5 @@ model LabourAssignment {
   @@index([startDate, endDate])
   // Study: Use "labour_assignments" as the database name for this Prisma model.
   @@map("labour_assignments")
-// Study: End the LabourAssignment model.
+// Study: End the definition for LabourAssignment.
 }

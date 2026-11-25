@@ -1,31 +1,31 @@
 // Study: Read required environment values for application configuration.
-// Study: Import `{ StringValue }` from `"ms"`.
+// Study: Bring in `{ StringValue }` from `"ms"` so this file can use it.
 import { StringValue } from "ms";
 
-// Study: Export `getEnv` as a reusable function.
+// Study: Set up a reusable step named `getEnv`.
 export const getEnv = (key: string): string => {
     // Study: Set `value` to `process.env[key]`.
     const value = process.env[key];
 
-    // Study: Run the following branch when `!value` is truthy.
+    // Study: Do the next step if there is no value for `value`.
     if (!value) {
-        // Study: Stop this execution path by throwing `new Error('${key} is not configured.')`.
+        // Study: Stop here and pass the problem onward: `new Error('${key} is not configured.')`.
         throw new Error(`${key} is not configured.`);
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Return `value` to the caller.
+    // Study: Give `value` back to the code that asked for it.
     return value;
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `getDurationEnv` as a reusable function.
+// Study: Set up a reusable step named `getDurationEnv`.
 export const getDurationEnv = (
-    // Study: Accept `key` with type `string`.
+    // Study: This step receives `key`. `string` describes what that information should look like.
     key: string
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ): StringValue => {
-    // Study: Return `getEnv(key) as StringValue` to the caller.
+    // Study: Give `getEnv(key) as StringValue` back to the code that asked for it.
     return getEnv(key) as StringValue;
-// Study: Close the code block.
+// Study: End this group of steps.
 };

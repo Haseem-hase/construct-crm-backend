@@ -1,61 +1,61 @@
-// Study: Read and verify credentials and attach the authenticated user to the request.
-// Study: Import `{ NextFunction, Request, Response }` from `"express"`.
+// Study: Checks who is making the request and makes that identity available to the next step.
+// Study: Bring in `{ NextFunction, Request, Response }` from `"express"` so this file can use it.
 import { NextFunction, Request, Response } from "express";
-// Study: Import `{ UnauthorizedError }` from `"../errors/UnauthorizedError"`.
+// Study: Bring in `{ UnauthorizedError }` from `"../errors/UnauthorizedError"` so this file can use it.
 import { UnauthorizedError } from "../errors/UnauthorizedError";
-// Study: Import `{ verifyAccessToken }` from `"../utils/jwt.utils"`.
+// Study: Bring in `{ verifyAccessToken }` from `"../utils/jwt.utils"` so this file can use it.
 import { verifyAccessToken } from "../utils/jwt.utils";
-// Study: Import `{ findUserById }` from `"../modules/auth/auth.repository"`.
+// Study: Bring in `{ findUserById }` from `"../modules/auth/auth.repository"` so this file can use it.
 import { findUserById } from "../modules/auth/auth.repository";
 
-// Study: Export `authenticate` as an async function that returns a promise.
+// Study: Make `authenticate` available to other files. Its result arrives after its work finishes.
 export const authenticate = async (
-    // Study: Accept `req` with type `Request`.
+    // Study: Read the information that came in with the request from the screen.
     req: Request,
-    // Study: Accept `res` with type `Response`.
+    // Study: Use this to send information or an error back to the screen.
     res: Response,
-    // Study: Accept `next` with type `NextFunction`.
+    // Study: Use this to move the request to the next check or action.
     next: NextFunction
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Run this block and handle failures in the associated catch block.
+    // Study: Try these steps. If one fails, go to the error-handling steps below.
     try {
-        // Study: Set `authHeader` to `req.headers.authorization`.
+        // Study: Read the sign-in proof sent with the request.
         const authHeader = req.headers.authorization;
 
-        // Study: Run the following branch when `!authHeader || !authHeader.startsWith("Bearer ")` is truthy.
+        // Study: Do the next step if this check passes: `!authHeader || !authHeader.startsWith("Bearer ")`.
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
-            // Study: Stop this execution path by throwing `new UnauthorizedError("Authentication token is missing.")`.
+            // Study: Stop here and report this problem: "Authentication token is missing."
             throw new UnauthorizedError("Authentication token is missing.");
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
 
         // Study: Set `token` to `authHeader.split(" ")[1]`.
         const token = authHeader.split(" ")[1];
 
-        // Study: Call `verifyAccessToken` and store the result as `payload`.
+        // Study: Check that the pass is genuine and valid, then read the user ID it carries.
         const payload = verifyAccessToken(token);
 
         // Study: Call `findUserById` and wait for it to finish and store its result in `user`.
         const user = await findUserById(payload.userId);
 
-        // Study: Run the following branch when `!user` is truthy.
+        // Study: Do the next step if there is no value for `user`.
         if (!user) {
-            // Study: Stop this execution path by throwing `new UnauthorizedError("User not found.")`.
+            // Study: Stop here and report this problem: "User not found."
             throw new UnauthorizedError("User not found.");
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
 
-        // Study: Assign `user` to `req.user`.
+        // Study: Attach the account to this request so later steps know who is asking.
         req.user = user;
 
-        // Study: Continue to the next Express middleware or handler.
+        // Study: Allow the request to move to its next check or action.
         next();
-    // Study: Handle an exception from the try block as `error`.
+    // Study: Handle a problem raised during the steps above.
     } catch (error) {
-        // Study: Pass the error to the next Express error handler.
+        // Study: Send the problem to the part of the backend that prepares an error reply.
         next(error);
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-// Study: Close the code block.
+// Study: End this group of steps.
 };

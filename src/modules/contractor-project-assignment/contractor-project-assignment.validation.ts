@@ -1,22 +1,22 @@
-// Study: Use Zod to parse and validate inputs for contractor placements on projects and their responsibilities.
-// Study: Import `{ z }` from `"zod"`.
+// Study: This file is about which contractors work on which jobs and what they are responsible for. Checks whether incoming information is complete and in the expected form.
+// Study: Bring in `{ z }` from `"zod"` so this file can use it.
 import { z } from "zod";
-// Study: Import `{ ContractorAssignmentStatus }` from `"@prisma/client"`.
+// Study: Bring in `{ ContractorAssignmentStatus }` from `"@prisma/client"` so this file can use it.
 import { ContractorAssignmentStatus } from "@prisma/client";
 
-// Study: Build a Zod validation rule with `z.object` and store the result as `contractorProjectAssignmentIdSchema`.
+// Study: Set up a check for incoming information using `z.object` and store the result as `contractorProjectAssignmentIdSchema`.
 export const contractorProjectAssignmentIdSchema = z.object({
-    // Study: Validate `id` with `z.string().uuid("Invalid assignment ID.")`.
+    // Study: Check `id` using the rule `z.string().uuid("Invalid assignment ID.")`.
     id: z.string().uuid("Invalid assignment ID."),
-// Study: Close the object literal.
+// Study: End this group of values.
 });
 
-// Study: Build a Zod validation rule with `z.object({ projectId: z.string().uuid("Invalid project ID."), contractorId: z.strin…` and store the result as `createContractorProjectAssignmentSchema`.
+// Study: Set up a check for incoming information using `z.object({ projectId: z.string().uuid("Invalid project ID."), contractorId: z.strin…` and store the result as `createContractorProjectAssignmentSchema`.
 export const createContractorProjectAssignmentSchema = z.object({
-    // Study: Validate `projectId` with `z.string().uuid("Invalid project ID.")`.
+    // Study: Check `projectId` using the rule `z.string().uuid("Invalid project ID.")`.
     projectId: z.string().uuid("Invalid project ID."),
     
-    // Study: Validate `contractorId` with `z.string().uuid("Invalid contractor ID.")`.
+    // Study: Check `contractorId` using the rule `z.string().uuid("Invalid contractor ID.")`.
     contractorId: z.string().uuid("Invalid contractor ID."),
     
     // Study: Set `responsibilityIds` to `z .array(z.string().uuid("Invalid responsibility ID.")) .refine((ids) => new Set(id…`.
@@ -27,16 +27,16 @@ export const createContractorProjectAssignmentSchema = z.object({
         .refine((ids) => new Set(ids).size === ids.length, {
             // Study: Set `message` to `"Responsibility IDs must not contain duplicates."`.
             message: "Responsibility IDs must not contain duplicates.",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         })
         // Study: Allow this value to be omitted.
         .optional(),
         
     // Study: Set `scopeDescription` to `z .string() .trim() .optional()`.
     scopeDescription: z
-        // Study: Continue the chain with `string`.
+        // Study: Require this value to be text.
         .string()
-        // Study: Remove surrounding whitespace.
+        // Study: Remove extra spaces at the beginning and end of the text.
         .trim()
         // Study: Allow this value to be omitted.
         .optional(),
@@ -57,16 +57,16 @@ export const createContractorProjectAssignmentSchema = z.object({
         
     // Study: Set `notes` to `z .string() .trim() .optional()`.
     notes: z
-        // Study: Continue the chain with `string`.
+        // Study: Require this value to be text.
         .string()
-        // Study: Remove surrounding whitespace.
+        // Study: Remove extra spaces at the beginning and end of the text.
         .trim()
         // Study: Allow this value to be omitted.
         .optional(),
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 }).strict();
 
-// Study: Build a Zod validation rule with `z.object({ responsibilityIds: z .array(z.string().uuid("Invalid responsibility ID."…` and store the result as `updateContractorProjectAssignmentSchema`.
+// Study: Set up a check for incoming information using `z.object({ responsibilityIds: z .array(z.string().uuid("Invalid responsibility ID."…` and store the result as `updateContractorProjectAssignmentSchema`.
 export const updateContractorProjectAssignmentSchema = z.object({
     // Study: Set `responsibilityIds` to `z .array(z.string().uuid("Invalid responsibility ID.")) .refine((ids) => new Set(id…`.
     responsibilityIds: z
@@ -76,16 +76,16 @@ export const updateContractorProjectAssignmentSchema = z.object({
         .refine((ids) => new Set(ids).size === ids.length, {
             // Study: Set `message` to `"Responsibility IDs must not contain duplicates."`.
             message: "Responsibility IDs must not contain duplicates.",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         })
         // Study: Allow this value to be omitted.
         .optional(),
         
     // Study: Set `scopeDescription` to `z .string() .trim() .nullable() .optional()`.
     scopeDescription: z
-        // Study: Continue the chain with `string`.
+        // Study: Require this value to be text.
         .string()
-        // Study: Remove surrounding whitespace.
+        // Study: Remove extra spaces at the beginning and end of the text.
         .trim()
         // Study: Allow an explicit null value.
         .nullable()
@@ -112,9 +112,9 @@ export const updateContractorProjectAssignmentSchema = z.object({
         
     // Study: Set `notes` to `z .string() .trim() .nullable() .optional()`.
     notes: z
-        // Study: Continue the chain with `string`.
+        // Study: Require this value to be text.
         .string()
-        // Study: Remove surrounding whitespace.
+        // Study: Remove extra spaces at the beginning and end of the text.
         .trim()
         // Study: Allow an explicit null value.
         .nullable()
@@ -127,15 +127,15 @@ export const updateContractorProjectAssignmentSchema = z.object({
         .nativeEnum(ContractorAssignmentStatus, {
             // Study: Set `message` to `"Invalid status."`.
             message: "Invalid status.",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         })
         // Study: Allow this value to be omitted.
         .optional(),
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 }).strict().refine(
     // Study: Supply `data` to the surrounding statement.
     (data) => Object.keys(data).length > 0,
     // Study: Start the object passed to the surrounding expression.
     { message: "At least one field must be provided for update." }
-// Study: Close the call arguments.
+// Study: End the list of information being sent to this step.
 );

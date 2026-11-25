@@ -1,26 +1,26 @@
-// Study: Translate HTTP requests into service calls and send HTTP responses for contacts attached to customer accounts.
-// Study: Import `{ Request, Response, NextFunction }` from `"express"`.
+// Study: This file is about the people you can contact at a customer account. Takes information sent by the screen, asks the backend to do the work, and sends back the result.
+// Study: Bring in `{ Request, Response, NextFunction }` from `"express"` so this file can use it.
 import { Request, Response, NextFunction } from "express";
-// Study: Import `* as customerContactService` from `"./customer-contact.service"`.
+// Study: Bring in `* as customerContactService` from `"./customer-contact.service"` so this file can use it.
 import * as customerContactService from "./customer-contact.service";
-// Study: Import `{ AuthenticatedUser }` from `"../../shared/types/authenticated-user"`.
+// Study: Bring in `{ AuthenticatedUser }` from `"../../shared/types/authenticated-user"` so this file can use it.
 import { AuthenticatedUser } from "../../shared/types/authenticated-user";
-// Study: Import `{ CustomerAndContactIdParams }` from `"./customer-contact.types"`.
+// Study: Bring in `{ CustomerAndContactIdParams }` from `"./customer-contact.types"` so this file can use it.
 import { CustomerAndContactIdParams } from "./customer-contact.types";
 
-// Study: Export `createCustomerContact` as an async function that returns a promise.
+// Study: Make `createCustomerContact` available to other files. Its result arrives after its work finishes.
 export const createCustomerContact = async (
-    // Study: Accept `req` with type `Request<{ customerId: string }>`.
+    // Study: Read the information that came in with the request from the screen.
     req: Request<{ customerId: string }>,
-    // Study: Accept `res` with type `Response`.
+    // Study: Use this to send information or an error back to the screen.
     res: Response,
-    // Study: Accept `next` with type `NextFunction`.
+    // Study: Use this to move the request to the next check or action.
     next: NextFunction
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Run this block and handle failures in the associated catch block.
+    // Study: Try these steps. If one fails, go to the error-handling steps below.
     try {
-        // Study: Set `user` to `req.user as AuthenticatedUser`.
+        // Study: Use the signed-in account attached to this request.
         const user = req.user as AuthenticatedUser;
 
         // Study: Call `customerContactService.createCustomerContact` and wait for it to finish and store its result in `contact`.
@@ -31,45 +31,45 @@ export const createCustomerContact = async (
             req.body,
             // Study: Supply `user` to the surrounding statement.
             user
-        // Study: Close the call arguments.
+        // Study: End the list of information being sent to this step.
         );
 
-        // Study: Send a JSON response to the client.
+        // Study: Send named information back to the screen as JSON.
         res.status(201).json({
-            // Study: Set `success` to `true`.
+            // Study: Tell the screen that the request succeeded.
             success: true,
             // Study: Set `message` to `"Customer contact created successfully."`.
             message: "Customer contact created successfully.",
             // Study: Supply the values to write to the database.
             data: {
-                // Study: Pass the current `contact` value under the same property name.
+                // Study: Carry the value of `contact` into the new group under the same name.
                 contact,
-            // Study: Close the object literal.
+            // Study: End this group of values.
             },
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
-    // Study: Handle an exception from the try block as `error`.
+    // Study: Handle a problem raised during the steps above.
     } catch (error) {
-        // Study: Pass the error to the next Express error handler.
+        // Study: Send the problem to the part of the backend that prepares an error reply.
         next(error);
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `getCustomerContacts` as an async function that returns a promise.
+// Study: Make `getCustomerContacts` available to other files. Its result arrives after its work finishes.
 export const getCustomerContacts = async (
-    // Study: Accept `req` with type `Request<{ customerId: string }>`.
+    // Study: Read the information that came in with the request from the screen.
     req: Request<{ customerId: string }>,
-    // Study: Accept `res` with type `Response`.
+    // Study: Use this to send information or an error back to the screen.
     res: Response,
-    // Study: Accept `next` with type `NextFunction`.
+    // Study: Use this to move the request to the next check or action.
     next: NextFunction
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Run this block and handle failures in the associated catch block.
+    // Study: Try these steps. If one fails, go to the error-handling steps below.
     try {
-        // Study: Set `user` to `req.user as AuthenticatedUser`.
+        // Study: Use the signed-in account attached to this request.
         const user = req.user as AuthenticatedUser;
 
         // Study: Call `customerContactService.getCustomerContacts` and wait for it to finish and store its result in `contacts`.
@@ -78,45 +78,45 @@ export const getCustomerContacts = async (
             req.params.customerId,
             // Study: Supply `user` to the surrounding statement.
             user
-        // Study: Close the call arguments.
+        // Study: End the list of information being sent to this step.
         );
 
-        // Study: Send a JSON response to the client.
+        // Study: Send named information back to the screen as JSON.
         res.status(200).json({
-            // Study: Set `success` to `true`.
+            // Study: Tell the screen that the request succeeded.
             success: true,
             // Study: Set `message` to `"Customer contacts retrieved successfully."`.
             message: "Customer contacts retrieved successfully.",
             // Study: Supply the values to write to the database.
             data: {
-                // Study: Pass the current `contacts` value under the same property name.
+                // Study: Carry the value of `contacts` into the new group under the same name.
                 contacts,
-            // Study: Close the object literal.
+            // Study: End this group of values.
             },
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
-    // Study: Handle an exception from the try block as `error`.
+    // Study: Handle a problem raised during the steps above.
     } catch (error) {
-        // Study: Pass the error to the next Express error handler.
+        // Study: Send the problem to the part of the backend that prepares an error reply.
         next(error);
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `getCustomerContactById` as an async function that returns a promise.
+// Study: Make `getCustomerContactById` available to other files. Its result arrives after its work finishes.
 export const getCustomerContactById = async (
-    // Study: Accept `req` with type `Request<CustomerAndContactIdParams>`.
+    // Study: Read the information that came in with the request from the screen.
     req: Request<CustomerAndContactIdParams>,
-    // Study: Accept `res` with type `Response`.
+    // Study: Use this to send information or an error back to the screen.
     res: Response,
-    // Study: Accept `next` with type `NextFunction`.
+    // Study: Use this to move the request to the next check or action.
     next: NextFunction
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Run this block and handle failures in the associated catch block.
+    // Study: Try these steps. If one fails, go to the error-handling steps below.
     try {
-        // Study: Set `user` to `req.user as AuthenticatedUser`.
+        // Study: Use the signed-in account attached to this request.
         const user = req.user as AuthenticatedUser;
 
         // Study: Call `customerContactService.getCustomerContactById` and wait for it to finish and store its result in `contact`.
@@ -127,45 +127,45 @@ export const getCustomerContactById = async (
             req.params.contactId,
             // Study: Supply `user` to the surrounding statement.
             user
-        // Study: Close the call arguments.
+        // Study: End the list of information being sent to this step.
         );
 
-        // Study: Send a JSON response to the client.
+        // Study: Send named information back to the screen as JSON.
         res.status(200).json({
-            // Study: Set `success` to `true`.
+            // Study: Tell the screen that the request succeeded.
             success: true,
             // Study: Set `message` to `"Customer contact retrieved successfully."`.
             message: "Customer contact retrieved successfully.",
             // Study: Supply the values to write to the database.
             data: {
-                // Study: Pass the current `contact` value under the same property name.
+                // Study: Carry the value of `contact` into the new group under the same name.
                 contact,
-            // Study: Close the object literal.
+            // Study: End this group of values.
             },
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
-    // Study: Handle an exception from the try block as `error`.
+    // Study: Handle a problem raised during the steps above.
     } catch (error) {
-        // Study: Pass the error to the next Express error handler.
+        // Study: Send the problem to the part of the backend that prepares an error reply.
         next(error);
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `updateCustomerContact` as an async function that returns a promise.
+// Study: Make `updateCustomerContact` available to other files. Its result arrives after its work finishes.
 export const updateCustomerContact = async (
-    // Study: Accept `req` with type `Request<CustomerAndContactIdParams>`.
+    // Study: Read the information that came in with the request from the screen.
     req: Request<CustomerAndContactIdParams>,
-    // Study: Accept `res` with type `Response`.
+    // Study: Use this to send information or an error back to the screen.
     res: Response,
-    // Study: Accept `next` with type `NextFunction`.
+    // Study: Use this to move the request to the next check or action.
     next: NextFunction
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Run this block and handle failures in the associated catch block.
+    // Study: Try these steps. If one fails, go to the error-handling steps below.
     try {
-        // Study: Set `user` to `req.user as AuthenticatedUser`.
+        // Study: Use the signed-in account attached to this request.
         const user = req.user as AuthenticatedUser;
 
         // Study: Call `customerContactService.updateCustomerContact` and wait for it to finish and store its result in `contact`.
@@ -178,45 +178,45 @@ export const updateCustomerContact = async (
             req.body,
             // Study: Supply `user` to the surrounding statement.
             user
-        // Study: Close the call arguments.
+        // Study: End the list of information being sent to this step.
         );
 
-        // Study: Send a JSON response to the client.
+        // Study: Send named information back to the screen as JSON.
         res.status(200).json({
-            // Study: Set `success` to `true`.
+            // Study: Tell the screen that the request succeeded.
             success: true,
             // Study: Set `message` to `"Customer contact updated successfully."`.
             message: "Customer contact updated successfully.",
             // Study: Supply the values to write to the database.
             data: {
-                // Study: Pass the current `contact` value under the same property name.
+                // Study: Carry the value of `contact` into the new group under the same name.
                 contact,
-            // Study: Close the object literal.
+            // Study: End this group of values.
             },
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
-    // Study: Handle an exception from the try block as `error`.
+    // Study: Handle a problem raised during the steps above.
     } catch (error) {
-        // Study: Pass the error to the next Express error handler.
+        // Study: Send the problem to the part of the backend that prepares an error reply.
         next(error);
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `deleteCustomerContact` as an async function that returns a promise.
+// Study: Make `deleteCustomerContact` available to other files. Its result arrives after its work finishes.
 export const deleteCustomerContact = async (
-    // Study: Accept `req` with type `Request<CustomerAndContactIdParams>`.
+    // Study: Read the information that came in with the request from the screen.
     req: Request<CustomerAndContactIdParams>,
-    // Study: Accept `res` with type `Response`.
+    // Study: Use this to send information or an error back to the screen.
     res: Response,
-    // Study: Accept `next` with type `NextFunction`.
+    // Study: Use this to move the request to the next check or action.
     next: NextFunction
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Run this block and handle failures in the associated catch block.
+    // Study: Try these steps. If one fails, go to the error-handling steps below.
     try {
-        // Study: Set `user` to `req.user as AuthenticatedUser`.
+        // Study: Use the signed-in account attached to this request.
         const user = req.user as AuthenticatedUser;
 
         // Study: Call `customerContactService.deleteCustomerContact` and wait for it to finish and store its result in `result`.
@@ -227,24 +227,24 @@ export const deleteCustomerContact = async (
             req.params.contactId,
             // Study: Supply `user` to the surrounding statement.
             user
-        // Study: Close the call arguments.
+        // Study: End the list of information being sent to this step.
         );
 
-        // Study: Send a JSON response to the client.
+        // Study: Send named information back to the screen as JSON.
         res.status(200).json({
-            // Study: Set `success` to `true`.
+            // Study: Tell the screen that the request succeeded.
             success: true,
             // Study: Set `message` to `"Customer contact deleted successfully."`.
             message: "Customer contact deleted successfully.",
             // Study: Set `data` to `result`.
             data: result,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
-    // Study: Handle an exception from the try block as `error`.
+    // Study: Handle a problem raised during the steps above.
     } catch (error) {
-        // Study: Pass the error to the next Express error handler.
+        // Study: Send the problem to the part of the backend that prepares an error reply.
         next(error);
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-// Study: Close the code block.
+// Study: End this group of steps.
 };

@@ -1,28 +1,28 @@
-// Study: Define TypeScript data contracts for customer accounts and parent-child customer relationships.
-// Study: Import `{ z }` from `"zod"`.
+// Study: This file is about customer accounts and which customers belong under a parent customer. Lists the names and kinds of information this part of the code expects.
+// Study: Bring in `{ z }` from `"zod"` so this file can use it.
 import { z } from "zod";
 
-// Study: Import `{ createCustomerSchema, updateCustomerSchema, }` from `"./customer.validation"`.
+// Study: Bring in `{ createCustomerSchema, updateCustomerSchema, }` from `"./customer.validation"` so this file can use it.
 import {
-    // Study: Bring `createCustomerSchema` into scope from the imported module.
+    // Study: Make `createCustomerSchema` from the other file available here.
     createCustomerSchema,
-    // Study: Bring `updateCustomerSchema` into scope from the imported module.
+    // Study: Make `updateCustomerSchema` from the other file available here.
     updateCustomerSchema,
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 } from "./customer.validation";
 
 
-// Study: Define the compile-time contract named `CreateCustomerInput` from the Zod schema so the types follow validation.
+// Study: Derive the expected information for `CreateCustomerInput` from the same rules that check submitted values.
 export type CreateCustomerInput = z.infer<
     // Study: Supply `createCustomerSchema` to the surrounding statement.
     typeof createCustomerSchema
-// Study: Close the generic type arguments that determine the resulting TypeScript type.
+// Study: End the list of details used to describe this kind of information.
 >;
 
 
-// Study: Define the compile-time contract named `UpdateCustomerInput` from the Zod schema so the types follow validation.
+// Study: Derive the expected information for `UpdateCustomerInput` from the same rules that check submitted values.
 export type UpdateCustomerInput = z.infer<
     // Study: Supply `updateCustomerSchema` to the surrounding statement.
     typeof updateCustomerSchema
-// Study: Close the generic type arguments that determine the resulting TypeScript type.
+// Study: End the list of details used to describe this kind of information.
 >;

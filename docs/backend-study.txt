@@ -1,35 +1,70 @@
 Construct CRM backend study notes
 =================================
 
-Start with src/server.ts, then src/app.ts and src/routes/index.ts. The server
-opens the HTTP port. The app sets up shared Express middleware and mounts the
-feature router under /api. The router adds a feature prefix, so /auth plus
-/login in the auth router becomes POST /api/auth/login.
+Lesson 1. What happens when someone uses the CRM?
+-------------------------------------------------
 
-Trace a request through the files
----------------------------------
+You can start here even if you have never read code. Imagine a site supervisor
+opens a project and uploads two progress photos. The screen is the frontend.
+The backend is the part of the CRM that receives the request, checks who sent
+it and what they can do, and saves the information. The database keeps
+records such as project names, account details, and links to photos.
 
-1. Open src/modules/auth/auth.routes.ts and find POST /login. The route lists
-   validate(loginSchema) before authController.login. Express follows that
-   order, so the controller receives the request after input validation.
-2. Follow loginSchema in auth.validation.ts, then the login handler in
-   auth.controller.ts and the business logic in auth.service.ts. Follow the
-   account lookup into auth.repository.ts, then find the User and RefreshToken
-   models in prisma/schema.prisma.
-3. Compare GET /api/auth/me. The authenticate middleware reads the Bearer
-   token, verifies it, looks up the user, and assigns req.user. The declaration
-   in src/shared/types/express.d.ts explains how TypeScript knows that property
-   exists. Other protected routes can add an authorize check for a module and
-   action after authentication.
-4. Try the same trace for a project update. Find the PATCH route in
-   project.routes.ts and follow authorization, image upload, the controller,
-   the service, and the repository. Check project.validation.test.ts for
-   examples of valid and invalid gallery and site-area input.
-5. For a database workflow, start with issueInventoryRequest in
-   inventory-workflow.service.ts. Follow the reads and writes inside the
-   transaction. Compare the request, warehouse stock, and stock movement
-   models to see which records represent workflow state, current quantity, and
-   history.
+Follow one request through the files
+------------------------------------
+
+1. Start in src/modules/projects/project.routes.ts. Find the line starting
+   with router.patch. PATCH means "change some details of an existing
+   record." The project ID in the address tells the backend which job the
+   supervisor wants to change. The checks on that line run in order.
+2. authenticate checks who is signed in. authorize checks whether that
+   person can update projects. Then uploadProjectImages receives the files.
+   Look for maxFiles to see how many files this upload accepts.
+3. project.controller.ts receives the incoming details and asks for the
+   update. project.service.ts applies the rules for changing the job.
+   project.repository.ts contains steps that read or write database records.
+   prisma/schema.prisma describes what information those records can hold.
+4. Read the // Study: line above each code line as you go. Start with the
+   comments for the overall steps and skip the punctuation on your first
+   read. A closing brace } marks the end of a group. It often ends a group
+   of steps that belong to the same check or action.
+5. Try reading src/modules/auth/auth.routes.ts next. Find POST /login.
+   Before the sign-in handler runs, validate(loginSchema) checks the submitted
+   details. The full address is /api/auth/login. Look in src/app.ts for /api
+   and src/routes/index.ts for /auth to see how the address is assembled.
+6. Once those examples feel familiar, try inventory. Find issueInventoryRequest
+   in inventory-workflow.service.ts. Imagine a warehouse issuing tools to a
+   site. Look for the steps that find the request, change the available stock,
+   and add a record of the movement.
+
+Words you will see beside the code
+----------------------------------
+
+Request / response. The message the screen sends and the reply it gets.
+Route. An address and action that tell the backend which work to do.
+Middleware. A step shared by routes, such as checking a sign-in.
+Controller. Takes the incoming message, asks for the work, and replies.
+Service. Applies business rules, such as which stock can be issued.
+Repository. Groups the steps used to read or save records.
+Record / field. Think of one row in a register and one detail on that row.
+ID. A value that identifies a record, such as a project or company.
+Prisma. The tool this backend uses to talk to the database.
+Zod. The tool used to check whether submitted information looks right.
+TypeScript. The language used here. Its types describe the kinds of values
+the code expects, such as text, a number, or a group of details.
+Function / return. A named or reusable step and the result it gives back.
+const / await. Give a value a name. Wait for some work to finish.
+if / !. Run a step only if a check passes. A leading ! reverses a check.
+Token. A pass the app sends as proof that someone is signed in.
+Transaction. A group of database steps treated as one job. If the write fails,
+the database can undo the changes made within that job.
+
+Where the backend starts
+------------------------
+
+src/server.ts opens the door for requests. src/app.ts sets up shared request
+handling. src/routes/index.ts directs each request to the right feature.
+Those three files make more sense after tracing one feature above.
 
 Project files and local infrastructure
 --------------------------------------

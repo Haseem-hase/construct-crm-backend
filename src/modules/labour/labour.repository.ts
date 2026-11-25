@@ -1,241 +1,241 @@
-// Study: Read and write database records through Prisma for worker records and their professions.
-// Study: Import `prisma` from `"../../lib/prisma"`.
+// Study: This file is about workers and the kinds of work they do. Finds or saves information in the database, where the CRM keeps its records.
+// Study: Bring in `prisma` from `"../../lib/prisma"` so this file can use it.
 import prisma from "../../lib/prisma";
 
-// Study: Import `{ CreateLabourInput, UpdateLabourInput, }` from `"./labour.types"`.
+// Study: Bring in `{ CreateLabourInput, UpdateLabourInput, }` from `"./labour.types"` so this file can use it.
 import {
-    // Study: Bring `CreateLabourInput` into scope from the imported module.
+    // Study: Make `CreateLabourInput` from the other file available here.
     CreateLabourInput,
-    // Study: Bring `UpdateLabourInput` into scope from the imported module.
+    // Study: Make `UpdateLabourInput` from the other file available here.
     UpdateLabourInput,
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 } from "./labour.types";
 
 
-// Study: Export `createLabour` as an async function that returns a promise.
+// Study: Make `createLabour` available to other files. Its result arrives after its work finishes.
 export const createLabour = async (
-    // Study: Accept `data` with type `CreateLabourInput & { organizationId: string; }`.
+    // Study: This step receives `data`. `CreateLabourInput & { organizationId: string; }` describes what that information should look like.
     data: CreateLabourInput & {
         // Study: Define `organizationId` with type `string`.
         organizationId: string;
     // Study: Close the object type.
     }
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Return `await prisma.labour.create({ data: { ...data, }, })` to the caller.
+    // Study: Give `await prisma.labour.create({ data: { ...data, }, })` back to the code that asked for it.
     return await prisma.labour.create({
         // Study: Supply the values to write to the database.
         data: {
             // Study: Expand the values from `data` into the surrounding collection.
             ...data,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
 
-// Study: Export `findLabours` as an async function that returns a promise.
+// Study: Make `findLabours` available to other files. Its result arrives after its work finishes.
 export const findLabours = async (
-    // Study: Accept `organizationId` with type `string`.
+    // Study: This step receives `organizationId`. `string` describes what that information should look like.
     organizationId: string
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Return `await prisma.labour.findMany({ where: { organizationId, }, include: { profession: t…` to the caller.
+    // Study: Give `await prisma.labour.findMany({ where: { organizationId, }, include: { profession: t…` back to the code that asked for it.
     return await prisma.labour.findMany({
-        // Study: Set the conditions that database records must match using organizationId.
+        // Study: Set the conditions that records must meet using organizationId.
         where: {
-            // Study: Pass the current `organizationId` value under the same property name.
+            // Study: Carry the value of `organizationId` into the new group under the same name.
             organizationId,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-        // Study: Load related database records with the main result.
+        // Study: Ask for linked information along with the main record.
         include: {
             // Study: Set `profession` to `true`.
             profession: true,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Set the sort order for the returned records.
         orderBy: {
             // Study: Set `createdAt` to `"desc"`.
             createdAt: "desc",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `findAllPlatformLabours` as an async function that returns a promise.
+// Study: Make `findAllPlatformLabours` available to other files. Its result arrives after its work finishes.
 export const findAllPlatformLabours = async () => prisma.labour.findMany({
-    // Study: Load related database records with the main result.
+    // Study: Ask for linked information along with the main record.
     include: {
         // Study: Set `profession` to `true`.
         profession: true,
         // Study: Load `organization` and return its selected fields: id, name.
         organization: { select: { id: true, name: true } },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     },
     // Study: Set the sort order for the returned records.
     orderBy: { createdAt: "desc" },
-// Study: Close the object literal.
+// Study: End this group of values.
 });
 
-// Study: Export `findPlatformLabourById` as an async function that returns a promise.
+// Study: Make `findPlatformLabourById` available to other files. Its result arrives after its work finishes.
 export const findPlatformLabourById = async (labourId: string) => prisma.labour.findUnique({
-    // Study: Set the conditions that database records must match using id.
+    // Study: Set the conditions that records must meet using id.
     where: { id: labourId },
-    // Study: Load related database records with the main result.
+    // Study: Ask for linked information along with the main record.
     include: {
         // Study: Set `profession` to `true`.
         profession: true,
         // Study: Load `organization` and return its selected fields: id, name.
         organization: { select: { id: true, name: true } },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     },
-// Study: Close the object literal.
+// Study: End this group of values.
 });
 
 
-// Study: Export `findLabourById` as an async function that returns a promise.
+// Study: Make `findLabourById` available to other files. Its result arrives after its work finishes.
 export const findLabourById = async (
-    // Study: Accept `labourId` with type `string`.
+    // Study: This step receives `labourId`. `string` describes what that information should look like.
     labourId: string,
-    // Study: Accept `organizationId` with type `string`.
+    // Study: This step receives `organizationId`. `string` describes what that information should look like.
     organizationId: string
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Return `await prisma.labour.findFirst({ where: { id: labourId, organizationId, }, include: …` to the caller.
+    // Study: Give `await prisma.labour.findFirst({ where: { id: labourId, organizationId, }, include: …` back to the code that asked for it.
     return await prisma.labour.findFirst({
-        // Study: Set the conditions that database records must match using id, organizationId.
+        // Study: Set the conditions that records must meet using id, organizationId.
         where: {
             // Study: Set `id` to `labourId`.
             id: labourId,
-            // Study: Pass the current `organizationId` value under the same property name.
+            // Study: Carry the value of `organizationId` into the new group under the same name.
             organizationId,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-        // Study: Load related database records with the main result.
+        // Study: Ask for linked information along with the main record.
         include: {
             // Study: Set `profession` to `true`.
             profession: true,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
 
-// Study: Export `updateLabour` as an async function that returns a promise.
+// Study: Make `updateLabour` available to other files. Its result arrives after its work finishes.
 export const updateLabour = async (
-    // Study: Accept `labourId` with type `string`.
+    // Study: This step receives `labourId`. `string` describes what that information should look like.
     labourId: string,
-    // Study: Accept `organizationId` with type `string`.
+    // Study: This step receives `organizationId`. `string` describes what that information should look like.
     organizationId: string,
-    // Study: Accept `data` with type `UpdateLabourInput`.
+    // Study: This step receives `data`. `UpdateLabourInput` describes what that information should look like.
     data: UpdateLabourInput
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
     // Study: Update all records matching the filters through `prisma.labour` and wait for it to finish and store its result in `result`.
     const result = await prisma.labour.updateMany({
-        // Study: Set the conditions that database records must match using id, organizationId.
+        // Study: Set the conditions that records must meet using id, organizationId.
         where: {
             // Study: Set `id` to `labourId`.
             id: labourId,
-            // Study: Pass the current `organizationId` value under the same property name.
+            // Study: Carry the value of `organizationId` into the new group under the same name.
             organizationId,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Supply the values to write to the database.
         data: {
             // Study: Expand the values from `data` into the surrounding collection.
             ...data,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
 
-    // Study: Run the following branch when `result.count === 0` is truthy.
+    // Study: Do the next step if this check passes: `result.count === 0`.
     if (result.count === 0) {
-        // Study: Return `null` to the caller.
+        // Study: Give `null` back to the code that asked for it.
         return null;
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Return `await prisma.labour.findFirst({ where: { id: labourId, organizationId }, include: {…` to the caller.
+    // Study: Give `await prisma.labour.findFirst({ where: { id: labourId, organizationId }, include: {…` back to the code that asked for it.
     return await prisma.labour.findFirst({
-        // Study: Set the conditions that database records must match using id, organizationId.
+        // Study: Set the conditions that records must meet using id, organizationId.
         where: { 
             // Study: Set `id` to `labourId`.
             id: labourId,
-            // Study: Pass the current `organizationId` value under the same property name.
+            // Study: Carry the value of `organizationId` into the new group under the same name.
             organizationId
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-        // Study: Load related database records with the main result.
+        // Study: Ask for linked information along with the main record.
         include: {
             // Study: Set `profession` to `true`.
             profession: true,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
 
-// Study: Export `findProfessionById` as an async function that returns a promise.
+// Study: Make `findProfessionById` available to other files. Its result arrives after its work finishes.
 export const findProfessionById = async (
-    // Study: Accept `professionId` with type `string`.
+    // Study: This step receives `professionId`. `string` describes what that information should look like.
     professionId: string
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Return `await prisma.profession.findUnique({ where: { id: professionId, }, select: { id: tr…` to the caller.
+    // Study: Give `await prisma.profession.findUnique({ where: { id: professionId, }, select: { id: tr…` back to the code that asked for it.
     return await prisma.profession.findUnique({
-        // Study: Set the conditions that database records must match using id.
+        // Study: Set the conditions that records must meet using id.
         where: {
             // Study: Set `id` to `professionId`.
             id: professionId,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-        // Study: Choose which fields Prisma returns.
+        // Study: Choose which details the database gives back.
         select: {
             // Study: Set `id` to `true`.
             id: true,
             // Study: Set `isActive` to `true`.
             isActive: true,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `findLabourByPhone` as an async function that returns a promise.
+// Study: Make `findLabourByPhone` available to other files. Its result arrives after its work finishes.
 export const findLabourByPhone = async (
-    // Study: Accept `organizationId` with type `string`.
+    // Study: This step receives `organizationId`. `string` describes what that information should look like.
     organizationId: string,
-    // Study: Accept `phone` with type `string`.
+    // Study: This step receives `phone`. `string` describes what that information should look like.
     phone: string
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Return `await prisma.labour.findUnique({ where: { organizationId_phone: { organizationId, p…` to the caller.
+    // Study: Give `await prisma.labour.findUnique({ where: { organizationId_phone: { organizationId, p…` back to the code that asked for it.
     return await prisma.labour.findUnique({
-        // Study: Set the conditions that database records must match using organizationId_phone.
+        // Study: Set the conditions that records must meet using organizationId_phone.
         where: {
             // Study: Start the nested value for `organizationId_phone`.
             organizationId_phone: {
-                // Study: Pass the current `organizationId` value under the same property name.
+                // Study: Carry the value of `organizationId` into the new group under the same name.
                 organizationId,
-                // Study: Pass the current `phone` value under the same property name.
+                // Study: Carry the value of `phone` into the new group under the same name.
                 phone,
-            // Study: Close the object literal.
+            // Study: End this group of values.
             },
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };

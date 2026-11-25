@@ -1,38 +1,38 @@
-// Study: Connect HTTP methods and paths to middleware and handlers for inventory assets, warehouse stock, requests, returns, and condition reports.
-// Study: Import `{ Router }` from `"express"`.
+// Study: This file is about tools, equipment, and materials that warehouses store, issue, and take back. Matches each request from the screen to the checks and work it needs.
+// Study: Bring in `{ Router }` from `"express"` so this file can use it.
 import { Router } from "express";
-// Study: Import `{ Action, Module }` from `"@prisma/client"`.
+// Study: Bring in `{ Action, Module }` from `"@prisma/client"` so this file can use it.
 import { Action, Module } from "@prisma/client";
-// Study: Import `{ authenticate }` from `"../../middlewares/authenticate"`.
+// Study: Bring in `{ authenticate }` from `"../../middlewares/authenticate"` so this file can use it.
 import { authenticate } from "../../middlewares/authenticate";
-// Study: Import `{ authorize }` from `"../../middlewares/authorize"`.
+// Study: Bring in `{ authorize }` from `"../../middlewares/authorize"` so this file can use it.
 import { authorize } from "../../middlewares/authorize";
-// Study: Import `* as controller` from `"./inventory.controller"`.
+// Study: Bring in `* as controller` from `"./inventory.controller"` so this file can use it.
 import * as controller from "./inventory.controller";
-// Study: Import `{ requireInventoryOrganization }` from `"./inventory-context.middleware"`.
+// Study: Bring in `{ requireInventoryOrganization }` from `"./inventory-context.middleware"` so this file can use it.
 import { requireInventoryOrganization } from "./inventory-context.middleware";
-// Study: Import `{ createImageUploadMiddleware }` from `"../../middlewares/upload-image.middleware"`.
+// Study: Bring in `{ createImageUploadMiddleware }` from `"../../middlewares/upload-image.middleware"` so this file can use it.
 import { createImageUploadMiddleware } from "../../middlewares/upload-image.middleware";
-// Study: Import `{ BadRequestError }` from `"../../errors/BadRequestError"`.
+// Study: Bring in `{ BadRequestError }` from `"../../errors/BadRequestError"` so this file can use it.
 import { BadRequestError } from "../../errors/BadRequestError";
 
 // Study: Call `createImageUploadMiddleware` and store the result as `uploadInventoryImage`.
 const uploadInventoryImage = createImageUploadMiddleware({
-    // Study: Provide the callback used for `directory`.
+    // Study: Give `directory` a step to run later when it needs a result.
     directory: (req) => {
         // Study: Set `organizationId` to `req.user?.systemRole === "SUPER_ADMIN" ? req.header("x-organization-id") : req.user…`.
         const organizationId = req.user?.systemRole === "SUPER_ADMIN"
-            // Study: Use this value when the preceding condition is truthy.
+            // Study: Use this value if the check above passes.
             ? req.header("x-organization-id")
-            // Study: Use this value when the preceding condition is falsy.
+            // Study: Use this value if the check above fails.
             : req.user?.organizationId;
-        // Study: Run the following branch when `!organizationId` is truthy and throw `new BadRequestError("Inventory organization context is missing.")`.
+        // Study: Do the next step if there is no value for `organizationId` . If so, stop and report "Inventory organization context is missing."
         if (!organizationId) throw new BadRequestError("Inventory organization context is missing.");
-        // Study: Return `'inventory/${organizationId}'` to the caller.
+        // Study: Give `'inventory/${organizationId}'` back to the code that asked for it.
         return `inventory/${organizationId}`;
-    // Study: Close the code block.
+    // Study: End this group of steps.
     },
-// Study: Close the object literal.
+// Study: End this group of values.
 });
 
 // Study: Call `Router` and store the result as `router`.
@@ -40,46 +40,46 @@ const router = Router();
 // Study: Mount Express middleware or a child router with `requireInventoryOrganization`.
 router.use(authenticate, requireInventoryOrganization);
 
-// Study: Register GET /request-options with `controller.getInventoryRequestOptions` after the listed middleware.
+// Study: When the screen asks to read information, use this GET address (`/request-options`). First check their permission.
 router.get("/request-options", authorize(Module.INVENTORY, Action.VIEW), controller.getInventoryRequestOptions);
-// Study: Register GET /assets with `controller.listInventoryAssets` after the listed middleware.
+// Study: When the screen asks to read information, use this GET address (`/assets`). First check their permission.
 router.get("/assets", authorize(Module.INVENTORY, Action.VIEW), controller.listInventoryAssets);
-// Study: Register GET /warehouses with `controller.listInventoryWarehouses` after the listed middleware.
+// Study: When the screen asks to read information, use this GET address (`/warehouses`). First check their permission.
 router.get("/warehouses", authorize(Module.INVENTORY, Action.VIEW), controller.listInventoryWarehouses);
-// Study: Register POST /warehouses with `controller.createInventoryWarehouse` after the listed middleware.
+// Study: When the screen asks to submit information, use this POST address (`/warehouses`). First check their permission.
 router.post("/warehouses", authorize(Module.INVENTORY, Action.CREATE), controller.createInventoryWarehouse);
-// Study: Register GET /stock with `controller.listWarehouseStock` after the listed middleware.
+// Study: When the screen asks to read information, use this GET address (`/stock`). First check their permission.
 router.get("/stock", authorize(Module.INVENTORY, Action.VIEW), controller.listWarehouseStock);
-// Study: Register POST /stock/adjustments with `controller.adjustWarehouseStock` after the listed middleware.
+// Study: When the screen asks to submit information, use this POST address (`/stock/adjustments`). First check their permission.
 router.post("/stock/adjustments", authorize(Module.INVENTORY, Action.UPDATE), controller.adjustWarehouseStock);
-// Study: Register GET /requests with `controller.listInventoryRequests` after the listed middleware.
+// Study: When the screen asks to read information, use this GET address (`/requests`). First check their permission.
 router.get("/requests", authorize(Module.INVENTORY, Action.VIEW), controller.listInventoryRequests);
-// Study: Register POST /requests with `controller.createInventoryRequest` after the listed middleware.
+// Study: When the screen asks to submit information, use this POST address (`/requests`). First check their permission.
 router.post("/requests", authorize(Module.INVENTORY, Action.CREATE), controller.createInventoryRequest);
-// Study: Register POST /requests/:id/review with `controller.reviewInventoryRequest` after the listed middleware.
+// Study: When the screen asks to submit information, use this POST address (`/requests/:id/review`). First check their permission.
 router.post("/requests/:id/review", authorize(Module.INVENTORY, Action.APPROVE), controller.reviewInventoryRequest);
-// Study: Register POST /requests/:id/issue with `controller.issueInventoryRequest` after the listed middleware.
+// Study: When the screen asks to submit information, use this POST address (`/requests/:id/issue`). First check their permission.
 router.post("/requests/:id/issue", authorize(Module.INVENTORY, Action.UPDATE), controller.issueInventoryRequest);
-// Study: Register GET /returns with `controller.listInventoryReturns` after the listed middleware.
+// Study: When the screen asks to read information, use this GET address (`/returns`). First check their permission.
 router.get("/returns", authorize(Module.INVENTORY, Action.VIEW), controller.listInventoryReturns);
-// Study: Register POST /returns with `controller.createInventoryReturn` after the listed middleware.
+// Study: When the screen asks to submit information, use this POST address (`/returns`). First check their permission.
 router.post("/returns", authorize(Module.INVENTORY, Action.CREATE), controller.createInventoryReturn);
-// Study: Register POST /returns/:id/review with `controller.reviewInventoryReturn` after the listed middleware.
+// Study: When the screen asks to submit information, use this POST address (`/returns/:id/review`). First check their permission.
 router.post("/returns/:id/review", authorize(Module.INVENTORY, Action.APPROVE), controller.reviewInventoryReturn);
-// Study: Register GET /condition-reports with `controller.listInventoryConditionReports` after the listed middleware.
+// Study: When the screen asks to read information, use this GET address (`/condition-reports`). First check their permission.
 router.get("/condition-reports", authorize(Module.INVENTORY, Action.VIEW), controller.listInventoryConditionReports);
-// Study: Register POST /condition-reports with `controller.createInventoryConditionReport` after the listed middleware.
+// Study: When the screen asks to submit information, use this POST address (`/condition-reports`). First check their permission.
 router.post("/condition-reports", authorize(Module.INVENTORY, Action.CREATE), controller.createInventoryConditionReport);
-// Study: Register PATCH /condition-reports/:id with `controller.reviewInventoryConditionReport` after the listed middleware.
+// Study: When the screen asks to update part of a record, use this PATCH address (`/condition-reports/:id`). First check their permission.
 router.patch("/condition-reports/:id", authorize(Module.INVENTORY, Action.UPDATE), controller.reviewInventoryConditionReport);
-// Study: Register POST /assets with `controller.createInventoryAsset` after the listed middleware.
+// Study: When the screen asks to submit information, use this POST address (`/assets`). First check their permission.
 router.post("/assets", authorize(Module.INVENTORY, Action.CREATE), uploadInventoryImage, controller.createInventoryAsset);
-// Study: Register GET /assets/:id with `controller.getInventoryAsset` after the listed middleware.
+// Study: When the screen asks to read information, use this GET address (`/assets/:id`). First check their permission.
 router.get("/assets/:id", authorize(Module.INVENTORY, Action.VIEW), controller.getInventoryAsset);
-// Study: Register PATCH /assets/:id with `controller.updateInventoryAsset` after the listed middleware.
+// Study: When the screen asks to update part of a record, use this PATCH address (`/assets/:id`). First check their permission.
 router.patch("/assets/:id", authorize(Module.INVENTORY, Action.UPDATE), uploadInventoryImage, controller.updateInventoryAsset);
-// Study: Register DELETE /assets/:id with `controller.deleteInventoryAsset` after the listed middleware.
+// Study: When the screen asks to remove a record, use this DELETE address (`/assets/:id`). First check their permission.
 router.delete("/assets/:id", authorize(Module.INVENTORY, Action.DELETE), controller.deleteInventoryAsset);
 
-// Study: Expose `router` as the default export.
+// Study: Make `router` the main thing other files can get from this file.
 export default router;

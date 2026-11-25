@@ -1,206 +1,206 @@
-// Study: Read and write database records through Prisma for contractor records.
-// Study: Import `prisma` from `"../../lib/prisma"`.
+// Study: This file is about the details the CRM keeps about contractors. Finds or saves information in the database, where the CRM keeps its records.
+// Study: Bring in `prisma` from `"../../lib/prisma"` so this file can use it.
 import prisma from "../../lib/prisma";
 
-// Study: Import `{ CreateContractorInput, UpdateContractorInput, }` from `"./contractor.types"`.
+// Study: Bring in `{ CreateContractorInput, UpdateContractorInput, }` from `"./contractor.types"` so this file can use it.
 import {
-    // Study: Bring `CreateContractorInput` into scope from the imported module.
+    // Study: Make `CreateContractorInput` from the other file available here.
     CreateContractorInput,
-    // Study: Bring `UpdateContractorInput` into scope from the imported module.
+    // Study: Make `UpdateContractorInput` from the other file available here.
     UpdateContractorInput,
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 } from "./contractor.types";
 
-// Study: Export `createContractor` as an async function that returns a promise.
+// Study: Make `createContractor` available to other files. Its result arrives after its work finishes.
 export const createContractor = async (
-    // Study: Accept `data` with type `CreateContractorInput & { organizationId: string; }`.
+    // Study: This step receives `data`. `CreateContractorInput & { organizationId: string; }` describes what that information should look like.
     data: CreateContractorInput & {
         // Study: Define `organizationId` with type `string`.
         organizationId: string;
     // Study: Close the object type.
     }
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Return `await prisma.contractor.create({ data: { ...data, }, })` to the caller.
+    // Study: Give `await prisma.contractor.create({ data: { ...data, }, })` back to the code that asked for it.
     return await prisma.contractor.create({
         // Study: Supply the values to write to the database.
         data: {
             // Study: Expand the values from `data` into the surrounding collection.
             ...data,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `findContractors` as an async function that returns a promise.
+// Study: Make `findContractors` available to other files. Its result arrives after its work finishes.
 export const findContractors = async (
-    // Study: Accept `organizationId` with type `string`.
+    // Study: This step receives `organizationId`. `string` describes what that information should look like.
     organizationId: string
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Return `await prisma.contractor.findMany({ where: { organizationId, }, orderBy: { createdAt…` to the caller.
+    // Study: Give `await prisma.contractor.findMany({ where: { organizationId, }, orderBy: { createdAt…` back to the code that asked for it.
     return await prisma.contractor.findMany({
-        // Study: Set the conditions that database records must match using organizationId.
+        // Study: Set the conditions that records must meet using organizationId.
         where: {
-            // Study: Pass the current `organizationId` value under the same property name.
+            // Study: Carry the value of `organizationId` into the new group under the same name.
             organizationId,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Set the sort order for the returned records.
         orderBy: {
             // Study: Set `createdAt` to `"desc"`.
             createdAt: "desc",
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `findAllPlatformContractors` as an async function that returns a promise.
+// Study: Make `findAllPlatformContractors` available to other files. Its result arrives after its work finishes.
 export const findAllPlatformContractors = async () => prisma.contractor.findMany({
-    // Study: Load related database records with the main result.
+    // Study: Ask for linked information along with the main record.
     include: { organization: { select: { id: true, name: true } } },
     // Study: Set the sort order for the returned records.
     orderBy: { createdAt: "desc" },
-// Study: Close the object literal.
+// Study: End this group of values.
 });
 
-// Study: Export `findPlatformContractorById` as an async function that returns a promise.
+// Study: Make `findPlatformContractorById` available to other files. Its result arrives after its work finishes.
 export const findPlatformContractorById = async (contractorId: string) => prisma.contractor.findUnique({
-    // Study: Set the conditions that database records must match using id.
+    // Study: Set the conditions that records must meet using id.
     where: { id: contractorId },
-    // Study: Load related database records with the main result.
+    // Study: Ask for linked information along with the main record.
     include: { organization: { select: { id: true, name: true } } },
-// Study: Close the object literal.
+// Study: End this group of values.
 });
 
-// Study: Export `findContractorById` as an async function that returns a promise.
+// Study: Make `findContractorById` available to other files. Its result arrives after its work finishes.
 export const findContractorById = async (
-    // Study: Accept `contractorId` with type `string`.
+    // Study: This step receives `contractorId`. `string` describes what that information should look like.
     contractorId: string,
-    // Study: Accept `organizationId` with type `string`.
+    // Study: This step receives `organizationId`. `string` describes what that information should look like.
     organizationId: string
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Return `await prisma.contractor.findFirst({ where: { id: contractorId, organizationId, }, })` to the caller.
+    // Study: Give `await prisma.contractor.findFirst({ where: { id: contractorId, organizationId, }, })` back to the code that asked for it.
     return await prisma.contractor.findFirst({
-        // Study: Set the conditions that database records must match using id, organizationId.
+        // Study: Set the conditions that records must meet using id, organizationId.
         where: {
             // Study: Set `id` to `contractorId`.
             id: contractorId,
-            // Study: Pass the current `organizationId` value under the same property name.
+            // Study: Carry the value of `organizationId` into the new group under the same name.
             organizationId,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `updateContractor` as an async function that returns a promise.
+// Study: Make `updateContractor` available to other files. Its result arrives after its work finishes.
 export const updateContractor = async (
-    // Study: Accept `contractorId` with type `string`.
+    // Study: This step receives `contractorId`. `string` describes what that information should look like.
     contractorId: string,
-    // Study: Accept `organizationId` with type `string`.
+    // Study: This step receives `organizationId`. `string` describes what that information should look like.
     organizationId: string,
-    // Study: Accept `data` with type `UpdateContractorInput`.
+    // Study: This step receives `data`. `UpdateContractorInput` describes what that information should look like.
     data: UpdateContractorInput
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
     // Study: Update all records matching the filters through `prisma.contractor` and wait for it to finish and store its result in `result`.
     const result = await prisma.contractor.updateMany({
-        // Study: Set the conditions that database records must match using id, organizationId.
+        // Study: Set the conditions that records must meet using id, organizationId.
         where: {
             // Study: Set `id` to `contractorId`.
             id: contractorId,
-            // Study: Pass the current `organizationId` value under the same property name.
+            // Study: Carry the value of `organizationId` into the new group under the same name.
             organizationId,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
         // Study: Supply the values to write to the database.
         data: {
             // Study: Expand the values from `data` into the surrounding collection.
             ...data,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
 
-    // Study: Run the following branch when `result.count === 0` is truthy.
+    // Study: Do the next step if this check passes: `result.count === 0`.
     if (result.count === 0) {
-        // Study: Return `null` to the caller.
+        // Study: Give `null` back to the code that asked for it.
         return null;
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Return `await prisma.contractor.findFirst({ where: { id: contractorId, organizationId, }, })` to the caller.
+    // Study: Give `await prisma.contractor.findFirst({ where: { id: contractorId, organizationId, }, })` back to the code that asked for it.
     return await prisma.contractor.findFirst({
-        // Study: Set the conditions that database records must match using id, organizationId.
+        // Study: Set the conditions that records must meet using id, organizationId.
         where: {
             // Study: Set `id` to `contractorId`.
             id: contractorId,
-            // Study: Pass the current `organizationId` value under the same property name.
+            // Study: Carry the value of `organizationId` into the new group under the same name.
             organizationId,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `findContractorByPhone` as an async function that returns a promise.
+// Study: Make `findContractorByPhone` available to other files. Its result arrives after its work finishes.
 export const findContractorByPhone = async (
-    // Study: Accept `organizationId` with type `string`.
+    // Study: This step receives `organizationId`. `string` describes what that information should look like.
     organizationId: string,
-    // Study: Accept `phone` with type `string`.
+    // Study: This step receives `phone`. `string` describes what that information should look like.
     phone: string
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Return `await prisma.contractor.findUnique({ where: { organizationId_phone: { organizationI…` to the caller.
+    // Study: Give `await prisma.contractor.findUnique({ where: { organizationId_phone: { organizationI…` back to the code that asked for it.
     return await prisma.contractor.findUnique({
-        // Study: Set the conditions that database records must match using organizationId_phone.
+        // Study: Set the conditions that records must meet using organizationId_phone.
         where: {
             // Study: Start the nested value for `organizationId_phone`.
             organizationId_phone: {
-                // Study: Pass the current `organizationId` value under the same property name.
+                // Study: Carry the value of `organizationId` into the new group under the same name.
                 organizationId,
-                // Study: Pass the current `phone` value under the same property name.
+                // Study: Carry the value of `phone` into the new group under the same name.
                 phone,
-            // Study: Close the object literal.
+            // Study: End this group of values.
             },
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `findContractorByEmail` as an async function that returns a promise.
+// Study: Make `findContractorByEmail` available to other files. Its result arrives after its work finishes.
 export const findContractorByEmail = async (
-    // Study: Accept `organizationId` with type `string`.
+    // Study: This step receives `organizationId`. `string` describes what that information should look like.
     organizationId: string,
-    // Study: Accept `email` with type `string`.
+    // Study: This step receives `email`. `string` describes what that information should look like.
     email: string
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Return `await prisma.contractor.findUnique({ where: { organizationId_email: { organizationI…` to the caller.
+    // Study: Give `await prisma.contractor.findUnique({ where: { organizationId_email: { organizationI…` back to the code that asked for it.
     return await prisma.contractor.findUnique({
-        // Study: Set the conditions that database records must match using organizationId_email.
+        // Study: Set the conditions that records must meet using organizationId_email.
         where: {
             // Study: Start the nested value for `organizationId_email`.
             organizationId_email: {
-                // Study: Pass the current `organizationId` value under the same property name.
+                // Study: Carry the value of `organizationId` into the new group under the same name.
                 organizationId,
-                // Study: Pass the current `email` value under the same property name.
+                // Study: Carry the value of `email` into the new group under the same name.
                 email,
-            // Study: Close the object literal.
+            // Study: End this group of values.
             },
-        // Study: Close the object literal.
+        // Study: End this group of values.
         },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };

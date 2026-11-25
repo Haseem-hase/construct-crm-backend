@@ -1,22 +1,22 @@
-// Study: Define TypeScript data contracts for worker placements on construction projects.
-// Study: Import `{ z }` from `"zod"`.
+// Study: This file is about which workers are assigned to each job. Lists the names and kinds of information this part of the code expects.
+// Study: Bring in `{ z }` from `"zod"` so this file can use it.
 import { z } from "zod";
-// Study: Import `{ createLabourAssignmentSchema, updateLabourAssignmentSchema, labourAssignmentIdSch…` from `"./labour-assignment.validation"`.
+// Study: Bring in `{ createLabourAssignmentSchema, updateLabourAssignmentSchema, labourAssignmentIdSch…` from `"./labour-assignment.validation"` so this file can use it.
 import {
-    // Study: Bring `createLabourAssignmentSchema` into scope from the imported module.
+    // Study: Make `createLabourAssignmentSchema` from the other file available here.
     createLabourAssignmentSchema,
-    // Study: Bring `updateLabourAssignmentSchema` into scope from the imported module.
+    // Study: Make `updateLabourAssignmentSchema` from the other file available here.
     updateLabourAssignmentSchema,
-    // Study: Bring `labourAssignmentIdSchema` into scope from the imported module.
+    // Study: Make `labourAssignmentIdSchema` from the other file available here.
     labourAssignmentIdSchema,
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 } from "./labour-assignment.validation";
 
-// Study: Define the compile-time contract named `CreateLabourAssignmentInput` from the Zod schema so the types follow validation.
+// Study: Derive the expected information for `CreateLabourAssignmentInput` from the same rules that check submitted values.
 export type CreateLabourAssignmentInput = z.infer<typeof createLabourAssignmentSchema>;
 
-// Study: Define the compile-time contract named `UpdateLabourAssignmentInput` from the Zod schema so the types follow validation.
+// Study: Derive the expected information for `UpdateLabourAssignmentInput` from the same rules that check submitted values.
 export type UpdateLabourAssignmentInput = z.infer<typeof updateLabourAssignmentSchema>;
 
-// Study: Define the compile-time contract named `LabourAssignmentIdParams` from the Zod schema so the types follow validation.
+// Study: Derive the expected information for `LabourAssignmentIdParams` from the same rules that check submitted values.
 export type LabourAssignmentIdParams = z.infer<typeof labourAssignmentIdSchema>;

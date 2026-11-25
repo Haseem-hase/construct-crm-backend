@@ -1,40 +1,40 @@
-// Study: Parse request data with Zod and pass validated values to downstream handlers.
-// Study: Import `{ Request, Response, NextFunction }` from `"express"`.
+// Study: Checks the information sent by the screen before passing it to the part that does the work.
+// Study: Bring in `{ Request, Response, NextFunction }` from `"express"` so this file can use it.
 import { Request, Response, NextFunction } from "express";
-// Study: Import `{ ZodError, ZodSchema }` from `"zod"`.
+// Study: Bring in `{ ZodError, ZodSchema }` from `"zod"` so this file can use it.
 import { ZodError, ZodSchema } from "zod";
-// Study: Import `{ BadRequestError }` from `"../errors/BadRequestError"`.
+// Study: Bring in `{ BadRequestError }` from `"../errors/BadRequestError"` so this file can use it.
 import { BadRequestError } from "../errors/BadRequestError";
 
-// Study: Define the compile-time contract named `ValidationSource`.
+// Study: Describe which information `ValidationSource` can contain so TypeScript can catch mistakes while checking the code.
 type ValidationSource = "body" | "params" | "query";
 
-// Study: Export `validate` as a reusable function.
+// Study: Set up a reusable step named `validate`.
 export const validate = (
-    // Study: Accept `schema` with type `ZodSchema`.
+    // Study: This step receives `schema`. `ZodSchema` describes what that information should look like.
     schema: ZodSchema,
-    // Study: Accept `source` with type `ValidationSource` with initial value `"body"`.
+    // Study: This step receives `source`. `ValidationSource` with initial value `"body"` describes what that information should look like.
     source: ValidationSource = "body"
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Return `( req: Request, res: Response, next: NextFunction ) => { try { const validatedData …` to the caller.
+    // Study: Give `( req: Request, res: Response, next: NextFunction ) => { try { const validatedData …` back to the code that asked for it.
     return (
-        // Study: Accept `req` with type `Request`.
+        // Study: Read the information that came in with the request from the screen.
         req: Request,
-        // Study: Accept `res` with type `Response`.
+        // Study: Use this to send information or an error back to the screen.
         res: Response,
-        // Study: Accept `next` with type `NextFunction`.
+        // Study: Use this to move the request to the next check or action.
         next: NextFunction
-    // Study: Close this group and continue the enclosing expression.
+    // Study: Finish this group and continue the surrounding step.
     ) => {
-        // Study: Run this block and handle failures in the associated catch block.
+        // Study: Try these steps. If one fails, go to the error-handling steps below.
         try {
-            // Study: Validate `req[source]` with `schema` and obtain the parsed value and store the result as `validatedData`.
+            // Study: Check `req[source]` using the rule `schema` and obtain the parsed value and store the result as `validatedData`.
             const validatedData = schema.parse(req[source]);
 
             // Express 5 exposes req.query through a getter, so keep parsed
             // query values in res.locals instead of assigning to req.query.
-            // Study: Run the following branch when `source === "query"` is truthy.
+            // Study: Do the next step if this check passes: `source === "query"`.
             if (source === "query") {
                 // Study: Assign `validatedData` to `res.locals.validatedQuery`.
                 res.locals.validatedQuery = validatedData;
@@ -42,32 +42,32 @@ export const validate = (
             } else {
                 // Study: Assign `validatedData` to `req[source]`.
                 req[source] = validatedData;
-            // Study: Close the code block.
+            // Study: End this group of steps.
             }
 
-            // Study: Continue to the next Express middleware or handler.
+            // Study: Allow the request to move to its next check or action.
             next();
-        // Study: Handle an exception from the try block as `error`.
+        // Study: Handle a problem raised during the steps above.
         } catch (error) {
-            // Study: Run the following branch when `error instanceof ZodError` is truthy.
+            // Study: Do the next step if this check passes: `error instanceof ZodError`.
             if (error instanceof ZodError) {
                 // Study: Set `message` to `error.issues[0]?.message || "Invalid request."`.
                 const message =
                     // Study: Evaluate `error.issues[0]?.message || "Invalid request."`.
                     error.issues[0]?.message || "Invalid request.";
 
-                // Study: Pass the error to the next Express error handler.
+                // Study: Send the problem to the part of the backend that prepares an error reply.
                 next(new BadRequestError(message));
                 // Study: Exit the function here.
                 return;
-            // Study: Close the code block.
+            // Study: End this group of steps.
             }
 
-            // Study: Pass the error to the next Express error handler.
+            // Study: Send the problem to the part of the backend that prepares an error reply.
             next(error);
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
-    // Study: Close the code block.
+    // Study: End this group of steps.
     };
-// Study: Close the code block.
+// Study: End this group of steps.
 };

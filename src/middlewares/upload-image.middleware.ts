@@ -1,15 +1,15 @@
-// Study: Configure image upload handling, including file storage and upload rules.
-// Study: Import `{ NextFunction, Request, Response }` from `"express"`.
+// Study: Decides which image uploads to accept and where to save them.
+// Study: Bring in `{ NextFunction, Request, Response }` from `"express"` so this file can use it.
 import { NextFunction, Request, Response } from "express";
-// Study: Import `multer, { MulterError }` from `"multer"`.
+// Study: Bring in `multer, { MulterError }` from `"multer"` so this file can use it.
 import multer, { MulterError } from "multer";
-// Study: Import `path` from `"path"`.
+// Study: Bring in `path` from `"path"` so this file can use it.
 import path from "path";
-// Study: Import `{ mkdirSync }` from `"fs"`.
+// Study: Bring in `{ mkdirSync }` from `"fs"` so this file can use it.
 import { mkdirSync } from "fs";
-// Study: Import `{ randomUUID }` from `"crypto"`.
+// Study: Bring in `{ randomUUID }` from `"crypto"` so this file can use it.
 import { randomUUID } from "crypto";
-// Study: Import `{ BadRequestError }` from `"../errors/BadRequestError"`.
+// Study: Bring in `{ BadRequestError }` from `"../errors/BadRequestError"` so this file can use it.
 import { BadRequestError } from "../errors/BadRequestError";
 
 // Study: Build the object `allowedMimeTypes` with the entries below.
@@ -20,11 +20,11 @@ const allowedMimeTypes: Record<string, string> = {
     "image/png": ".png",
     // Study: Set `"image/webp"` to `".webp"`.
     "image/webp": ".webp",
-// Study: Close the object literal.
+// Study: End this group of values.
 };
 
 /** Creates a single-image upload middleware that stores files under uploads/<directory>. */
-// Study: Export `createImageUploadMiddleware` as a reusable function.
+// Study: Set up a reusable step named `createImageUploadMiddleware`.
 export const createImageUploadMiddleware = (options: {
     // Study: Define `directory` with type `(req: Request) => string`.
     directory: (req: Request) => string;
@@ -34,7 +34,7 @@ export const createImageUploadMiddleware = (options: {
     maxSizeBytes?: number;
     // Study: Define `maxFiles` as optional with type `number`.
     maxFiles?: number;
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 }) => {
     // Study: Set `maxFiles` to `options.maxFiles ?? 1`.
     const maxFiles = options.maxFiles ?? 1;
@@ -42,9 +42,9 @@ export const createImageUploadMiddleware = (options: {
     const upload = multer({
         // Study: Set `storage` to `multer.diskStorage({ destination: (req, _file, callback) => { try { const directory…`.
         storage: multer.diskStorage({
-            // Study: Provide the callback used for `destination`.
+            // Study: Give `destination` a step to run later when it needs a result.
             destination: (req, _file, callback) => {
-                // Study: Run this block and handle failures in the associated catch block.
+                // Study: Try these steps. If one fails, go to the error-handling steps below.
                 try {
                     // Study: Call `path.resolve` and store the result as `directory`.
                     const directory = path.resolve(process.cwd(), "uploads", options.directory(req));
@@ -52,76 +52,76 @@ export const createImageUploadMiddleware = (options: {
                     mkdirSync(directory, { recursive: true });
                     // Study: Call `callback`.
                     callback(null, directory);
-                // Study: Handle an exception from the try block as `error`.
+                // Study: Handle a problem raised during the steps above.
                 } catch (error) {
                     // Study: Call `callback`.
                     callback(error as Error, "");
-                // Study: Close the code block.
+                // Study: End this group of steps.
                 }
-            // Study: Close the code block.
+            // Study: End this group of steps.
             },
-            // Study: Provide the callback used for `filename`.
+            // Study: Give `filename` a step to run later when it needs a result.
             filename: (_req, file, callback) => {
                 // Study: Set `extension` to `allowedMimeTypes[file.mimetype]`.
                 const extension = allowedMimeTypes[file.mimetype];
-                // Study: Run the following branch when `!extension` is truthy.
+                // Study: Do the next step if there is no value for `extension`.
                 if (!extension) {
                     // Study: Call `callback`.
                     callback(new BadRequestError("Choose a JPEG, PNG, or WebP image."), "");
                     // Study: Exit the function here.
                     return;
-                // Study: Close the code block.
+                // Study: End this group of steps.
                 }
                 // Study: Call `callback`.
                 callback(null, `${randomUUID()}${extension}`);
-            // Study: Close the code block.
+            // Study: End this group of steps.
             },
-        // Study: Close the object literal.
+        // Study: End this group of values.
         }),
         // Study: Start the nested value for `limits`.
         limits: { fileSize: options.maxSizeBytes ?? 5 * 1024 * 1024, files: maxFiles },
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
 
-    // Study: Return `(req: Request, res: Response, next: NextFunction) => { const parser = maxFiles === …` to the caller.
+    // Study: Give `(req: Request, res: Response, next: NextFunction) => { const parser = maxFiles === …` back to the code that asked for it.
     return (req: Request, res: Response, next: NextFunction) => {
         // Study: Set `parser` to `maxFiles === 1 ? upload.single(options.fieldName ?? "image") : upload.array(options…`.
         const parser = maxFiles === 1
-            // Study: Use this value when the preceding condition is truthy.
+            // Study: Use this value if the check above passes.
             ? upload.single(options.fieldName ?? "image")
-            // Study: Use this value when the preceding condition is falsy.
+            // Study: Use this value if the check above fails.
             : upload.array(options.fieldName ?? "images", maxFiles);
         // Study: Call `parser`.
         parser(req, res, (error?: unknown) => {
-            // Study: Run the following branch when `error instanceof MulterError && error.code === "LIMIT_FILE_SIZE"` is truthy.
+            // Study: Do the next step if this check passes: `error instanceof MulterError && error.code === "LIMIT_FILE_SIZE"`.
             if (error instanceof MulterError && error.code === "LIMIT_FILE_SIZE") {
-                // Study: Pass the error to the next Express error handler.
+                // Study: Send the problem to the part of the backend that prepares an error reply.
                 next(new BadRequestError("Each image must be 5 MB or smaller."));
                 // Study: Exit the function here.
                 return;
-            // Study: Close the code block.
+            // Study: End this group of steps.
             }
-            // Study: Run the following branch when `error instanceof MulterError` is truthy.
+            // Study: Do the next step if this check passes: `error instanceof MulterError`.
             if (error instanceof MulterError) {
-                // Study: Run the following branch when `maxFiles > 1 && (error.code === "LIMIT_FILE_COUNT" || error.code === "LIMIT_UNEXPEC…` is truthy.
+                // Study: Do the next step if this check passes: `maxFiles > 1 && (error.code === "LIMIT_FILE_COUNT" || error.code === "LIMIT_UNEXPEC…`.
                 if (maxFiles > 1 && (error.code === "LIMIT_FILE_COUNT" || error.code === "LIMIT_UNEXPECTED_FILE")) {
-                    // Study: Pass the error to the next Express error handler.
+                    // Study: Send the problem to the part of the backend that prepares an error reply.
                     next(new BadRequestError(`Upload no more than ${maxFiles} images at a time.`));
                     // Study: Exit the function here.
                     return;
-                // Study: Close the code block.
+                // Study: End this group of steps.
                 }
-                // Study: Pass the error to the next Express error handler.
+                // Study: Send the problem to the part of the backend that prepares an error reply.
                 next(new BadRequestError("Unable to process the selected image."));
                 // Study: Exit the function here.
                 return;
-            // Study: Close the code block.
+            // Study: End this group of steps.
             }
-            // Study: Pass the error to the next Express error handler.
+            // Study: Send the problem to the part of the backend that prepares an error reply.
             next(error);
-        // Study: Close the code block.
+        // Study: End this group of steps.
         });
-    // Study: Close the code block.
+    // Study: End this group of steps.
     };
-// Study: Close the code block.
+// Study: End this group of steps.
 };

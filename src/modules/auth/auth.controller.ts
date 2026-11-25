@@ -1,186 +1,186 @@
-// Study: Translate HTTP requests into service calls and send HTTP responses for account registration, sign-in, sign-out, and session token refresh.
-// Study: Import `{ Request, Response, NextFunction }` from `"express"`.
+// Study: This file is about signing in, signing out, creating an account, and staying signed in. Takes information sent by the screen, asks the backend to do the work, and sends back the result.
+// Study: Bring in `{ Request, Response, NextFunction }` from `"express"` so this file can use it.
 import { Request, Response, NextFunction } from "express";
-// Study: Import `* as authService` from `"./auth.service"`.
+// Study: Bring in `* as authService` from `"./auth.service"` so this file can use it.
 import * as authService from "./auth.service";
 
 //register
-// Study: Export `registerCustomer` as an async function that returns a promise.
+// Study: Make `registerCustomer` available to other files. Its result arrives after its work finishes.
 export const registerCustomer = async (
-    // Study: Accept `req` with type `Request`.
+    // Study: Read the information that came in with the request from the screen.
     req: Request,
-    // Study: Accept `res` with type `Response`.
+    // Study: Use this to send information or an error back to the screen.
     res: Response,
-    // Study: Accept `next` with type `NextFunction`.
+    // Study: Use this to move the request to the next check or action.
     next: NextFunction
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Run this block and handle failures in the associated catch block.
+    // Study: Try these steps. If one fails, go to the error-handling steps below.
     try {
         // Study: Call `authService.registerCustomer` and wait for it to finish and store its result in `result`.
         const result = await authService.registerCustomer(req.body);
 
-        // Study: Send a JSON response to the client.
+        // Study: Send named information back to the screen as JSON.
         res.status(200).json({
-            // Study: Set `success` to `true`.
+            // Study: Tell the screen that the request succeeded.
             success: true,
             // Study: Set `message` to `"Customer registered successfully."`.
             message: "Customer registered successfully.",
             // Study: Set `data` to `result`.
             data: result
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
-    // Study: Handle an exception from the try block as `error`.
+    // Study: Handle a problem raised during the steps above.
     } catch (error) {
-        // Study: Pass the error to the next Express error handler.
+        // Study: Send the problem to the part of the backend that prepares an error reply.
         next(error);
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
 //login
-// Study: Export `login` as an async function that returns a promise.
+// Study: Make `login` available to other files. Its result arrives after its work finishes.
 export const login = async (
-    // Study: Accept `req` with type `Request`.
+    // Study: Read the information that came in with the request from the screen.
     req: Request,
-    // Study: Accept `res` with type `Response`.
+    // Study: Use this to send information or an error back to the screen.
     res: Response,
-    // Study: Accept `next` with type `NextFunction`.
+    // Study: Use this to move the request to the next check or action.
     next: NextFunction
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Run this block and handle failures in the associated catch block.
+    // Study: Try these steps. If one fails, go to the error-handling steps below.
     try{
         // Study: Call `authService.login` and wait for it to finish and store its result in `result`.
         const result = await authService.login(req.body);
 
-        // Study: Send a JSON response to the client.
+        // Study: Send named information back to the screen as JSON.
         res.status(200).json({
-            // Study: Set `success` to `true`.
+            // Study: Tell the screen that the request succeeded.
             success: true,
             // Study: Set `message` to `"Logged in successfully."`.
             message: "Logged in successfully.",
             // Study: Set `data` to `result`.
             data: result,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
-    // Study: Handle an exception from the try block as `error`.
+    // Study: Handle a problem raised during the steps above.
     } catch (error) {
-        // Study: Pass the error to the next Express error handler.
+        // Study: Send the problem to the part of the backend that prepares an error reply.
         next(error);
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
 //get me
-// Study: Export `getMe` as an async function that returns a promise.
+// Study: Make `getMe` available to other files. Its result arrives after its work finishes.
 export const getMe = async (
-    // Study: Accept `req` with type `Request`.
+    // Study: Read the information that came in with the request from the screen.
     req: Request,
-    // Study: Accept `res` with type `Response`.
+    // Study: Use this to send information or an error back to the screen.
     res: Response,
-    // Study: Accept `next` with type `NextFunction`.
+    // Study: Use this to move the request to the next check or action.
     next: NextFunction
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Run this block and handle failures in the associated catch block.
+    // Study: Try these steps. If one fails, go to the error-handling steps below.
     try {
         // Study: Call `authService.getMe` and wait for it to finish and store its result in `result`.
         const result = await authService.getMe(req.user!);
 
-        // Study: Send a JSON response to the client.
+        // Study: Send named information back to the screen as JSON.
         res.status(200).json({
-            // Study: Set `success` to `true`.
+            // Study: Tell the screen that the request succeeded.
             success: true,
             // Study: Set `message` to `"User profile retrieved successfully."`.
             message: "User profile retrieved successfully.",
             // Study: Set `data` to `result`.
             data: result,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
-    // Study: Handle an exception from the try block as `error`.
+    // Study: Handle a problem raised during the steps above.
     } catch (error) {
-        // Study: Pass the error to the next Express error handler.
+        // Study: Send the problem to the part of the backend that prepares an error reply.
         next(error);
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-// Study: Close the code block.
+// Study: End this group of steps.
 }
 
 //post refresh token logic
-// Study: Export `refreshAccessToken` as an async function that returns a promise.
+// Study: Make `refreshAccessToken` available to other files. Its result arrives after its work finishes.
 export const refreshAccessToken = async (
-    // Study: Accept `req` with type `Request`.
+    // Study: Read the information that came in with the request from the screen.
     req: Request,
-    // Study: Accept `res` with type `Response`.
+    // Study: Use this to send information or an error back to the screen.
     res: Response,
-    // Study: Accept `next` with type `NextFunction`.
+    // Study: Use this to move the request to the next check or action.
     next: NextFunction
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Run this block and handle failures in the associated catch block.
+    // Study: Try these steps. If one fails, go to the error-handling steps below.
     try {
         // Study: Call `authService.refreshAccessToken` and wait for it to finish and store its result in `result`.
         const result = await authService.refreshAccessToken(
             // Study: Supply `req` to the surrounding statement.
             req.body.refreshToken
-        // Study: Close the call arguments.
+        // Study: End the list of information being sent to this step.
         );
 
-        // Study: Send a JSON response to the client.
+        // Study: Send named information back to the screen as JSON.
         res.status(200).json({
-            // Study: Set `success` to `true`.
+            // Study: Tell the screen that the request succeeded.
             success: true,
             // Study: Set `message` to `"Tokens refreshed successfully."`.
             message: "Tokens refreshed successfully.",
             // Study: Set `data` to `result`.
             data: result
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
-    // Study: Handle an exception from the try block as `error`.
+    // Study: Handle a problem raised during the steps above.
     } catch (error) {
-        // Study: Pass the error to the next Express error handler.
+        // Study: Send the problem to the part of the backend that prepares an error reply.
         next(error);
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
 //logout
-// Study: Export `logout` as an async function that returns a promise.
+// Study: Make `logout` available to other files. Its result arrives after its work finishes.
 export const logout = async (
-    // Study: Accept `req` with type `Request`.
+    // Study: Read the information that came in with the request from the screen.
     req: Request,
-    // Study: Accept `res` with type `Response`.
+    // Study: Use this to send information or an error back to the screen.
     res: Response,
-    // Study: Accept `next` with type `NextFunction`.
+    // Study: Use this to move the request to the next check or action.
     next: NextFunction
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Run this block and handle failures in the associated catch block.
+    // Study: Try these steps. If one fails, go to the error-handling steps below.
     try {
         // Study: Call `authService.logout` and wait for it to finish.
         await authService.logout(
             // Study: Supply `req` to the surrounding statement.
             req.body.refreshToken
-        // Study: Close the call arguments.
+        // Study: End the list of information being sent to this step.
         );
 
-        // Study: Send a JSON response to the client.
+        // Study: Send named information back to the screen as JSON.
         res.status(200).json({
-            // Study: Set `success` to `true`.
+            // Study: Tell the screen that the request succeeded.
             success: true,
             // Study: Set `message` to `"Logged out successfully."`.
             message: "Logged out successfully."
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
-    // Study: Handle an exception from the try block as `error`.
+    // Study: Handle a problem raised during the steps above.
     } catch (error) {
-        // Study: Pass the error to the next Express error handler.
+        // Study: Send the problem to the part of the backend that prepares an error reply.
         next(error);
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-// Study: Close the code block.
+// Study: End this group of steps.
 };

@@ -1,16 +1,16 @@
 // Study: Provide reusable date helpers for backend callers.
-// Study: Import `ms, { StringValue }` from `"ms"`.
+// Study: Bring in `ms, { StringValue }` from `"ms"` so this file can use it.
 import ms, { StringValue } from "ms";
 
-// Study: Export `addDuration` as a reusable function.
+// Study: Set up a reusable step named `addDuration`.
 export const addDuration = (
-    // Study: Accept `duration` with type `StringValue`.
+    // Study: This step receives `duration`. `StringValue` describes what that information should look like.
     duration: StringValue,
-    // Study: Accept `from` with type `Date` with initial value `new Date()`.
+    // Study: This step receives `from`. `Date` with initial value `new Date()` describes what that information should look like.
     from: Date = new Date()
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ): Date => {
-    // Study: Return `new Date(from.getTime() + ms(duration))` to the caller.
+    // Study: Give `new Date(from.getTime() + ms(duration))` back to the code that asked for it.
     return new Date(from.getTime() + ms(duration));
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 };  //"Give me a date that is 7 days from now if 7d is inside addDuration("7d")"

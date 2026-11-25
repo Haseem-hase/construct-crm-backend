@@ -1,37 +1,37 @@
-// Study: Connect HTTP methods and paths to middleware and handlers for contacts attached to customer accounts.
-// Study: Import `{ Router }` from `"express"`.
+// Study: This file is about the people you can contact at a customer account. Matches each request from the screen to the checks and work it needs.
+// Study: Bring in `{ Router }` from `"express"` so this file can use it.
 import { Router } from "express";
-// Study: Import `{ Module, Action }` from `"@prisma/client"`.
+// Study: Bring in `{ Module, Action }` from `"@prisma/client"` so this file can use it.
 import { Module, Action } from "@prisma/client";
-// Study: Import `{ authenticate }` from `"../../middlewares/authenticate"`.
+// Study: Bring in `{ authenticate }` from `"../../middlewares/authenticate"` so this file can use it.
 import { authenticate } from "../../middlewares/authenticate";
-// Study: Import `{ authorize }` from `"../../middlewares/authorize"`.
+// Study: Bring in `{ authorize }` from `"../../middlewares/authorize"` so this file can use it.
 import { authorize } from "../../middlewares/authorize";
-// Study: Import `{ validate }` from `"../../middlewares/validate"`.
+// Study: Bring in `{ validate }` from `"../../middlewares/validate"` so this file can use it.
 import { validate } from "../../middlewares/validate";
-// Study: Import `{ createCustomerContactSchema, updateCustomerContactSchema, customerAndContactIdPar…` from `"./customer-contact.validation"`.
+// Study: Bring in `{ createCustomerContactSchema, updateCustomerContactSchema, customerAndContactIdPar…` from `"./customer-contact.validation"` so this file can use it.
 import {
-    // Study: Bring `createCustomerContactSchema` into scope from the imported module.
+    // Study: Make `createCustomerContactSchema` from the other file available here.
     createCustomerContactSchema,
-    // Study: Bring `updateCustomerContactSchema` into scope from the imported module.
+    // Study: Make `updateCustomerContactSchema` from the other file available here.
     updateCustomerContactSchema,
-    // Study: Bring `customerAndContactIdParamsSchema` into scope from the imported module.
+    // Study: Make `customerAndContactIdParamsSchema` from the other file available here.
     customerAndContactIdParamsSchema,
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 } from "./customer-contact.validation";
-// Study: Import `{ createCustomerContact, getCustomerContacts, getCustomerContactById, updateCustome…` from `"./customer-contact.controller"`.
+// Study: Bring in `{ createCustomerContact, getCustomerContacts, getCustomerContactById, updateCustome…` from `"./customer-contact.controller"` so this file can use it.
 import {
-    // Study: Bring `createCustomerContact` into scope from the imported module.
+    // Study: Make `createCustomerContact` from the other file available here.
     createCustomerContact,
-    // Study: Bring `getCustomerContacts` into scope from the imported module.
+    // Study: Make `getCustomerContacts` from the other file available here.
     getCustomerContacts,
-    // Study: Bring `getCustomerContactById` into scope from the imported module.
+    // Study: Make `getCustomerContactById` from the other file available here.
     getCustomerContactById,
-    // Study: Bring `updateCustomerContact` into scope from the imported module.
+    // Study: Make `updateCustomerContact` from the other file available here.
     updateCustomerContact,
-    // Study: Bring `deleteCustomerContact` into scope from the imported module.
+    // Study: Make `deleteCustomerContact` from the other file available here.
     deleteCustomerContact,
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 } from "./customer-contact.controller";
 
 // Enable mergeParams to access :customerId from the parent router
@@ -48,7 +48,7 @@ const customerIdOnlySchema = customerAndContactIdParamsSchema.pick({ customerId:
 router.post(
     // Study: Supply the literal string `"/"` here.
     "/",
-    // Study: Call `authorize`.
+    // Study: Check that the signed-in person has permission for the action listed here.
     authorize(Module.CUSTOMER, Action.CREATE),
     // Study: Call `validate`.
     validate(customerIdOnlySchema, "params"),
@@ -56,40 +56,40 @@ router.post(
     validate(createCustomerContactSchema, "body"),
     // Study: Supply `createCustomerContact` to the surrounding statement.
     createCustomerContact
-// Study: Close the call arguments.
+// Study: End the list of information being sent to this step.
 );
 
 // Study: Register GET / with `getCustomerContacts` after the listed middleware.
 router.get(
     // Study: Supply the literal string `"/"` here.
     "/",
-    // Study: Call `authorize`.
+    // Study: Check that the signed-in person has permission for the action listed here.
     authorize(Module.CUSTOMER, Action.VIEW),
     // Study: Call `validate`.
     validate(customerIdOnlySchema, "params"),
     // Study: Supply `getCustomerContacts` to the surrounding statement.
     getCustomerContacts
-// Study: Close the call arguments.
+// Study: End the list of information being sent to this step.
 );
 
 // Study: Register GET /:contactId with `getCustomerContactById` after the listed middleware.
 router.get(
     // Study: Supply the literal string `"/:contactId"` here.
     "/:contactId",
-    // Study: Call `authorize`.
+    // Study: Check that the signed-in person has permission for the action listed here.
     authorize(Module.CUSTOMER, Action.VIEW),
     // Study: Call `validate`.
     validate(customerAndContactIdParamsSchema, "params"),
     // Study: Supply `getCustomerContactById` to the surrounding statement.
     getCustomerContactById
-// Study: Close the call arguments.
+// Study: End the list of information being sent to this step.
 );
 
 // Study: Register PATCH /:contactId with `updateCustomerContact` after the listed middleware.
 router.patch(
     // Study: Supply the literal string `"/:contactId"` here.
     "/:contactId",
-    // Study: Call `authorize`.
+    // Study: Check that the signed-in person has permission for the action listed here.
     authorize(Module.CUSTOMER, Action.UPDATE),
     // Study: Call `validate`.
     validate(customerAndContactIdParamsSchema, "params"),
@@ -97,21 +97,21 @@ router.patch(
     validate(updateCustomerContactSchema, "body"),
     // Study: Supply `updateCustomerContact` to the surrounding statement.
     updateCustomerContact
-// Study: Close the call arguments.
+// Study: End the list of information being sent to this step.
 );
 
 // Study: Register DELETE /:contactId with `deleteCustomerContact` after the listed middleware.
 router.delete(
     // Study: Supply the literal string `"/:contactId"` here.
     "/:contactId",
-    // Study: Call `authorize`.
+    // Study: Check that the signed-in person has permission for the action listed here.
     authorize(Module.CUSTOMER, Action.DELETE),
     // Study: Call `validate`.
     validate(customerAndContactIdParamsSchema, "params"),
     // Study: Supply `deleteCustomerContact` to the surrounding statement.
     deleteCustomerContact
-// Study: Close the call arguments.
+// Study: End the list of information being sent to this step.
 );
 
-// Study: Expose `router` as the default export.
+// Study: Make `router` the main thing other files can get from this file.
 export default router;

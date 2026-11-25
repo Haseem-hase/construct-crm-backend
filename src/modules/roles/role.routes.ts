@@ -1,61 +1,61 @@
-// Study: Connect HTTP methods and paths to middleware and handlers for role templates, organization roles, and permission assignments.
-// Study: Import `{ Router }` from `"express"`.
+// Study: This file is about job roles in each company and the actions people in those roles may take. Matches each request from the screen to the checks and work it needs.
+// Study: Bring in `{ Router }` from `"express"` so this file can use it.
 import { Router } from "express";
 
-// Study: Import `{ createGlobalRoleController, getGlobalRolesController, getGlobalRoleController, up…` from `"./role.controller"`.
+// Study: Bring in `{ createGlobalRoleController, getGlobalRolesController, getGlobalRoleController, up…` from `"./role.controller"` so this file can use it.
 import {
-    // Study: Bring `createGlobalRoleController` into scope from the imported module.
+    // Study: Make `createGlobalRoleController` from the other file available here.
     createGlobalRoleController,
-    // Study: Bring `getGlobalRolesController` into scope from the imported module.
+    // Study: Make `getGlobalRolesController` from the other file available here.
     getGlobalRolesController,
-    // Study: Bring `getGlobalRoleController` into scope from the imported module.
+    // Study: Make `getGlobalRoleController` from the other file available here.
     getGlobalRoleController,
-    // Study: Bring `updateGlobalRoleController` into scope from the imported module.
+    // Study: Make `updateGlobalRoleController` from the other file available here.
     updateGlobalRoleController,
-    // Study: Bring `deleteGlobalRoleController` into scope from the imported module.
+    // Study: Make `deleteGlobalRoleController` from the other file available here.
     deleteGlobalRoleController,
-    // Study: Bring `createOrganizationRoleController` into scope from the imported module.
+    // Study: Make `createOrganizationRoleController` from the other file available here.
     createOrganizationRoleController,
-    // Study: Bring `getOrganizationRolesController` into scope from the imported module.
+    // Study: Make `getOrganizationRolesController` from the other file available here.
     getOrganizationRolesController,
-    // Study: Bring `getOrganizationRoleController` into scope from the imported module.
+    // Study: Make `getOrganizationRoleController` from the other file available here.
     getOrganizationRoleController,
-    // Study: Bring `updateOrganizationRoleController` into scope from the imported module.
+    // Study: Make `updateOrganizationRoleController` from the other file available here.
     updateOrganizationRoleController,
-    // Study: Bring `deleteOrganizationRoleController` into scope from the imported module.
+    // Study: Make `deleteOrganizationRoleController` from the other file available here.
     deleteOrganizationRoleController,
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 } from "./role.controller";
 
-// Study: Import `{ authenticate }` from `"../../middlewares/authenticate"`.
+// Study: Bring in `{ authenticate }` from `"../../middlewares/authenticate"` so this file can use it.
 import { authenticate } from "../../middlewares/authenticate";
-// Study: Import `{ authorize }` from `"../../middlewares/authorize"`.
+// Study: Bring in `{ authorize }` from `"../../middlewares/authorize"` so this file can use it.
 import { authorize } from "../../middlewares/authorize";
-// Study: Import `{ Module, Action }` from `"@prisma/client"`.
+// Study: Bring in `{ Module, Action }` from `"@prisma/client"` so this file can use it.
 import { Module, Action } from "@prisma/client";
-// Study: Import `{ validate }` from `"../../middlewares/validate"`.
+// Study: Bring in `{ validate }` from `"../../middlewares/validate"` so this file can use it.
 import { validate } from "../../middlewares/validate";
-// Study: Import `{ createRoleSchema, roleIdSchema, updateRoleSchema }` from `"./role.validation"`.
+// Study: Bring in `{ createRoleSchema, roleIdSchema, updateRoleSchema }` from `"./role.validation"` so this file can use it.
 import { createRoleSchema, roleIdSchema, updateRoleSchema } from "./role.validation";
-// Study: Import `{ requireSuperAdmin }` from `"../../middlewares/require-super-admin"`.
+// Study: Bring in `{ requireSuperAdmin }` from `"../../middlewares/require-super-admin"` so this file can use it.
 import { requireSuperAdmin } from "../../middlewares/require-super-admin";
-// Study: Import `{ ForbiddenError }` from `"../../errors/ForbiddenError"`.
+// Study: Bring in `{ ForbiddenError }` from `"../../errors/ForbiddenError"` so this file can use it.
 import { ForbiddenError } from "../../errors/ForbiddenError";
 
 // Study: Call `Router` and store the result as `router`.
 const router = Router();
 
-// Study: Define `requireOrganizationContext` as a reusable function.
+// Study: Set up a reusable step named `requireOrganizationContext`.
 const requireOrganizationContext = (req: import("express").Request, _res: import("express").Response, next: import("express").NextFunction) => {
-    // Study: Run the following branch when `req.user?.systemRole === "SUPER_ADMIN" || !req.user?.organizationId` is truthy.
+    // Study: Do the next step if this check passes: `req.user?.systemRole === "SUPER_ADMIN" || !req.user?.organizationId`.
     if (req.user?.systemRole === "SUPER_ADMIN" || !req.user?.organizationId) {
-        // Study: Return `next(new ForbiddenError("Organization role APIs require organization membership."))` to the caller.
+        // Study: Give `next(new ForbiddenError("Organization role APIs require organization membership."))` back to the code that asked for it.
         return next(new ForbiddenError("Organization role APIs require organization membership."));
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-    // Study: Continue to the next Express middleware or handler.
+    // Study: Allow the request to move to its next check or action.
     next();
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
 //all role routes require authentication
@@ -72,13 +72,13 @@ router.post(
     "/global",
     // Study: Supply `requireSuperAdmin` to the surrounding statement.
     requireSuperAdmin,
-    // Study: Call `authorize`.
+    // Study: Check that the signed-in person has permission for the action listed here.
     authorize(Module.ROLE, Action.CREATE),
     // Study: Call `validate`.
     validate(createRoleSchema, "body"),
     // Study: Supply `createGlobalRoleController` to the surrounding statement.
     createGlobalRoleController
-// Study: Close the call arguments.
+// Study: End the list of information being sent to this step.
 );
 
 // Study: Register GET /global with `getGlobalRolesController` after the listed middleware.
@@ -87,11 +87,11 @@ router.get(
     "/global",
     // Study: Supply `requireSuperAdmin` to the surrounding statement.
     requireSuperAdmin,
-    // Study: Call `authorize`.
+    // Study: Check that the signed-in person has permission for the action listed here.
     authorize(Module.ROLE, Action.VIEW),
     // Study: Supply `getGlobalRolesController` to the surrounding statement.
     getGlobalRolesController
-// Study: Close the call arguments.
+// Study: End the list of information being sent to this step.
 );
 
 // Study: Register GET /global/:id with `getGlobalRoleController` after the listed middleware.
@@ -100,13 +100,13 @@ router.get(
     "/global/:id",
     // Study: Supply `requireSuperAdmin` to the surrounding statement.
     requireSuperAdmin,
-    // Study: Call `authorize`.
+    // Study: Check that the signed-in person has permission for the action listed here.
     authorize(Module.ROLE, Action.VIEW),
     // Study: Call `validate`.
     validate(roleIdSchema, "params"),
     // Study: Supply `getGlobalRoleController` to the surrounding statement.
     getGlobalRoleController
-// Study: Close the call arguments.
+// Study: End the list of information being sent to this step.
 );
 
 // Study: Register PATCH /global/:id with `updateGlobalRoleController` after the listed middleware.
@@ -115,7 +115,7 @@ router.patch(
     "/global/:id",
     // Study: Supply `requireSuperAdmin` to the surrounding statement.
     requireSuperAdmin,
-    // Study: Call `authorize`.
+    // Study: Check that the signed-in person has permission for the action listed here.
     authorize(Module.ROLE, Action.UPDATE),
     // Study: Call `validate`.
     validate(roleIdSchema, "params"),
@@ -123,7 +123,7 @@ router.patch(
     validate(updateRoleSchema, "body"),
     // Study: Supply `updateGlobalRoleController` to the surrounding statement.
     updateGlobalRoleController
-// Study: Close the call arguments.
+// Study: End the list of information being sent to this step.
 );
 
 // Study: Register DELETE /global/:id with `deleteGlobalRoleController` after the listed middleware.
@@ -132,13 +132,13 @@ router.delete(
     "/global/:id",
     // Study: Supply `requireSuperAdmin` to the surrounding statement.
     requireSuperAdmin,
-    // Study: Call `authorize`.
+    // Study: Check that the signed-in person has permission for the action listed here.
     authorize(Module.ROLE, Action.DELETE),
     // Study: Call `validate`.
     validate(roleIdSchema, "params"),
     // Study: Supply `deleteGlobalRoleController` to the surrounding statement.
     deleteGlobalRoleController
-// Study: Close the call arguments.
+// Study: End the list of information being sent to this step.
 );
 
 // ==========================================
@@ -151,13 +151,13 @@ router.post(
     "/",
     // Study: Supply `requireOrganizationContext` to the surrounding statement.
     requireOrganizationContext,
-    // Study: Call `authorize`.
+    // Study: Check that the signed-in person has permission for the action listed here.
     authorize(Module.ROLE, Action.CREATE),
     // Study: Call `validate`.
     validate(createRoleSchema, "body"),
     // Study: Supply `createOrganizationRoleController` to the surrounding statement.
     createOrganizationRoleController
-// Study: Close the call arguments.
+// Study: End the list of information being sent to this step.
 );
 
 // Study: Register GET / with `getOrganizationRolesController` after the listed middleware.
@@ -166,11 +166,11 @@ router.get(
     "/",
     // Study: Supply `requireOrganizationContext` to the surrounding statement.
     requireOrganizationContext,
-    // Study: Call `authorize`.
+    // Study: Check that the signed-in person has permission for the action listed here.
     authorize(Module.ROLE, Action.VIEW),
     // Study: Supply `getOrganizationRolesController` to the surrounding statement.
     getOrganizationRolesController
-// Study: Close the call arguments.
+// Study: End the list of information being sent to this step.
 );
 
 // Study: Register GET /:id with `getOrganizationRoleController` after the listed middleware.
@@ -179,13 +179,13 @@ router.get(
     "/:id",
     // Study: Supply `requireOrganizationContext` to the surrounding statement.
     requireOrganizationContext,
-    // Study: Call `authorize`.
+    // Study: Check that the signed-in person has permission for the action listed here.
     authorize(Module.ROLE, Action.VIEW),
     // Study: Call `validate`.
     validate(roleIdSchema, "params"),
     // Study: Supply `getOrganizationRoleController` to the surrounding statement.
     getOrganizationRoleController
-// Study: Close the call arguments.
+// Study: End the list of information being sent to this step.
 );
 
 // Study: Register PATCH /:id with `updateOrganizationRoleController` after the listed middleware.
@@ -194,7 +194,7 @@ router.patch(
     "/:id",
     // Study: Supply `requireOrganizationContext` to the surrounding statement.
     requireOrganizationContext,
-    // Study: Call `authorize`.
+    // Study: Check that the signed-in person has permission for the action listed here.
     authorize(Module.ROLE, Action.UPDATE),
     // Study: Call `validate`.
     validate(roleIdSchema, "params"),
@@ -202,7 +202,7 @@ router.patch(
     validate(updateRoleSchema, "body"),
     // Study: Supply `updateOrganizationRoleController` to the surrounding statement.
     updateOrganizationRoleController
-// Study: Close the call arguments.
+// Study: End the list of information being sent to this step.
 );
 
 // Study: Register DELETE /:id with `deleteOrganizationRoleController` after the listed middleware.
@@ -211,14 +211,14 @@ router.delete(
     "/:id",
     // Study: Supply `requireOrganizationContext` to the surrounding statement.
     requireOrganizationContext,
-    // Study: Call `authorize`.
+    // Study: Check that the signed-in person has permission for the action listed here.
     authorize(Module.ROLE, Action.DELETE),
     // Study: Call `validate`.
     validate(roleIdSchema, "params"),
     // Study: Supply `deleteOrganizationRoleController` to the surrounding statement.
     deleteOrganizationRoleController
-// Study: Close the call arguments.
+// Study: End the list of information being sent to this step.
 );
 
-// Study: Expose `router` as the default export.
+// Study: Make `router` the main thing other files can get from this file.
 export default router;

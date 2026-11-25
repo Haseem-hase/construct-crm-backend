@@ -1,123 +1,123 @@
-// Study: Apply business rules and coordinate database operations for contractor placements on projects and their responsibilities.
-// Study: Import `* as assignmentRepository` from `"./contractor-project-assignment.repository"`.
+// Study: This file is about which contractors work on which jobs and what they are responsible for. Applies the rules for this part of the CRM, such as what must be checked before saving a change.
+// Study: Bring in `* as assignmentRepository` from `"./contractor-project-assignment.repository"` so this file can use it.
 import * as assignmentRepository from "./contractor-project-assignment.repository";
-// Study: Import `{ findContractorById }` from `"../contractor/contractor.repository"`.
+// Study: Bring in `{ findContractorById }` from `"../contractor/contractor.repository"` so this file can use it.
 import { findContractorById } from "../contractor/contractor.repository";
-// Study: Import `{ findProjectByIdAndOrganization }` from `"../projects/project.repository"`.
+// Study: Bring in `{ findProjectByIdAndOrganization }` from `"../projects/project.repository"` so this file can use it.
 import { findProjectByIdAndOrganization } from "../projects/project.repository";
-// Study: Import `* as labourAssignmentRepository` from `"../labour-assignment/labour-assignment.repository"`.
+// Study: Bring in `* as labourAssignmentRepository` from `"../labour-assignment/labour-assignment.repository"` so this file can use it.
 import * as labourAssignmentRepository from "../labour-assignment/labour-assignment.repository";
-// Study: Import `prisma` from `"../../lib/prisma"`.
+// Study: Bring in `prisma` from `"../../lib/prisma"` so this file can use it.
 import prisma from "../../lib/prisma";
-// Study: Import `{ CreateContractorProjectAssignmentBody, UpdateContractorProjectAssignmentBody }` from `"./contractor-project-assignment.types"`.
+// Study: Bring in `{ CreateContractorProjectAssignmentBody, UpdateContractorProjectAssignmentBody }` from `"./contractor-project-assignment.types"` so this file can use it.
 import { 
-    // Study: Bring `CreateContractorProjectAssignmentBody` into scope from the imported module.
+    // Study: Make `CreateContractorProjectAssignmentBody` from the other file available here.
     CreateContractorProjectAssignmentBody, 
-    // Study: Bring `UpdateContractorProjectAssignmentBody` into scope from the imported module.
+    // Study: Make `UpdateContractorProjectAssignmentBody` from the other file available here.
     UpdateContractorProjectAssignmentBody 
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 } from "./contractor-project-assignment.types";
-// Study: Import `{ NotFoundError }` from `"../../errors/NotFoundError"`.
+// Study: Bring in `{ NotFoundError }` from `"../../errors/NotFoundError"` so this file can use it.
 import { NotFoundError } from "../../errors/NotFoundError";
-// Study: Import `{ BadRequestError }` from `"../../errors/BadRequestError"`.
+// Study: Bring in `{ BadRequestError }` from `"../../errors/BadRequestError"` so this file can use it.
 import { BadRequestError } from "../../errors/BadRequestError";
-// Study: Import `{ ConflictError }` from `"../../errors/ConflictError"`.
+// Study: Bring in `{ ConflictError }` from `"../../errors/ConflictError"` so this file can use it.
 import { ConflictError } from "../../errors/ConflictError";
-// Study: Import `{ ContractorStatus, ProjectStatus, ContractorAssignmentStatus }` from `"@prisma/client"`.
+// Study: Bring in `{ ContractorStatus, ProjectStatus, ContractorAssignmentStatus }` from `"@prisma/client"` so this file can use it.
 import { ContractorStatus, ProjectStatus, ContractorAssignmentStatus } from "@prisma/client";
 
-// Study: Export `createAssignment` as an async function that returns a promise.
+// Study: Make `createAssignment` available to other files. Its result arrives after its work finishes.
 export const createAssignment = async (
-    // Study: Accept `organizationId` with type `string`.
+    // Study: This step receives `organizationId`. `string` describes what that information should look like.
     organizationId: string,
-    // Study: Accept `data` with type `CreateContractorProjectAssignmentBody`.
+    // Study: This step receives `data`. `CreateContractorProjectAssignmentBody` describes what that information should look like.
     data: CreateContractorProjectAssignmentBody
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
     // 1. Verify project ownership and status
     // Study: Call `findProjectByIdAndOrganization` and wait for it to finish and store its result in `project`.
     const project = await findProjectByIdAndOrganization(data.projectId, organizationId);
-    // Study: Run the following branch when `!project` is truthy.
+    // Study: Do the next step if there is no value for `project`.
     if (!project) {
-        // Study: Stop this execution path by throwing `new NotFoundError("Project not found in your organization.")`.
+        // Study: Stop here and report this problem: "Project not found in your organization."
         throw new NotFoundError("Project not found in your organization.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-    // Study: Run the following branch when `project.status !== ProjectStatus.PLANNING && project.status !== ProjectStatus.ACTIVE` is truthy.
+    // Study: Do the next step if this check passes: `project.status !== ProjectStatus.PLANNING && project.status !== ProjectStatus.ACTIVE`.
     if (project.status !== ProjectStatus.PLANNING && project.status !== ProjectStatus.ACTIVE) {
-        // Study: Stop this execution path by throwing `new BadRequestError('Cannot assign contractor to a project with status: ${project.s…`.
+        // Study: Stop here and pass the problem onward: `new BadRequestError('Cannot assign contractor to a project with status: ${project.s…`.
         throw new BadRequestError(`Cannot assign contractor to a project with status: ${project.status}`);
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // 2. Verify contractor ownership and status
     // Study: Call `findContractorById` and wait for it to finish and store its result in `contractor`.
     const contractor = await findContractorById(data.contractorId, organizationId);
-    // Study: Run the following branch when `!contractor` is truthy.
+    // Study: Do the next step if there is no value for `contractor`.
     if (!contractor) {
-        // Study: Stop this execution path by throwing `new NotFoundError("Contractor not found in your organization.")`.
+        // Study: Stop here and report this problem: "Contractor not found in your organization."
         throw new NotFoundError("Contractor not found in your organization.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-    // Study: Run the following branch when `contractor.status !== ContractorStatus.ACTIVE` is truthy.
+    // Study: Do the next step if this check passes: `contractor.status !== ContractorStatus.ACTIVE`.
     if (contractor.status !== ContractorStatus.ACTIVE) {
-        // Study: Stop this execution path by throwing `new BadRequestError('Cannot assign an inactive contractor. Current status: ${contra…`.
+        // Study: Stop here and pass the problem onward: `new BadRequestError('Cannot assign an inactive contractor. Current status: ${contra…`.
         throw new BadRequestError(`Cannot assign an inactive contractor. Current status: ${contractor.status}`);
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // 3. Duplicate assignment check
     // Study: Call `assignmentRepository.findByProjectAndContractor` and wait for it to finish and store its result in `existingAssignment`.
     const existingAssignment = await assignmentRepository.findByProjectAndContractor(data.projectId, data.contractorId);
-    // Study: Run the following branch when `existingAssignment` is truthy.
+    // Study: Do the next step if this check passes: `existingAssignment`.
     if (existingAssignment) {
-        // Study: Stop this execution path by throwing `new ConflictError("This contractor is already assigned to this project.")`.
+        // Study: Stop here and report this problem: "This contractor is already assigned to this project."
         throw new ConflictError("This contractor is already assigned to this project.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // 4. Responsibility validation
-    // Study: Run the following branch when `data.responsibilityIds && data.responsibilityIds.length > 0` is truthy.
+    // Study: Do the next step if this check passes: `data.responsibilityIds && data.responsibilityIds.length > 0`.
     if (data.responsibilityIds && data.responsibilityIds.length > 0) {
-        // Study: Fetch records matching the query through `prisma.responsibility` and wait for it to finish and store its result in `responsibilities`.
+        // Study: Find all matching records using `prisma.responsibility` and wait for it to finish and store its result in `responsibilities`.
         const responsibilities = await prisma.responsibility.findMany({
-            // Study: Set the conditions that database records must match using id.
+            // Study: Set the conditions that records must meet using id.
             where: { id: { in: data.responsibilityIds } },
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
 
-        // Study: Run the following branch when `responsibilities.length !== data.responsibilityIds.length` is truthy.
+        // Study: Do the next step if this check passes: `responsibilities.length !== data.responsibilityIds.length`.
         if (responsibilities.length !== data.responsibilityIds.length) {
-            // Study: Stop this execution path by throwing `new BadRequestError("One or more responsibilities do not exist.")`.
+            // Study: Stop here and report this problem: "One or more responsibilities do not exist."
             throw new BadRequestError("One or more responsibilities do not exist.");
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
 
         // Study: Keep the items in `responsibilities` that satisfy the predicate and store the result as `inactiveResponsibilities`.
         const inactiveResponsibilities = responsibilities.filter(r => !r.isActive);
-        // Study: Run the following branch when `inactiveResponsibilities.length > 0` is truthy.
+        // Study: Do the next step if this check passes: `inactiveResponsibilities.length > 0`.
         if (inactiveResponsibilities.length > 0) {
-            // Study: Stop this execution path by throwing `new BadRequestError("One or more responsibilities are inactive.")`.
+            // Study: Stop here and report this problem: "One or more responsibilities are inactive."
             throw new BadRequestError("One or more responsibilities are inactive.");
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // 5. Date validation
-    // Study: Run the following branch when `data.startDate && data.endDate` is truthy.
+    // Study: Do the next step if this check passes: `data.startDate && data.endDate`.
     if (data.startDate && data.endDate) {
-        // Study: Run the following branch when `data.endDate < data.startDate` is truthy.
+        // Study: Do the next step if this check passes: `data.endDate < data.startDate`.
         if (data.endDate < data.startDate) {
-            // Study: Stop this execution path by throwing `new BadRequestError("End date cannot be before start date.")`.
+            // Study: Stop here and report this problem: "End date cannot be before start date."
             throw new BadRequestError("End date cannot be before start date.");
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // 6. Create Assignment
-    // Study: Return `await assignmentRepository.create({ projectId: data.projectId, contractorId: data.c…` to the caller.
+    // Study: Give `await assignmentRepository.create({ projectId: data.projectId, contractorId: data.c…` back to the code that asked for it.
     return await assignmentRepository.create({
         // Study: Set `projectId` to `data.projectId`.
         projectId: data.projectId,
@@ -133,50 +133,50 @@ export const createAssignment = async (
         notes: data.notes,
         // Study: Set `responsibilityIds` to `data.responsibilityIds`.
         responsibilityIds: data.responsibilityIds,
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `getAssignmentById` as an async function that returns a promise.
+// Study: Make `getAssignmentById` available to other files. Its result arrives after its work finishes.
 export const getAssignmentById = async (organizationId: string, assignmentId: string) => {
     // Study: Call `assignmentRepository.findById` and wait for it to finish and store its result in `assignment`.
     const assignment = await assignmentRepository.findById(assignmentId);
-    // Study: Run the following branch when `!assignment` is truthy.
+    // Study: Do the next step if there is no value for `assignment`.
     if (!assignment) {
-        // Study: Stop this execution path by throwing `new NotFoundError("Assignment not found.")`.
+        // Study: Stop here and report this problem: "Assignment not found."
         throw new NotFoundError("Assignment not found.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
     
-    // Study: Run the following branch when `assignment.project.organizationId !== organizationId` is truthy.
+    // Study: Do the next step if this check passes: `assignment.project.organizationId !== organizationId`.
     if (assignment.project.organizationId !== organizationId) {
-        // Study: Stop this execution path by throwing `new NotFoundError("Assignment not found.")`.
+        // Study: Stop here and report this problem: "Assignment not found."
         throw new NotFoundError("Assignment not found.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Return `assignment` to the caller.
+    // Study: Give `assignment` back to the code that asked for it.
     return assignment;
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `getPlatformAssignmentById` as an async function that returns a promise.
+// Study: Make `getPlatformAssignmentById` available to other files. Its result arrives after its work finishes.
 export const getPlatformAssignmentById = async (assignmentId: string) => {
     // Study: Call `assignmentRepository.findById` and wait for it to finish and store its result in `assignment`.
     const assignment = await assignmentRepository.findById(assignmentId);
-    // Study: Run the following branch when `!assignment` is truthy and throw `new NotFoundError("Assignment not found.")`.
+    // Study: Do the next step if there is no value for `assignment` . If so, stop and report "Assignment not found."
     if (!assignment) throw new NotFoundError("Assignment not found.");
-    // Study: Return `assignment` to the caller.
+    // Study: Give `assignment` back to the code that asked for it.
     return assignment;
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `getAssignments` as an async function that returns a promise.
+// Study: Make `getAssignments` available to other files. Its result arrives after its work finishes.
 export const getAssignments = async (
-    // Study: Accept `organizationId` with type `string`.
+    // Study: This step receives `organizationId`. `string` describes what that information should look like.
     organizationId: string,
-    // Study: Accept `filters` with type `{ projectId?: string; contractorId?: string; status?: ContractorAssignmentStatus; }`.
+    // Study: This step receives `filters`. `{ projectId?: string; contractorId?: string; status?: ContractorAssignmentStatus; }` describes what that information should look like.
     filters: {
         // Study: Define `projectId` as optional with type `string`.
         projectId?: string;
@@ -186,45 +186,45 @@ export const getAssignments = async (
         status?: ContractorAssignmentStatus;
     // Study: Close the object type.
     }
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
     // Validate project filter tenant
-    // Study: Run the following branch when `filters.projectId` is truthy.
+    // Study: Do the next step if this check passes: `filters.projectId`.
     if (filters.projectId) {
         // Study: Call `findProjectByIdAndOrganization` and wait for it to finish and store its result in `project`.
         const project = await findProjectByIdAndOrganization(filters.projectId, organizationId);
-        // Study: Run the following branch when `!project` is truthy.
+        // Study: Do the next step if there is no value for `project`.
         if (!project) {
-            // Study: Stop this execution path by throwing `new NotFoundError("Project not found in your organization.")`.
+            // Study: Stop here and report this problem: "Project not found in your organization."
             throw new NotFoundError("Project not found in your organization.");
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // Validate contractor filter tenant
-    // Study: Run the following branch when `filters.contractorId` is truthy.
+    // Study: Do the next step if this check passes: `filters.contractorId`.
     if (filters.contractorId) {
         // Study: Call `findContractorById` and wait for it to finish and store its result in `contractor`.
         const contractor = await findContractorById(filters.contractorId, organizationId);
-        // Study: Run the following branch when `!contractor` is truthy.
+        // Study: Do the next step if there is no value for `contractor`.
         if (!contractor) {
-            // Study: Stop this execution path by throwing `new NotFoundError("Contractor not found in your organization.")`.
+            // Study: Stop here and report this problem: "Contractor not found in your organization."
             throw new NotFoundError("Contractor not found in your organization.");
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // Study: Call `assignmentRepository.findMany` and wait for it to finish and store its result in `assignments`.
     const assignments = await assignmentRepository.findMany(organizationId, filters);
     
-    // Study: Return `assignments` to the caller.
+    // Study: Give `assignments` back to the code that asked for it.
     return assignments;
-// Study: Close the code block.
+// Study: End this group of steps.
 };
 
-// Study: Export `getPlatformAssignments` as an async function that returns a promise.
+// Study: Make `getPlatformAssignments` available to other files. Its result arrives after its work finishes.
 export const getPlatformAssignments = async (filters: {
     // Study: Define `projectId` as optional with type `string`.
     projectId?: string;
@@ -235,59 +235,59 @@ export const getPlatformAssignments = async (filters: {
 // Study: Call `assignmentRepository.findAllPlatform`.
 }) => assignmentRepository.findAllPlatform(filters);
 
-// Study: Export `updateAssignment` as an async function that returns a promise.
+// Study: Make `updateAssignment` available to other files. Its result arrives after its work finishes.
 export const updateAssignment = async (
-    // Study: Accept `organizationId` with type `string`.
+    // Study: This step receives `organizationId`. `string` describes what that information should look like.
     organizationId: string,
-    // Study: Accept `assignmentId` with type `string`.
+    // Study: This step receives `assignmentId`. `string` describes what that information should look like.
     assignmentId: string,
-    // Study: Accept `data` with type `UpdateContractorProjectAssignmentBody`.
+    // Study: This step receives `data`. `UpdateContractorProjectAssignmentBody` describes what that information should look like.
     data: UpdateContractorProjectAssignmentBody
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
     // 1. Fetch assignment and verify tenant
     // Study: Call `assignmentRepository.findById` and wait for it to finish and store its result in `assignment`.
     const assignment = await assignmentRepository.findById(assignmentId);
-    // Study: Run the following branch when `!assignment` is truthy.
+    // Study: Do the next step if there is no value for `assignment`.
     if (!assignment) {
-        // Study: Stop this execution path by throwing `new NotFoundError("Assignment not found.")`.
+        // Study: Stop here and report this problem: "Assignment not found."
         throw new NotFoundError("Assignment not found.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
     
-    // Study: Run the following branch when `assignment.project.organizationId !== organizationId` is truthy.
+    // Study: Do the next step if this check passes: `assignment.project.organizationId !== organizationId`.
     if (assignment.project.organizationId !== organizationId) {
-        // Study: Stop this execution path by throwing `new NotFoundError("Assignment not found.")`.
+        // Study: Stop here and report this problem: "Assignment not found."
         throw new NotFoundError("Assignment not found.");
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // 2. Responsibility validation
-    // Study: Run the following branch when `data.responsibilityIds && data.responsibilityIds.length > 0` is truthy.
+    // Study: Do the next step if this check passes: `data.responsibilityIds && data.responsibilityIds.length > 0`.
     if (data.responsibilityIds && data.responsibilityIds.length > 0) {
-        // Study: Fetch records matching the query through `prisma.responsibility` and wait for it to finish and store its result in `responsibilities`.
+        // Study: Find all matching records using `prisma.responsibility` and wait for it to finish and store its result in `responsibilities`.
         const responsibilities = await prisma.responsibility.findMany({
-            // Study: Set the conditions that database records must match using id.
+            // Study: Set the conditions that records must meet using id.
             where: { id: { in: data.responsibilityIds } },
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
 
-        // Study: Run the following branch when `responsibilities.length !== data.responsibilityIds.length` is truthy.
+        // Study: Do the next step if this check passes: `responsibilities.length !== data.responsibilityIds.length`.
         if (responsibilities.length !== data.responsibilityIds.length) {
-            // Study: Stop this execution path by throwing `new BadRequestError("One or more responsibilities do not exist.")`.
+            // Study: Stop here and report this problem: "One or more responsibilities do not exist."
             throw new BadRequestError("One or more responsibilities do not exist.");
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
 
         // Study: Keep the items in `responsibilities` that satisfy the predicate and store the result as `inactiveResponsibilities`.
         const inactiveResponsibilities = responsibilities.filter(r => !r.isActive);
-        // Study: Run the following branch when `inactiveResponsibilities.length > 0` is truthy.
+        // Study: Do the next step if this check passes: `inactiveResponsibilities.length > 0`.
         if (inactiveResponsibilities.length > 0) {
-            // Study: Stop this execution path by throwing `new BadRequestError("One or more responsibilities are inactive.")`.
+            // Study: Stop here and report this problem: "One or more responsibilities are inactive."
             throw new BadRequestError("One or more responsibilities are inactive.");
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // 3. Date validation
@@ -296,47 +296,47 @@ export const updateAssignment = async (
     // Study: Set `resultingEndDate` to `data.endDate !== undefined ? data.endDate : assignment.endDate`.
     const resultingEndDate = data.endDate !== undefined ? data.endDate : assignment.endDate;
 
-    // Study: Run the following branch when `resultingStartDate !== null && resultingEndDate !== null` is truthy.
+    // Study: Do the next step if this check passes: `resultingStartDate !== null && resultingEndDate !== null`.
     if (resultingStartDate !== null && resultingEndDate !== null) {
-        // Study: Run the following branch when `resultingEndDate < resultingStartDate` is truthy.
+        // Study: Do the next step if this check passes: `resultingEndDate < resultingStartDate`.
         if (resultingEndDate < resultingStartDate) {
-            // Study: Stop this execution path by throwing `new BadRequestError("Resulting end date cannot be before start date.")`.
+            // Study: Stop here and report this problem: "Resulting end date cannot be before start date."
             throw new BadRequestError("Resulting end date cannot be before start date.");
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
-    // Study: Run the following branch when `data.startDate !== undefined || data.endDate !== undefined` is truthy.
+    // Study: Do the next step if this check passes: `data.startDate !== undefined || data.endDate !== undefined`.
     if (data.startDate !== undefined || data.endDate !== undefined) {
         // Study: Call `labourAssignmentRepository.findMany` and wait for it to finish and store its result in `childLabourAssignments`.
         const childLabourAssignments = await labourAssignmentRepository.findMany(organizationId, {
             // Study: Set `contractorProjectAssignmentId` to `assignmentId`.
             contractorProjectAssignmentId: assignmentId,
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
 
         // Study: Iterate over each item from `childLabourAssignments` using `const la`.
         for (const la of childLabourAssignments) {
-            // Study: Run the following branch when `resultingStartDate !== null && la.startDate < resultingStartDate` is truthy.
+            // Study: Do the next step if this check passes: `resultingStartDate !== null && la.startDate < resultingStartDate`.
             if (resultingStartDate !== null && la.startDate < resultingStartDate) {
-                // Study: Stop this execution path by throwing `new ConflictError("Contractor project assignment dates cannot be changed because th…`.
+                // Study: Stop here and pass the problem onward: `new ConflictError("Contractor project assignment dates cannot be changed because th…`.
                 throw new ConflictError("Contractor project assignment dates cannot be changed because they would invalidate existing labour assignments.");
-            // Study: Close the code block.
+            // Study: End this group of steps.
             }
-            // Study: Run the following branch when `resultingEndDate !== null && la.endDate > resultingEndDate` is truthy.
+            // Study: Do the next step if this check passes: `resultingEndDate !== null && la.endDate > resultingEndDate`.
             if (resultingEndDate !== null && la.endDate > resultingEndDate) {
-                // Study: Stop this execution path by throwing `new ConflictError("Contractor project assignment dates cannot be changed because th…`.
+                // Study: Stop here and pass the problem onward: `new ConflictError("Contractor project assignment dates cannot be changed because th…`.
                 throw new ConflictError("Contractor project assignment dates cannot be changed because they would invalidate existing labour assignments.");
-            // Study: Close the code block.
+            // Study: End this group of steps.
             }
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
 
-    // Study: Run the following branch when `data.status !== undefined && data.status !== assignment.status` is truthy.
+    // Study: Do the next step if this check passes: `data.status !== undefined && data.status !== assignment.status`.
     if (data.status !== undefined && data.status !== assignment.status) {
         // Study: Set `currentStatus` to `assignment.status`.
         const currentStatus = assignment.status;
@@ -357,23 +357,23 @@ export const updateAssignment = async (
             [ContractorAssignmentStatus.CANCELLED]: [],
             // Study: Start the nested value for `[ContractorAssignmentStatus.TERMINATED]`.
             [ContractorAssignmentStatus.TERMINATED]: [],
-        // Study: Close the object literal.
+        // Study: End this group of values.
         };
 
-        // Study: Run the following branch when `!allowedTransitions[currentStatus].includes(requestedStatus)` is truthy.
+        // Study: Do the next step if this check passes: `!allowedTransitions[currentStatus].includes(requestedStatus)`.
         if (!allowedTransitions[currentStatus].includes(requestedStatus)) {
-            // Study: Stop this execution path by throwing `new BadRequestError('Cannot change assignment status from ${currentStatus} to ${req…`.
+            // Study: Stop here and pass the problem onward: `new BadRequestError('Cannot change assignment status from ${currentStatus} to ${req…`.
             throw new BadRequestError(`Cannot change assignment status from ${currentStatus} to ${requestedStatus}.`);
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // Study: Set `cancelActiveLabourAssignments` to `false`.
     let cancelActiveLabourAssignments = false;
-    // Study: Run the following branch when `data.status !== undefined && data.status !== assignment.status` is truthy.
+    // Study: Do the next step if this check passes: `data.status !== undefined && data.status !== assignment.status`.
     if (data.status !== undefined && data.status !== assignment.status) {
-        // Study: Run the following branch when `data.status === ContractorAssignmentStatus.COMPLETED || data.status === ContractorA…` is truthy.
+        // Study: Do the next step if this check passes: `data.status === ContractorAssignmentStatus.COMPLETED || data.status === ContractorA…`.
         if (
             // Study: Evaluate `data.status === ContractorAssignmentStatus.COMPLETED || data.status === ContractorA…`.
             data.status === ContractorAssignmentStatus.COMPLETED ||
@@ -381,17 +381,17 @@ export const updateAssignment = async (
             data.status === ContractorAssignmentStatus.TERMINATED ||
             // Study: Evaluate `data.status === ContractorAssignmentStatus.CANCELLED`.
             data.status === ContractorAssignmentStatus.CANCELLED
-        // Study: Close this group and continue the enclosing expression.
+        // Study: Finish this group and continue the surrounding step.
         ) {
             // Study: Assign `true` to `cancelActiveLabourAssignments`.
             cancelActiveLabourAssignments = true;
-        // Study: Close the code block.
+        // Study: End this group of steps.
         }
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
 
     // 4. Execute Update
-    // Study: Return `await assignmentRepository.update(assignmentId, { scopeDescription: data.scopeDescr…` to the caller.
+    // Study: Give `await assignmentRepository.update(assignmentId, { scopeDescription: data.scopeDescr…` back to the code that asked for it.
     return await assignmentRepository.update(assignmentId, {
         // Study: Set `scopeDescription` to `data.scopeDescription`.
         scopeDescription: data.scopeDescription,
@@ -405,9 +405,9 @@ export const updateAssignment = async (
         status: data.status,
         // Study: Set `responsibilityIds` to `data.responsibilityIds`.
         responsibilityIds: data.responsibilityIds,
-        // Study: Pass the current `cancelActiveLabourAssignments` value under the same property name.
+        // Study: Carry the value of `cancelActiveLabourAssignments` into the new group under the same name.
         cancelActiveLabourAssignments,
-    // Study: Close the object literal.
+    // Study: End this group of values.
     });
-// Study: Close the code block.
+// Study: End this group of steps.
 };

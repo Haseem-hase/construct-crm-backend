@@ -1,44 +1,44 @@
-// Study: Translate HTTP requests into service calls and send HTTP responses for the contractor responsibility catalog.
-// Study: Import `{ Request, Response, NextFunction }` from `"express"`.
+// Study: This file is about the list of duties that can be assigned to a contractor. Takes information sent by the screen, asks the backend to do the work, and sends back the result.
+// Study: Bring in `{ Request, Response, NextFunction }` from `"express"` so this file can use it.
 import { Request, Response, NextFunction } from "express";
 
-// Study: Import `* as responsibilityService` from `"./responsibility.service"`.
+// Study: Bring in `* as responsibilityService` from `"./responsibility.service"` so this file can use it.
 import * as responsibilityService from "./responsibility.service";
 
-// Study: Export `getResponsibilities` as an async function that returns a promise.
+// Study: Make `getResponsibilities` available to other files. Its result arrives after its work finishes.
 export const getResponsibilities = async (
-    // Study: Accept `req` with type `Request`.
+    // Study: Read the information that came in with the request from the screen.
     req: Request,
-    // Study: Accept `res` with type `Response`.
+    // Study: Use this to send information or an error back to the screen.
     res: Response,
-    // Study: Accept `next` with type `NextFunction`.
+    // Study: Use this to move the request to the next check or action.
     next: NextFunction
-// Study: Close this group and continue the enclosing expression.
+// Study: Finish this group and continue the surrounding step.
 ) => {
-    // Study: Run this block and handle failures in the associated catch block.
+    // Study: Try these steps. If one fails, go to the error-handling steps below.
     try {
         // Study: Call `responsibilityService.getResponsibilities` and wait for it to finish and store its result in `responsibilities`.
         const responsibilities = await responsibilityService.getResponsibilities();
 
-        // Study: Send a JSON response to the client.
+        // Study: Send named information back to the screen as JSON.
         res.status(200).json({
-            // Study: Set `success` to `true`.
+            // Study: Tell the screen that the request succeeded.
             success: true,
             // Study: Set `message` to `"Responsibilities retrieved successfully."`.
             message: "Responsibilities retrieved successfully.",
             // Study: Supply the values to write to the database.
             data: {
-                // Study: Pass the current `responsibilities` value under the same property name.
+                // Study: Carry the value of `responsibilities` into the new group under the same name.
                 responsibilities,
-            // Study: Close the object literal.
+            // Study: End this group of values.
             },
-        // Study: Close the object literal.
+        // Study: End this group of values.
         });
-    // Study: Handle an exception from the try block as `error`.
+    // Study: Handle a problem raised during the steps above.
     } catch (error) {
-        // Study: Pass the error to the next Express error handler.
+        // Study: Send the problem to the part of the backend that prepares an error reply.
         next(error);
-    // Study: Close the code block.
+    // Study: End this group of steps.
     }
-// Study: Close the code block.
+// Study: End this group of steps.
 };
